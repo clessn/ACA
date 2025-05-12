@@ -498,5 +498,16 @@ DataClean$ses_4children18_bin <- ifelse(DataClean$ses_children18_char == "4 enfa
 table(DataClean$ses_3children18_bin)
 
 #In politics, people sometimes talk of left and right. - Where would you place yourself on this scale with 0 being entirely to the left and 10 being entirely to the right?
---------------------------------
 table(clean$ideo_left_right_1)
+#####à finir####
+
+DataClean$ideo_left_num <- NA
+DataClean$ideo_left_num[DataRaw$chronotype == 5] <- 0
+DataClean$ideo_left_num[DataRaw$chronotype == 4] <- 0.25
+DataClean$ideo_left_num[DataRaw$chronotype == 3] <- 0.5
+DataClean$ideo_left_num[DataRaw$chronotype == 2] <- 0.75
+DataClean$ideo_left_num[DataRaw$chronotype == 1] <- 1
+
+#How interested are you in politics generally? - Select a number from 0 to 10, where 0 means no interest at all, and 10 means a great deal of interest.
+table(clean$ideo_interest_1)
+
