@@ -609,16 +609,135 @@ DataClean$budget_debt_priority_num[clean$budget_issue_imp_5 == 5] <- 0
 table(DataClean$budget_debt_priority_num)
 
 #Imagine the government has the means to increase spending in some areas, but not all. Among the following policy areas, which are most important to you? You can allocate 100 points. Give more points to the areas you consider to be most important and less to those you consider to be less important. The government should: - increase access to healthcare
-table(clean$budget_spend_prio._6)
+##healthcare
+
+attributes(clean$budget_spend_prio._6)
+class(clean$budget_spend_prio._6)
+table(clean$budget_spend_prio._6, useNA = "always")
+
+clean <- clean %>%
+  mutate(
+    budget_spend_prio_health_num = as.numeric(budget_spend_prio._6),
+    budget_spend_prio_health_raw = budget_spend_prio_health_num / 100,
+    budget_spend_prio_health_norm = case_when(
+      is.na(budget_spend_prio_health_raw) ~ NA_real_,
+      budget_spend_prio_health_raw <= 0.125 ~ 0.00,
+      budget_spend_prio_health_raw <= 0.375 ~ 0.25,
+      budget_spend_prio_health_raw <= 0.625 ~ 0.50,
+      budget_spend_prio_health_raw <= 0.875 ~ 0.75,
+      TRUE ~ 1.00
+    )
+  )
+
+DataClean$budget_spend_prio_health_norm <- clean$budget_spend_prio_health_norm
+
+
+table(DataClean$budget_spend_prio_health_norm, useNA = "always")
+
 
 #Imagine the government has the means to increase spending in some areas, but not all. Among the following policy areas, which are most important to you? You can allocate 100 points. Give more points to the areas you consider to be most important and less to those you consider to be less important. The government should: - increase home care for seniors
-table(clean$budget_spend_prio._7)
+##seniors
+attributes(clean$budget_spend_prio._7)
+class(clean$budget_spend_prio._7)
+table(clean$budget_spend_prio._7, useNA = "always")
 
-table(clean$budget_spend_prio._8)
+clean <- clean %>%
+  mutate(
+    budget_spend_prio_seniors_num = as.numeric(budget_spend_prio._7),
+    budget_spend_prio_seniors_raw = budget_spend_prio_seniors_num / 100,
+    budget_spend_prio_seniors_norm = case_when(
+      is.na(budget_spend_prio_seniors_raw) ~ NA_real_,
+      budget_spend_prio_seniors_raw <= 0.125 ~ 0.00,
+      budget_spend_prio_seniors_raw <= 0.375 ~ 0.25,
+      budget_spend_prio_seniors_raw <= 0.625 ~ 0.50,
+      budget_spend_prio_seniors_raw <= 0.875 ~ 0.75,
+      TRUE ~ 1.00
+    )
+  )
 
-table(clean$budget_spend_prio._9)
+DataClean$budget_spend_prio_seniors_norm <- clean$budget_spend_prio_seniors_norm
 
-table(clean$budget_spend_prio._10)
+
+table(DataClean$budget_spend_prio_seniors_norm, useNA = "always")
+
+
+#Imagine the government has the means to increase spending in some areas, but not all. Among the following policy areas, which are most important to you? You can allocate 100 points. Give more points to the areas you consider to be most important and less to those you consider to be less important. The government should: - increase the availability of subsidized childcare
+#childcare
+
+attributes(clean$budget_spend_prio._8)
+class(clean$budget_spend_prio._8)
+table(clean$budget_spend_prio._8, useNA = "always")
+
+clean <- clean %>%
+  mutate(
+    budget_spend_prio_childcare_num = as.numeric(budget_spend_prio._8),
+    budget_spend_prio_childcare_raw = budget_spend_prio_childcare_num / 100,
+    budget_spend_prio_childcare_norm = case_when(
+      is.na(budget_spend_prio_childcare_raw) ~ NA_real_,
+      budget_spend_prio_childcare_raw <= 0.125 ~ 0.00,
+      budget_spend_prio_childcare_raw <= 0.375 ~ 0.25,
+      budget_spend_prio_childcare_raw <= 0.625 ~ 0.50,
+      budget_spend_prio_childcare_raw <= 0.875 ~ 0.75,
+      TRUE ~ 1.00
+    )
+  )
+
+DataClean$budget_spend_prio_childcare_norm <- clean$budget_spend_prio_childcare_norm
+
+
+table(DataClean$budget_spend_prio_childcare_norm, useNA = "always")
+
+#Imagine the government has the means to increase spending in some areas, but not all. Among the following policy areas, which are most important to you? You can allocate 100 points. Give more points to the areas you consider to be most important and less to those you consider to be less important. The government should: - improve the cost of living
+##cost of living
+
+attributes(clean$budget_spend_prio._9)
+class(clean$budget_spend_prio._9)
+table(clean$budget_spend_prio._9, useNA = "always")
+
+clean <- clean %>%
+  mutate(
+    budget_spend_prio_costLiving_num = as.numeric(budget_spend_prio._9),
+    budget_spend_prio_costLiving_raw = budget_spend_prio_costLiving_num / 100,
+    budget_spend_prio_costLiving_norm = case_when(
+      is.na(budget_spend_prio_costLiving_raw) ~ NA_real_,
+      budget_spend_prio_costLiving_raw <= 0.125 ~ 0.00,
+      budget_spend_prio_costLiving_raw <= 0.375 ~ 0.25,
+      budget_spend_prio_costLiving_raw <= 0.625 ~ 0.50,
+      budget_spend_prio_costLiving_raw <= 0.875 ~ 0.75,
+      TRUE ~ 1.00
+    )
+  )
+
+DataClean$budget_spend_prio_costLiving_norm <- clean$budget_spend_prio_costLiving_norm
+
+
+table(DataClean$budget_spend_prio_costLiving_norm, useNA = "always")
+
+#Imagine the government has the means to increase spending in some areas, but not all. Among the following policy areas, which are most important to you? You can allocate 100 points. Give more points to the areas you consider to be most important and less to those you consider to be less important. The government should: - invest in the fight against climate change
+##climate change
+
+attributes(clean$budget_spend_prio._10)
+class(clean$budget_spend_prio._10)
+table(clean$budget_spend_prio._10, useNA = "always")
+
+clean <- clean %>%
+  mutate(
+    budget_spend_prio_climateChange_num = as.numeric(budget_spend_prio._10),
+    budget_spend_prio_climateChange_raw = budget_spend_prio_climateChange_num / 100,
+    budget_spend_prio_climateChange_norm = case_when(
+      is.na(budget_spend_prio_climateChange_raw) ~ NA_real_,
+      budget_spend_prio_climateChange_raw <= 0.125 ~ 0.00,
+      budget_spend_prio_climateChange_raw <= 0.375 ~ 0.25,
+      budget_spend_prio_climateChange_raw <= 0.625 ~ 0.50,
+      budget_spend_prio_climateChange_raw <= 0.875 ~ 0.75,
+      TRUE ~ 1.00
+    )
+  )
+
+DataClean$budget_spend_prio_climateChange_norm <- clean$budget_spend_prio_climateChange_norm
+
+
+table(DataClean$budget_spend_prio_climateChange_norm, useNA = "always")
 
 #To what extent do you agree with the following statement: The government should increase spending on childcare.
 table(clean$tradeoff_invest_cc0)
@@ -925,3 +1044,4 @@ table(DataClean$tradeoff_senior_income_num)
 
 
 write.csv(clean, "data/clean_df.csv")
+
