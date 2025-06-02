@@ -1,7 +1,7 @@
 # ===================================================
 # Cleaning & Wrangling ACA
 # ===================================================
-# Version: April 30th, 2025, 9:30 am
+# Version: June 2nd, 2025
 
 # -----------------------
 # 1. Load packages
@@ -1043,5 +1043,5 @@ table(DataClean$tradeoff_senior_income_num)
 #table(DataClean$quebec_FR_bin)
 
 
-write.csv(clean, "data/clean_df.csv")
+write.csv(DataClean, "data/clean_df.csv")
 
