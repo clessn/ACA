@@ -138,6 +138,7 @@ plot(pred_health) +
 
 # Combine into one panel
 wrap_plots(priority_plots, ncol = 1)
+
 #gof_map_df <- data.frame(
 #  raw = c("r.squared", "adj.r.squared", "nobs", "AIC", "BIC"),
 #  clean = c("R²", "Adj. R²", "N", "AIC", "BIC"),
@@ -178,6 +179,7 @@ model_tbl <- modelsummary(
 )
 
 # Spending distribution by issue
+# What explains priorities for an issue? (Same as above)
 budget_spend_prio_childcare_norm
 budget_spend_prio_climateChange_norm
 budget_spend_prio_costLiving_norm
@@ -185,12 +187,23 @@ budget_spend_prio_health_norm
 budget_spend_prio_seniors_norm
 
 # Policy: childcare spending
+# What explains priorities for an issue? (Same as above)
 tradeoff_childcare_num                 # control
 tradeoff_childcare_higher_taxes_num    # higher taxes treatment
 tradeoff_childcare_by_cutting_num      # cuts treatment
 tradeoff_childcare_debt_num            # debt treatment
 
+# Models
+mod_tradeoff_control  <- lm(tradeoff_childcare_num ~ age65plus_bin + ses_male_bin + ..., data = df)
+mod_tradeoff_taxes    <- lm(tradeoff_childcare_higher_taxes_num ~ age65plus_bin + ses_male_bin + ..., data = df)
+mod_tradeoff_cuts     <- lm(tradeoff_childcare_by_cutting_num ~ age65plus_bin + ses_male_bin + ..., data = df)
+mod_tradeoff_debt     <- lm(tradeoff_childcare_debt_num ~ age65plus_bin + ses_male_bin + ..., data = df)
+
+# Plot
+plot(ggpredict(mod_tradeoff_taxes, terms = "ses_male_bin"))
+
 # Policy: taxes
+# What explains priorities for an issue? (Same as above)
 tradeoff_no_taxes_num                 # control
 tradeoff_taxes_sales_num              # sales tax treatment
 tradeoff_taxes_high_income_num        # income tax treatment
