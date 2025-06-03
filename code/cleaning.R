@@ -216,16 +216,15 @@ table(clean$ses_year_born.)
 DataClean$ses_age <- 2025 - as.numeric(clean$ses_year_born.)
 
 # Création des catégories d'âge
-DataClean$age1824_bin   <- ifelse(DataClean$ses_age >= 18 & DataClean$ses_age <= 24, 1, 0)
-DataClean$age2534_bin   <- ifelse(DataClean$ses_age >= 25 & DataClean$ses_age <= 34, 1, 0)
-DataClean$age3544_bin   <- ifelse(DataClean$ses_age >= 35 & DataClean$ses_age <= 44, 1, 0)
-DataClean$age4554_bin   <- ifelse(DataClean$ses_age >= 45 & DataClean$ses_age <= 54, 1, 0)
-DataClean$age5564_bin   <- ifelse(DataClean$ses_age >= 55 & DataClean$ses_age <= 64, 1, 0)
-DataClean$age65plus_bin <- ifelse(DataClean$ses_age >= 65, 1, 0)
+DataClean$age34    <- ifelse(DataClean$ses_age >= 18 & DataClean$ses_age <= 34, 1, 0)
+DataClean$age35_54 <- ifelse(DataClean$ses_age >= 35 & DataClean$ses_age <= 54, 1, 0)
+#(55 plus becomes reference)
+
+
 
 # Vérification
 table(DataClean$ses_age)
-table(DataClean$age1824_bin)
+table(DataClean$age35_54)
 
 #In which province or territory are you currently living?-------------------------------------------------------------
 attributes(clean$ses_region.)
@@ -251,56 +250,78 @@ table(DataClean$ses_french_bin)
 #What is the highest level of education that you have completed?--------------------------------------------------------
 attributes(clean$ses_education)
 table(clean$ses_education)
-DataClean$ses_education_char <- NA
-DataClean$ses_education_char[clean$ses_education == "Bachelor’s degree"] <- "bachelor_degree"
-DataClean$ses_education_char[clean$ses_education == "Completed elementary school"] <- "completed_elementary_school"
-DataClean$ses_education_char[clean$ses_education == "Completed secondary/ high school"] <- "completed_secondary_high school"
-DataClean$ses_education_char[clean$ses_education == "Completed technical, community college, CEGEP, College Classique"] <- "completed_technical_community_college_cegep_college_classique"
-DataClean$ses_education_char[clean$ses_education == "Master’s degree"] <- "master_degree"
-DataClean$ses_education_char[clean$ses_education == "Professional degree or doctorate"] <- "professional_degree_or_doctorate"
-DataClean$ses_education_char[clean$ses_education == "Some secondary/ high school"] <- "some_secondary_high_school"
-DataClean$ses_education_char[clean$ses_education == "Some technical, community college, CEGEP, College Classique"] <- "some_technical_community_college_cegep_college_classique"
-DataClean$ses_education_char[clean$ses_education == "Some university"] <- "some_university"
 
-table(DataClean$ses_education_char)
+# Initialisation
+DataClean$educ_group <- NA
 
-DataClean$ses_educBachelor_bin <- ifelse(DataClean$ses_education_char == "bachelor_degree", 1, 0)
-DataClean$ses_educElementary_bin <- ifelse(DataClean$ses_education_char == "completed_elementary_school", 1, 0)
-DataClean$ses_educSecondaryCompleted_bin <- ifelse(DataClean$ses_education_char == "completed_secondary_high school", 1, 0)
-DataClean$ses_educTechnicalCompleted_bin <- ifelse(DataClean$ses_education_char == "completed_technical_community_college_cegep_college_classique", 1, 0)
-DataClean$ses_educMaster_bin <- ifelse(DataClean$ses_education_char == "master_degree", 1, 0)
-DataClean$ses_educDoctorate_bin <- ifelse(DataClean$ses_education_char == "professional_degree_or_doctorate", 1, 0)
-DataClean$ses_educHighSchoolSome_bin <- ifelse(DataClean$ses_education_char == "some_secondary_high_school", 1, 0)
-DataClean$ses_educTechnicalSome_bin <- ifelse(DataClean$ses_education_char == "some_technical_community_college_cegep_college_classique", 1, 0)
-DataClean$ses_educUniversitySome_bin <- ifelse(DataClean$ses_education_char == "some_university", 1, 0)
+# Groupe 1 : Avant le secondaire (educBHS)
+DataClean$educ_group[clean$ses_education == "Completed elementary school"] <- "educBHS"
 
-table(DataClean$ses_educBachelor_bin)
+# Groupe 2 : Secondaire et collégial/technique (educHS)
+DataClean$educ_group[clean$ses_education %in% c(
+  "Completed secondary/ high school",
+  "Some secondary/ high school",
+  "Completed technical, community college, CEGEP, College Classique",
+  "Some technical, community college, CEGEP, College Classique"
+)] <- "educHS"
+
+# Groupe 3 : Universitaire (educUniv)
+DataClean$educ_group[clean$ses_education %in% c(
+  "Bachelor’s degree",
+  "Some university",
+  "Master’s degree",
+  "Professional degree or doctorate"
+)] <- "educUniv"
+
+table(DataClean$educ_group)
+
+# Variables binaires pour chaque groupe d'éducation
+DataClean$educBHS <- ifelse(DataClean$educ_group == "educBHS", 1, 0)
+DataClean$educHS  <- ifelse(DataClean$educ_group == "educHS", 1, 0)
+#educUniv_bin comme référence
+
+table(DataClean$educHS)
 
 #Approximately, which of the following categories does your-----------------------------------------------------------------------------------------
-attributes(clean$ses_income)
 table(clean$ses_income)
 DataClean$ses_income_char <- NA
-DataClean$ses_income_num <- NA
-
-DataClean$ses_income_char[clean$ses_income == "$1 to $30,000"]             <- "$1_to_$30,000"
-DataClean$ses_income_char[clean$ses_income == "$30,001 to $60,000"]        <- "$30,001_to_$60,000"
-DataClean$ses_income_char[clean$ses_income == "$60,001 to $90,000"]        <- "$60,001_to_$90,000"
-DataClean$ses_income_char[clean$ses_income == "$90,001 to $110,000"]       <- "$90,001_to_$110,000"
-DataClean$ses_income_char[clean$ses_income == "$110,001 to $150,000"]      <- "$110,001_to_$150,000"
-DataClean$ses_income_char[clean$ses_income == "$150,001 to $200,000"]      <- "$150,001_to_$200,000"
-DataClean$ses_income_char[clean$ses_income == "More than $200,000"]        <- "More_than_$200,000"
+DataClean$ses_income3Cat <- NA
 
 
-DataClean$ses_income30000_bin      <- ifelse(DataClean$ses_income_char == "$1_to_$30,000", 1, 0)
-DataClean$ses_income60000_bin      <- ifelse(DataClean$ses_income_char == "$30,001_to_$60,000", 1, 0)
-DataClean$ses_income90000_bin      <- ifelse(DataClean$ses_income_char == "$60,001_to_$90,000", 1, 0)
-DataClean$ses_income110000_bin     <- ifelse(DataClean$ses_income_char == "$90,001_to_$110,000", 1, 0)
-DataClean$ses_income150000_bin     <- ifelse(DataClean$ses_income_char == "$110,001_to_$150,000", 1, 0)
-DataClean$ses_income200000_bin     <- ifelse(DataClean$ses_income_char == "$150,001_to_$200,000", 1, 0)
-DataClean$ses_incomeMore200000_bin <- ifelse(DataClean$ses_income_char == "More_than_$200,000", 1, 0)
+# Nettoyage des réponses income en format texte propre
+DataClean$ses_income_char[clean$ses_income == "$1 to $30,000"]             <- "1_to_30000"
+DataClean$ses_income_char[clean$ses_income == "$30,001 to $60,000"]        <- "30001_to_60000"
+DataClean$ses_income_char[clean$ses_income == "$60,001 to $90,000"]        <- "60001_to_90000"
+DataClean$ses_income_char[clean$ses_income == "$90,001 to $110,000"]       <- "90001_to_110000"
+DataClean$ses_income_char[clean$ses_income == "$110,001 to $150,000"]      <- "110001_to_150000"
+DataClean$ses_income_char[clean$ses_income == "$150,001 to $200,000"]      <- "150001_to_200000"
+DataClean$ses_income_char[clean$ses_income == "More than $200,000"]        <- "more_than_200000"
 
-# Vérifie
-table(DataClean$ses_income110000_bin)
+# Création des 3 grandes catégories de revenu
+DataClean$ses_income3Cat[DataClean$ses_income_char %in% c("1_to_30000")] <- "Low"
+
+DataClean$ses_income3Cat[DataClean$ses_income_char %in% c(
+  "30001_to_60000", 
+  "60001_to_90000", 
+  "90001_to_110000", 
+  "110001_to_150000"
+)] <- "Mid"
+
+DataClean$ses_income3Cat[DataClean$ses_income_char %in% c(
+  "150001_to_200000", 
+  "more_than_200000"
+)] <- "High"  # Référence
+
+# Création des variables binaires avec High comme référence
+DataClean$incomeLow_bin <- ifelse(DataClean$ses_income3Cat == "Low", 1, 0)
+DataClean$incomeMid_bin <- ifelse(DataClean$ses_income3Cat == "Mid", 1, 0)
+# Pas de variable pour "High" → référence implicite
+
+# Vérification
+table(DataClean$ses_income3Cat, useNA = "always")
+table(DataClean$incomeLow_bin, useNA = "always")
+table(DataClean$incomeMid_bin, useNA = "always")
+
 
 #What are the first three characters of your postal code?-----------------------------------------------------
 attributes(clean$ses_postal_code)
@@ -312,7 +333,7 @@ table(DataClean$ses_postalCode)
 #What is your marital status?-------------------------------------------------------------------------------------
 attributes(clean$ses_marital_status)
 table(clean$ses_marital_status)
-DataClean$ses_matStatus <- NA
+DataClean$ses_matStatus_char <- NA
 
 DataClean$ses_matStatus_char[clean$ses_marital_status == "Single"]                  <- "single"
 DataClean$ses_matStatus_char[clean$ses_marital_status == "Married"]                 <- "married"
@@ -320,14 +341,10 @@ DataClean$ses_matStatus_char[clean$ses_marital_status == "Common-law relationshi
 DataClean$ses_matStatus_char[clean$ses_marital_status == "Widower/widow"]           <- "widower"
 DataClean$ses_matStatus_char[clean$ses_marital_status == "Divorced/separated"]      <- "divorced"
 
-DataClean$matStatus_single_bin      <- ifelse(DataClean$ses_matStatus_char == "single", 1, 0)
-DataClean$matStatus_married_bin     <- ifelse(DataClean$ses_matStatus_char == "married", 1, 0)
-DataClean$matStatus_commonlaw_bin   <- ifelse(DataClean$ses_matStatus_char == "common_law", 1, 0)
-DataClean$matStatus_widow_bin       <- ifelse(DataClean$ses_matStatus_char == "widower", 1, 0)
-DataClean$matStatus_divorced_bin    <- ifelse(DataClean$ses_matStatus_char == "divorced", 1, 0)
+# Création de la variable binaire : 1 = marié, 0 = autres
+DataClean$matStatus_married_bin <- ifelse(DataClean$ses_matStatus_char == "married", 1, 0)
 
-# Vérification
-table(DataClean$matStatus_commonlaw_bin)
+table(DataClean$matStatus_married_bin)
 
 #Is the home you currently live in------------------------------------------------------------
 attributes(clean$ses_home_ownership)
@@ -347,20 +364,18 @@ table(DataClean$home_rented_bin)
 attributes(clean$ses_children.)
 table(clean$ses_children.)
 
+# Nettoyage de la variable enfants
 DataClean$ses_children_char <- NA
-DataClean$ses_children_char[clean$ses_children. == "Alone with children"]           <- "alone_with_children"
-DataClean$ses_children_char[clean$ses_children. == "Alone without children"]        <- "alone_without_children"
-DataClean$ses_children_char[clean$ses_children. == "In couple with children"]       <- "in_couple_with_children"
-DataClean$ses_children_char[clean$ses_children. == "In couple without children"]    <- "in_couple_without_children"
+DataClean$ses_children_char[clean$ses_children. == "Alone with children"]        <- "alone_with_children"
+DataClean$ses_children_char[clean$ses_children. == "Alone without children"]     <- "alone_without_children"
+DataClean$ses_children_char[clean$ses_children. == "In couple with children"]    <- "in_couple_with_children"
+DataClean$ses_children_char[clean$ses_children. == "In couple without children"] <- "in_couple_without_children"
 
-#binaires
-DataClean$alone_with_children_bin        <- ifelse(DataClean$ses_children_char == "alone_with_children", 1, 0)
-DataClean$alone_without_children_bin     <- ifelse(DataClean$ses_children_char == "alone_without_children", 1, 0)
-DataClean$couple_with_children_bin       <- ifelse(DataClean$ses_children_char == "in_couple_with_children", 1, 0)
-DataClean$couple_without_children_bin    <- ifelse(DataClean$ses_children_char == "in_couple_without_children", 1, 0)
-
-# Vérification
-table(DataClean$alone_with_children_bin)
+# Variable binaire : 1 = avec enfants, 0 = sans enfants
+DataClean$children_bin <- ifelse(DataClean$ses_children_char %in% c(
+  "alone_with_children", "in_couple_with_children"
+), 1, 0)
+table(DataClean$children_bin)
 
 #Were you born in Canada?-----------------------------------------------------------------------------------------
 attributes(clean$ses_citizen_status)
@@ -372,111 +387,96 @@ table(DataClean$ses_citizenYes_bin)
 attributes(clean$ses_employ_status.)
 table(clean$ses_employ_status.)
 
+# Nettoyage de la variable de statut d'emploi
 DataClean$ses_employ_status_char <- NA
+
 DataClean$ses_employ_status_char[clean$ses_employ_status. == "A caregiver or homemaker"] <- "caregiver_or_homemaker"
 DataClean$ses_employ_status_char[clean$ses_employ_status. == "A student attending school"] <- "student_attending_school"
 DataClean$ses_employ_status_char[clean$ses_employ_status. == "Not working due to illness/disability, or not looking for work"] <- "not_working_due_to_illness_disability_or_not_looking_for_work"
 DataClean$ses_employ_status_char[clean$ses_employ_status. == "Retired"] <- "retired"
 DataClean$ses_employ_status_char[clean$ses_employ_status. == "Seasonal work"] <- "seasonal_work"
 DataClean$ses_employ_status_char[clean$ses_employ_status. == "Self-employed"] <- "self_employed"
-DataClean$ses_employ_status_char[clean$ses_employ_status. == "Temporarily not working (e.g. parental leave, seasonal worker, in the process of changing jobs)"] <- "temporarily_not_working_parental_leave_seasonal_worker_in_the_process_of_changing_jobs"
-DataClean$ses_employ_status_char[clean$ses_employ_status. == "Unemployed, and looking for work"] <- "unemployed_and_looking_for_work"
-DataClean$ses_employ_status_char[clean$ses_employ_status. == "Working full-time (35 or more hours per week)"] <- "working_full_time_35_or_more_hours_per_week"
-DataClean$ses_employ_status_char[clean$ses_employ_status. == "Working part-time (less than 35 hours per week)"] <- "working_part_time_less_than_35_hours_per_week"
+DataClean$ses_employ_status_char[clean$ses_employ_status. == "Temporarily not working (e.g. parental leave, seasonal worker, in the process of changing jobs)"] <- "temporarily_not_working"
+DataClean$ses_employ_status_char[clean$ses_employ_status. == "Unemployed, and looking for work"] <- "unemployed"
+DataClean$ses_employ_status_char[clean$ses_employ_status. == "Working full-time (35 or more hours per week)"] <- "working_full_time"
+DataClean$ses_employ_status_char[clean$ses_employ_status. == "Working part-time (less than 35 hours per week)"] <- "working_part_time"
 
-#binaires
-DataClean$employ_caregiver_bin     <- ifelse(DataClean$ses_employ_status_char == "caregiver_or_homemaker", 1, 0)
-DataClean$employ_student_bin       <- ifelse(DataClean$ses_employ_status_char == "student_attending_school", 1, 0)
-DataClean$employ_disabled_bin      <- ifelse(DataClean$ses_employ_status_char == "not_working_due_to_illness_disability_or_not_looking_for_work", 1, 0)
-DataClean$employ_retired_bin       <- ifelse(DataClean$ses_employ_status_char == "retired", 1, 0)
-DataClean$employ_seasonal_bin      <- ifelse(DataClean$ses_employ_status_char == "seasonal_work", 1, 0)
-DataClean$employ_self_bin          <- ifelse(DataClean$ses_employ_status_char == "self_employed", 1, 0)
-DataClean$employ_temp_notwork_bin  <- ifelse(DataClean$ses_employ_status_char == "temporarily_not_working_parental_leave_seasonal_worker_in_the_process_of_changing_jobs", 1, 0)
-DataClean$employ_unemployed_bin    <- ifelse(DataClean$ses_employ_status_char == "unemployed_and_looking_for_work", 1, 0)
-DataClean$employ_fulltime_bin      <- ifelse(DataClean$ses_employ_status_char == "working_full_time_35_or_more_hours_per_week", 1, 0)
-DataClean$employ_parttime_bin      <- ifelse(DataClean$ses_employ_status_char == "working_part_time_less_than_35_hours_per_week", 1, 0)
+# Variable binaire : 1 = employé à temps plein, 0 = tout le reste
+DataClean$employ_fulltime_bin <- ifelse(DataClean$ses_employ_status_char == "working_full_time", 1, 0)
 
 # Vérification
-table(DataClean$employ_fulltime_bin)
+table(DataClean$employ_fulltime_bin, useNA = "always")
+
 
 #Which option best describes your current family structure-----------------------------------------------------------------
 table(clean$ses_family_structure)
 
+# Nettoyage de la variable sur la structure familiale
 DataClean$ses_family_structure_char <- NA
-DataClean$ses_family_structure_char[clean$ses_family_structure == "Single parent"] <- "single parent"
-DataClean$ses_family_structure_char[clean$ses_family_structure == "Two parents in a relationship but living separately"] <- "two_parents_in_a_relationship_but_living_separately"
-DataClean$ses_family_structure_char[clean$ses_family_structure == "Two parents in a relationship in a first union (marriage or common-law)"] <- "two_parents_in_a_relationship_in_a_first_union_marriage_or_common_law"
-DataClean$ses_family_structure_char[clean$ses_family_structure == "Two parents in a relationship in a second union (marriage or common-law)"] <- "two parents_in_a_relationship_in_a_second_union_marriage_or_common_law"
+DataClean$ses_family_structure_char[clean$ses_family_structure == "Single parent"] <- "single_parent"
+DataClean$ses_family_structure_char[clean$ses_family_structure == "Two parents in a relationship but living separately"] <- "separate_parents"
+DataClean$ses_family_structure_char[clean$ses_family_structure == "Two parents in a relationship in a first union (marriage or common-law)"] <- "first_union"
+DataClean$ses_family_structure_char[clean$ses_family_structure == "Two parents in a relationship in a second union (marriage or common-law)"] <- "second_union"
 DataClean$ses_family_structure_char[clean$ses_family_structure == "Other/Prefer not to answer"] <- "other"
 
-
-#binaires
-DataClean$family_single_bin       <- ifelse(DataClean$ses_family_structure_char == "single parent", 1, 0)
-DataClean$family_separate_bin     <- ifelse(DataClean$ses_family_structure_char == "two_parents_in_a_relationship_but_living_separately", 1, 0)
-DataClean$family_first_union_bin  <- ifelse(DataClean$ses_family_structure_char == "two_parents_in_a_relationship_in_a_first_union_marriage_or_common_law", 1, 0)
-DataClean$family_second_union_bin <- ifelse(DataClean$ses_family_structure_char == "two parents_in_a_relationship_in_a_second_union_marriage_or_common_law", 1, 0)
-DataClean$family_other_bin        <- ifelse(DataClean$ses_family_structure_char == "other", 1, 0)
+# Variable binaire : 1 = première union, 0 = le reste
+DataClean$family_first_union_bin <- ifelse(DataClean$ses_family_structure_char == "first_union", 1, 0)
 
 # Vérification
-table(DataClean$family_first_union_bin)
+table(DataClean$family_first_union_bin, useNA = "always")
+
 
 #How many children do you have in each of the following age groups currently living with you in your household? - Ages 0 to 5--------------
 table(clean$ses_household_compo._1)
 
+# Nettoyage de la variable enfants 0-5 ans
 DataClean$ses_children05_char <- NA
 DataClean$ses_children05_char[clean$ses_household_compo._1 == 0] <- "0 enfant 0-5 ans"
 DataClean$ses_children05_char[clean$ses_household_compo._1 == 1] <- "1 enfant 0-5 ans"
 DataClean$ses_children05_char[clean$ses_household_compo._1 == 2] <- "2 enfants 0-5 ans"
 DataClean$ses_children05_char[clean$ses_household_compo._1 == 3] <- "3 enfants 0-5 ans"
 
-table(DataClean$ses_children05_char)
-#binaires
-DataClean$ses_0children05_bin <- ifelse(DataClean$ses_children05_char == "0 enfant 0-5 ans", 1, 0)
-DataClean$ses_1children05_bin <- ifelse(DataClean$ses_children05_char == "1 enfant 0-5 ans", 1, 0)
-DataClean$ses_2children05_bin <- ifelse(DataClean$ses_children05_char == "2 enfants 0-5 ans", 1, 0)
-DataClean$ses_3children05_bin <- ifelse(DataClean$ses_children05_char == "3 enfants 0-5 ans", 1, 0)
+# Variable binaire : 1 = au moins 1 enfant 0-5 ans, 0 = aucun
+DataClean$youngChildren <- ifelse(clean$ses_household_compo._1 > 0, 1, 0)
 
 # Vérification
-table(DataClean$ses_3children05_bin)
+table(DataClean$youngChildren, useNA = "always")
 
 
 #How many children do you have in each of the following age groups currently living with you in your household? - Ages 6-12-----------------
 table(clean$ses_household_compo._2)
 
+# Nettoyage de la variable enfants 6-12 ans
 DataClean$ses_children612_char <- NA
 DataClean$ses_children612_char[clean$ses_household_compo._2 == 0] <- "0 enfant 6-12 ans"
 DataClean$ses_children612_char[clean$ses_household_compo._2 == 1] <- "1 enfant 6-12 ans"
 DataClean$ses_children612_char[clean$ses_household_compo._2 == 2] <- "2 enfants 6-12 ans"
 DataClean$ses_children612_char[clean$ses_household_compo._2 == 3] <- "3 enfants 6-12 ans"
 
-#binaires
-DataClean$ses_0children612_bin <- ifelse(DataClean$ses_children612_char == "0 enfant 6-12 ans", 1, 0)
-DataClean$ses_1children612_bin <- ifelse(DataClean$ses_children612_char == "1 enfant 6-12 ans", 1, 0)
-DataClean$ses_2children612_bin <- ifelse(DataClean$ses_children612_char == "2 enfants 6-12 ans", 1, 0)
-DataClean$ses_3children612_bin <- ifelse(DataClean$ses_children612_char == "3 enfants 6-12 ans", 1, 0)
+# Variable binaire : 1 = au moins 1 enfant 6-12 ans, 0 = aucun
+DataClean$dependentChildren <- ifelse(clean$ses_household_compo._2 > 0, 1, 0)
 
 # Vérification
-table(DataClean$ses_3children612_bin)
+table(DataClean$dependentChildren, useNA = "always")
+
 
 #How many children do you have in each of the following age groups currently living with you in your household? - Ages 13-17-----------------
 table(clean$ses_household_compo._3)
 
+# Nettoyage de la variable enfants 13-17 ans
 DataClean$ses_children1317_char <- NA
 DataClean$ses_children1317_char[clean$ses_household_compo._3 == 0] <- "0 enfant 13-17 ans"
 DataClean$ses_children1317_char[clean$ses_household_compo._3 == 1] <- "1 enfant 13-17 ans"
 DataClean$ses_children1317_char[clean$ses_household_compo._3 == 2] <- "2 enfants 13-17 ans"
 DataClean$ses_children1317_char[clean$ses_household_compo._3 == 3] <- "3 enfants 13-17 ans"
 DataClean$ses_children1317_char[clean$ses_household_compo._3 == 4] <- "4 enfants 13-17 ans"
-#binaires
-DataClean$ses_0children1317_bin <- ifelse(DataClean$ses_children1317_char == "0 enfant 13-17 ans", 1, 0)
-DataClean$ses_1children1317_bin <- ifelse(DataClean$ses_children1317_char == "1 enfant 13-17 ans", 1, 0)
-DataClean$ses_2children1317_bin <- ifelse(DataClean$ses_children1317_char == "2 enfants 13-17 ans", 1, 0)
-DataClean$ses_3children1317_bin <- ifelse(DataClean$ses_children1317_char == "3 enfants 13-17 ans", 1, 0)
-DataClean$ses_4children1317_bin <- ifelse(DataClean$ses_children1317_char == "4 enfants 13-17 ans", 1, 0)
 
+# Variable binaire : 1 = au moins 1 enfant 13-17 ans, 0 = aucun
+DataClean$teenChildren <- ifelse(clean$ses_household_compo._3 > 0, 1, 0)
 
 # Vérification
-table(DataClean$ses_3children1317_bin)
+table(DataClean$teenChildren, useNA = "always")
+
 
 #How many children do you have in each of the following age groups currently living with you in your household? - Ages 18+------------------
 table(clean$ses_household_compo._4)
@@ -501,18 +501,18 @@ table(DataClean$ses_3children18_bin)
 #In politics, people sometimes talk of left and right. - Where would you place yourself on this scale with 0 being entirely to the left and 10 being entirely to the right?
 table(clean$ideo_left_right_1)
 
-DataClean$ideo_right_num <- NA
-DataClean$ideo_right_num[clean$ideo_left_right_1 == 10] <- 1
-DataClean$ideo_right_num[clean$ideo_left_right_1 == 9] <- 0.88
-DataClean$ideo_right_num[clean$ideo_left_right_1 == 8] <- 0.77
-DataClean$ideo_right_num[clean$ideo_left_right_1 == 7] <- 0.66
-DataClean$ideo_right_num[clean$ideo_left_right_1 == 6] <- 0.55
-DataClean$ideo_right_num[clean$ideo_left_right_1 == 5] <- 0.44
-DataClean$ideo_right_num[clean$ideo_left_right_1 == 4] <- 0.33
-DataClean$ideo_right_num[clean$ideo_left_right_1 == 3] <- 0.22
-DataClean$ideo_right_num[clean$ideo_left_right_1 == 2] <- 0.11
-DataClean$ideo_right_num[clean$ideo_left_right_1 == 1] <- 0
-table(DataClean$ideo_right_num)
+DataClean$ideo_right_num. <- NA
+DataClean$ideo_right_num.[clean$ideo_left_right_1 == 10] <- 1
+DataClean$ideo_right_num.[clean$ideo_left_right_1 == 9] <- 0.88
+DataClean$ideo_right_num.[clean$ideo_left_right_1 == 8] <- 0.77
+DataClean$ideo_right_num.[clean$ideo_left_right_1 == 7] <- 0.66
+DataClean$ideo_right_num.[clean$ideo_left_right_1 == 6] <- 0.55
+DataClean$ideo_right_num.[clean$ideo_left_right_1 == 5] <- 0.44
+DataClean$ideo_right_num.[clean$ideo_left_right_1 == 4] <- 0.33
+DataClean$ideo_right_num.[clean$ideo_left_right_1 == 3] <- 0.22
+DataClean$ideo_right_num.[clean$ideo_left_right_1 == 2] <- 0.11
+DataClean$ideo_right_num.[clean$ideo_left_right_1 == 1] <- 0
+table(DataClean$ideo_right_num.)
 
 #How interested are you in politics generally? - Select a number from 0 to 10, where 0 means no interest at all, and 10 means a great deal of interest.
 table(clean$ideo_interest_1)
@@ -535,20 +535,59 @@ table(DataClean$ideo_interest_politics_num)
 table(clean$ideo_cynicism)
 DataClean$ideo_cynicism <- clean$ideo_cynicism
 
+# Nettoyage de la variable ideo_cynicism
 DataClean$ideo_cynicism_char <- NA
 DataClean$ideo_cynicism_char[clean$ideo_cynicism == "Themselves"]   <- "themselves"
 DataClean$ideo_cynicism_char[clean$ideo_cynicism == "Their party"]  <- "their_party"
 DataClean$ideo_cynicism_char[clean$ideo_cynicism == "The country"]  <- "the_country"
 DataClean$ideo_cynicism_char[clean$ideo_cynicism == "Don’t know"]   <- "dont_know"
 
-table(DataClean$ideo_cynicism_char)
+# Variables binaires
+DataClean$ideo_party_them <- ifelse(DataClean$ideo_cynicism_char == "themselves", 1, 0)
+DataClean$ideo_party_bin    <- ifelse(DataClean$ideo_cynicism_char == "their_party", 1, 0)
+DataClean$ideo_country_bin  <- ifelse(DataClean$ideo_cynicism_char == "the_country", 1, 0)
 
-#binaires
-DataClean$ideo_them_bin <- ifelse(DataClean$ideo_cynicism_char == "themselves", 1, 0)
-DataClean$ideo_party_bin <- ifelse(DataClean$ideo_cynicism_char == "their_party", 1, 0)
-DataClean$ideo_country_bin <- ifelse(DataClean$ideo_cynicism_char == "the_country", 1, 0)
-DataClean$ideo_dontknow_bin <- ifelse(DataClean$ideo_cynicism_char == "dont_know", 1, 0)
-table(DataClean$ideo_them_bin)
+# Vérification
+table(DataClean$ideo_party_them, useNA = "always")
+table(DataClean$ideo_party_bin, useNA = "always")
+table(DataClean$ideo_country_bin, useNA = "always")
+
+
+
+#People have different ways of defining themselves. What do you consider yourself?
+#NE FONCTIONNE PAS ENCORE
+table(data$ideo_define_AL)
+table(data$ideo_define_BC)
+table(data$ideo_define_MA)
+table(data$ideo_define_NB.)
+table(data$ideo_define_NL)
+table(data$ideo_define_NT)
+table(data$ideo_define_NS)
+table(data$ideo_define_NU)
+table(data$ideo_define_ON)
+table(data$ideo_define_PE)
+table(data$ideo_define_YU)
+table(data$ideo_define_QC)
+table(data$ideo_define_SA)
+
+DataClean$define_province_then_canada <- ifelse(
+  data$ideo_define_AL == "First Albertan, second Canadian" |
+    data$ideo_define_BC == "First British Columbian, second Canadian" |
+    data$ideo_define_NB. == "First New Brunswicker, second Canadian" |
+    data$ideo_define_NS == "First Nova Scotian, second Canadian" |
+    data$ideo_define_QC == "First Québécois(e), second Canadian" |
+    data$ideo_define_ON == "First Ontarian, second Canadian" |
+    data$ideo_define_NT == "First Northwest Territorian, second Canadian" |
+    data$ideo_define_NU == "First Nunavummiut, second Canadian" |
+    data$ideo_define_PE == "First Islander, second Canadian" |
+    data$ideo_define_YU == "First Yukoner, second Canadian" |
+    data$ideo_define_NL == "First Newfoundlander and Labradorian, second Canadian" |
+    data$ideo_define_SA == "First Saskatchewanian, second Canadian" |
+    data$ideo_define_MA == "First Manitoban, second Canadian",
+  1, 0
+)
+
+table(DataClean$define_province_then_canada, useNA = "always")
 
 #############################################################################################################
 
@@ -564,6 +603,14 @@ DataClean$budget_health_priority_num[clean$budget_issue_imp_1 == 4] <- 0.25
 DataClean$budget_health_priority_num[clean$budget_issue_imp_1 == 5] <- 0
 table(DataClean$budget_health_priority_num)
 
+# Création de la variable binaire : 1 = priorité forte à la santé (0.75 ou 1), 0 = le reste
+DataClean$budget_health_priority_bin <- ifelse(
+  DataClean$budget_health_priority_num %in% c(0.75, 1), 1, 0
+)
+
+# Vérification
+table(DataClean$budget_health_priority_bin, useNA = "always")
+
 #Now we would like to ask you about public finance questions. Please remember to read closely and pay attention. You will be asked questions to check your memory and comprehension. Please arrange the following policy issues by order of importance - Education
 table(clean$budget_issue_imp_2)
 
@@ -574,6 +621,14 @@ DataClean$budget_education_priority_num[clean$budget_issue_imp_2 == 3] <- 0.50
 DataClean$budget_education_priority_num[clean$budget_issue_imp_2 == 4] <- 0.25
 DataClean$budget_education_priority_num[clean$budget_issue_imp_2 == 5] <- 0
 table(DataClean$budget_education_priority_num)
+
+# Création de la variable binaire : 1 = priorité forte à l'éducation (0.75 ou 1), 0 = le reste
+DataClean$budget_education_priority_bin <- ifelse(
+  DataClean$budget_education_priority_num %in% c(0.75, 1), 1, 0
+)
+
+# Vérification
+table(DataClean$budget_education_priority_bin, useNA = "always")
 
 #Now we would like to ask you about public finance questions. Please remember to read closely and pay attention. You will be asked questions to check your memory and comprehension. Please arrange the following policy issues by order of importance - Pensions
 table(clean$budget_issue_imp_3)
@@ -586,6 +641,14 @@ DataClean$budget_pensions_priority_num[clean$budget_issue_imp_3 == 4] <- 0.25
 DataClean$budget_pensions_priority_num[clean$budget_issue_imp_3 == 5] <- 0
 table(DataClean$budget_pensions_priority_num)
 
+# Création de la variable binaire : 1 = priorité forte aux pensions (0.75 ou 1), 0 = le reste
+DataClean$budget_pensions_priority_bin <- ifelse(
+  DataClean$budget_pensions_priority_num %in% c(0.75, 1), 1, 0
+)
+
+# Vérification
+table(DataClean$budget_pensions_priority_bin, useNA = "always")
+
 #Now we would like to ask you about public finance questions. Please remember to read closely and pay attention. You will be asked questions to check your memory and comprehension. Please arrange the following policy issues by order of importance - Taxes
 table(clean$budget_issue_imp_4)
 
@@ -597,6 +660,15 @@ DataClean$budget_taxes_priority_num[clean$budget_issue_imp_4 == 4] <- 0.25
 DataClean$budget_taxes_priority_num[clean$budget_issue_imp_4 == 5] <- 0
 table(DataClean$budget_taxes_priority_num)
 
+# Création de la variable binaire : 1 = priorité forte aux taxes (0.75 ou 1), 0 = le reste
+DataClean$budget_taxes_priority_bin <- ifelse(
+  DataClean$budget_taxes_priority_num %in% c(0.75, 1), 1, 0
+)
+
+# Vérification
+table(DataClean$budget_taxes_priority_bin, useNA = "always")
+
+
 #Now we would like to ask you about public finance questions. Please remember to read closely and pay attention. You will be asked questions to check your memory and comprehension. Please arrange the following policy issues by order of importance - Public debt
 table(clean$budget_issue_imp_5)
 
@@ -607,6 +679,14 @@ DataClean$budget_debt_priority_num[clean$budget_issue_imp_5 == 3] <- 0.50
 DataClean$budget_debt_priority_num[clean$budget_issue_imp_5 == 4] <- 0.25
 DataClean$budget_debt_priority_num[clean$budget_issue_imp_5 == 5] <- 0
 table(DataClean$budget_debt_priority_num)
+
+# Création de la variable binaire : 1 = priorité forte à la dette (0.75 ou 1), 0 = le reste
+DataClean$budget_debt_priority_bin <- ifelse(
+  DataClean$budget_debt_priority_num %in% c(0.75, 1), 1, 0
+)
+
+# Vérification
+table(DataClean$budget_debt_priority_bin, useNA = "always")
 
 #Imagine the government has the means to increase spending in some areas, but not all. Among the following policy areas, which are most important to you? You can allocate 100 points. Give more points to the areas you consider to be most important and less to those you consider to be less important. The government should: - increase access to healthcare
 ##healthcare
