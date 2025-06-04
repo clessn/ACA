@@ -27,7 +27,7 @@ library(rlang)
 #
 #write.csv(raw_data, "data/ACA_April_30.csv")
 
-clean <- read.csv("data/ACA_April_30.csv") 
+data <- read.csv("data/ACA_April_30.csv") 
 # -----------------------
 # 3. Clean metadata rows
 # -----------------------
@@ -57,11 +57,12 @@ codebook <- tibble(
 # Filter for finished survey and consented to all
 # Once removing those who did not finish, did not consent and did not correctly respond
 # to the attention check: from n=634 to n=482
+class(clean)
 
 clean <- data %>%
  dplyr::select(-StartDate, -EndDate, -Status, -Progress, -RecordedDate,
  #        -ExternalReferencel
- )%>%
+ ) %>%
   dplyr::filter(
     Finished == "True",
     consent == "I have read the consent form and agree to participate in this survey.",
@@ -84,6 +85,7 @@ clean <- clean %>%
       TRUE ~ as.character(ses_language)
     )
   )
+
 
 # Check: not useful in this sample
 list(unique(clean$ses_language_clean))
@@ -134,10 +136,16 @@ unique(clean$ideo_vote_prov_clean)
 unique(clean$ideo_define_clean)
 
 # Drop all _TEXT and previous ideo_vote/define
+# Keep _clean columns and federal ideo_vote/define variables; remove provincial ones
 clean <- clean %>%
-  select(-matches("_TEXT$")) %>%
-  select(-matches("^ideo_vote_"), -matches("^ideo_define_")) %>%
-  select(matches("_clean$"), everything())
+  select(
+    -matches("^ideo_vote_fed_[A-Z]{2}$"),     # Drop ideo_vote_fed_XX
+    -matches("^ideo_vote_prov_[A-Z]{2}$"),    # Drop ideo_vote_prov_XX
+    -matches("^ideo_define_[A-Z]{2}$"),       # Drop ideo_define_XX
+    -matches("_TEXT$"),                       # Drop all *_TEXT columns
+    everything()                              # Keep all other columns, including *_clean
+  )
+
 
 # Clean trust questions (Qualtrics issue, question not asked for msot)
 n_obs <- clean %>% filter(!is.na(trust_institution_1)) %>% count()
@@ -182,7 +190,7 @@ for (new_var in names(trust_mapping)) {
 
 # Drop all the old trust variables
 clean <- clean %>%
-  select(-all_of(existing_trust_vars))
+  select(-any_of(existing_trust_vars))
 
 # -----------------------
 # Rename variables and check for coding
@@ -191,7 +199,6 @@ clean <- clean %>%
 -------------------------
 
 ##Cleaning Elsa
-
 DataClean <- data.frame(id = 1:nrow(clean))
 
   
@@ -555,6 +562,25 @@ table(DataClean$ideo_country_bin, useNA = "always")
 
 
 #People have different ways of defining themselves. What do you consider yourself?
+table(clean$ideo_define_clean)
+# Clean better for full survey!
+DataClean$ideo_define_num <- NA_real_
+DataClean$ideo_define_num[clean$ideo_define_clean == "Solely as Canadian"] <- 1
+DataClean$ideo_define_num[clean$ideo_define_clean == "First Canadian, second Albertan"] <- 0.75
+DataClean$ideo_define_num[clean$ideo_define_clean == "First Canadian, second Ontarian"] <- 0.75
+DataClean$ideo_define_num[clean$ideo_define_clean == "First Quebecer, second Canadian"] <- 0.75
+DataClean$ideo_define_num[clean$ideo_define_clean == "First British Columbian, second Canadian"] <- 0.75
+DataClean$ideo_define_num[clean$ideo_define_clean == "First Canadian, second Nova Scotian"] <- 0.75
+DataClean$ideo_define_num[clean$ideo_define_clean == "Equally Canadian and Albertan"] <- 0.5
+DataClean$ideo_define_num[clean$ideo_define_clean == "Equally Canadian and Ontarian"] <- 0.5
+DataClean$ideo_define_num[clean$ideo_define_clean == "Equally Canadian and Quebecer"] <- 0.5
+DataClean$ideo_define_num[clean$ideo_define_clean == "Equally Canadian and British Columbian "] <- 0.5
+DataClean$ideo_define_num[clean$ideo_define_clean == "First Yukoner, second Canadian "] <- 0.25
+DataClean$ideo_define_num[clean$ideo_define_clean == "First Quebecer, second Canadian"] <- 0.25
+DataClean$ideo_define_num[clean$ideo_define_clean == "Solely as British Columbian"] <- 0
+DataClean$ideo_define_num[clean$ideo_define_clean == "Solely as Quebecer"] <- 0
+table(DataClean$ideo_define_num)
+
 #NE FONCTIONNE PAS ENCORE
 table(data$ideo_define_AL)
 table(data$ideo_define_BC)
@@ -612,6 +638,8 @@ data$ideo_define_SA_bin <- 0  # Aucun répondant n’a cette réponse, donc 0
 
 table(data$ideo_define_SA_bin)
 table(data$ideo_define_QC_bin)
+
+
 #############################################################################################################
 
 
@@ -1154,46 +1182,46 @@ table(data$trust_institut_terr_5)
 
 
 
-##To what extent do you agree with the following statement: The government should increase spending on green economy.
-#table(clean$tradeoff_invest_ge0.)
-#
-#DataClean$tradeoff_invest_green_num <- NA_real_
-#DataClean$tradeoff_invest_green_num[clean$tradeoff_invest_ge0. == "Strongly agree"] <- 1
-#DataClean$tradeoff_invest_green_num[clean$tradeoff_invest_ge0. == "Somewhat agree"] <- 0.66
-#DataClean$tradeoff_invest_green_num[clean$tradeoff_invest_ge0. == "Somewhat disagree"] <- 0.33
-#DataClean$tradeoff_invest_green_num[clean$tradeoff_invest_ge0. == "Strongly disagree"] <- 0
-#table(DataClean$tradeoff_invest_green_num)
-#
-##To what extent do you agree with the following statement: The government should increase spending on the green economy, even if that implies higher taxes.
-#table(clean$tradeoff_invest_ge1)
-#
-#DataClean$tradeoff_taxes_green_num <- NA_real_
-#DataClean$tradeoff_taxes_green_num[clean$tradeoff_invest_ge1 == "Strongly agree"] <- 1
-#DataClean$tradeoff_taxes_green_num[clean$tradeoff_invest_ge1 == "Somewhat agree"] <- 0.66
-#DataClean$tradeoff_taxes_green_num[clean$tradeoff_invest_ge1 == "Somewhat disagree"] <- 0.33
-#DataClean$tradeoff_taxes_green_num[clean$tradeoff_invest_ge1 == "Strongly disagree"] <- 0
-#table(DataClean$tradeoff_taxes_green_num)
-#
-##To what extent do you agree with the following statement:  The government should increase spending on the green economy, even if that implies cutting back in other areas.
-#table(clean$tradeoff_invest_ge2)
-#
-#DataClean$tradeoff_cutting_for_green_num <- NA_real_
-#DataClean$tradeoff_cutting_for_green_num[clean$tradeoff_invest_ge2 == "Strongly agree"] <- 1
-#DataClean$tradeoff_cutting_for_green_num[clean$tradeoff_invest_ge2 == "Somewhat agree"] <- 0.66
-#DataClean$tradeoff_cutting_for_green_num[clean$tradeoff_invest_ge2 == "Somewhat disagree"] <- 0.33
-#DataClean$tradeoff_cutting_for_green_num[clean$tradeoff_invest_ge2 == "Strongly disagree"] <- 0
-#table(DataClean$tradeoff_cutting_for_green_num)
-#
-##To what extent do you agree with the following statement:  The government should increase spending on the green economy, even if that implies a higher public debt.
-#table(clean$tradeoff_invest_ge3)
-#
-#DataClean$tradeoff_debt_green_num <- NA_real_
-#DataClean$tradeoff_debt_green_num[clean$tradeoff_invest_ge3 == "Strongly agree"] <- 1
-#DataClean$tradeoff_debt_green_num[clean$tradeoff_invest_ge3 == "Somewhat agree"] <- 0.66
-#DataClean$tradeoff_debt_green_num[clean$tradeoff_invest_ge3 == "Somewhat disagree"] <- 0.33
-#DataClean$tradeoff_debt_green_num[clean$tradeoff_invest_ge3 == "Strongly disagree"] <- 0
-#table(DataClean$tradeoff_debt_green_num)
-#
+#To what extent do you agree with the following statement: The government should increase spending on green economy.
+table(clean$tradeoff_invest_ge0.)
+
+DataClean$tradeoff_invest_green_num <- NA_real_
+DataClean$tradeoff_invest_green_num[clean$tradeoff_invest_ge0. == "Strongly agree"] <- 1
+DataClean$tradeoff_invest_green_num[clean$tradeoff_invest_ge0. == "Somewhat agree"] <- 0.66
+DataClean$tradeoff_invest_green_num[clean$tradeoff_invest_ge0. == "Somewhat disagree"] <- 0.33
+DataClean$tradeoff_invest_green_num[clean$tradeoff_invest_ge0. == "Strongly disagree"] <- 0
+table(DataClean$tradeoff_invest_green_num)
+
+#To what extent do you agree with the following statement: The government should increase spending on the green economy, even if that implies higher taxes.
+table(clean$tradeoff_invest_ge1)
+
+DataClean$tradeoff_taxes_green_num <- NA_real_
+DataClean$tradeoff_taxes_green_num[clean$tradeoff_invest_ge1 == "Strongly agree"] <- 1
+DataClean$tradeoff_taxes_green_num[clean$tradeoff_invest_ge1 == "Somewhat agree"] <- 0.66
+DataClean$tradeoff_taxes_green_num[clean$tradeoff_invest_ge1 == "Somewhat disagree"] <- 0.33
+DataClean$tradeoff_taxes_green_num[clean$tradeoff_invest_ge1 == "Strongly disagree"] <- 0
+table(DataClean$tradeoff_taxes_green_num)
+
+#To what extent do you agree with the following statement:  The government should increase spending on the green economy, even if that implies cutting back in other areas.
+table(clean$tradeoff_invest_ge2)
+
+DataClean$tradeoff_cutting_for_green_num <- NA_real_
+DataClean$tradeoff_cutting_for_green_num[clean$tradeoff_invest_ge2 == "Strongly agree"] <- 1
+DataClean$tradeoff_cutting_for_green_num[clean$tradeoff_invest_ge2 == "Somewhat agree"] <- 0.66
+DataClean$tradeoff_cutting_for_green_num[clean$tradeoff_invest_ge2 == "Somewhat disagree"] <- 0.33
+DataClean$tradeoff_cutting_for_green_num[clean$tradeoff_invest_ge2 == "Strongly disagree"] <- 0
+table(DataClean$tradeoff_cutting_for_green_num)
+
+#To what extent do you agree with the following statement:  The government should increase spending on the green economy, even if that implies a higher public debt.
+table(clean$tradeoff_invest_ge3)
+
+DataClean$tradeoff_debt_green_num <- NA_real_
+DataClean$tradeoff_debt_green_num[clean$tradeoff_invest_ge3 == "Strongly agree"] <- 1
+DataClean$tradeoff_debt_green_num[clean$tradeoff_invest_ge3 == "Somewhat agree"] <- 0.66
+DataClean$tradeoff_debt_green_num[clean$tradeoff_invest_ge3 == "Somewhat disagree"] <- 0.33
+DataClean$tradeoff_debt_green_num[clean$tradeoff_invest_ge3 == "Strongly disagree"] <- 0
+table(DataClean$tradeoff_debt_green_num)
+
 
 ##province
 #table(clean$province)
@@ -1222,5 +1250,5 @@ table(data$trust_institut_terr_5)
 #table(DataClean$quebec_FR_bin)
 
 
-write.csv(DataClean, "data/clean_df.csv")
+write.csv(DataClean, "data/clean_df_full.csv")
 

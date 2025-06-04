@@ -22,7 +22,7 @@ library(patchwork)
 # 2. Load data
 # -----------------------
 df <- read.csv("data/clean_df.csv") 
-
+df$define
 str(df$ses_male_bin)
 # -----------------------
 # 3. DV & IV
@@ -186,7 +186,7 @@ budget_spend_prio_costLiving_norm
 budget_spend_prio_health_norm
 budget_spend_prio_seniors_norm
 
-# Policy: childcare spending
+# Policy: childcare spending (low n, why?)
 # What explains priorities for an issue? (Same as above)
 tradeoff_childcare_num                 # control
 tradeoff_childcare_higher_taxes_num    # higher taxes treatment
@@ -217,6 +217,7 @@ tradeoff_childcare_lowincome_num      # increase price med/high income
 tradeoff_senior_benefits_num         # lower pension benefits
 tradeoff_senior_income_num           # increase price med/high income
 
+# Policy: Green economy
 # IV
 ses_french_bin                      # language, FR = 1
 ses_male_bin                        # gender, M = 1
