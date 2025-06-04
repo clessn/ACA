@@ -1,7 +1,7 @@
 # ===================================================
 # Models for SASE Conference (July 2025)
 # ===================================================
-# Version: June 2nd, 2025
+# Version: June 4th, 2025
 
 # -----------------------
 # 1. Load packages
@@ -16,14 +16,16 @@ library(purrr)
 library(rlang)
 library(MASS)
 library(effects)
+library(ggeffects)
+library(sjPlot)
 library(patchwork)
 
 # -----------------------
 # 2. Load data
 # -----------------------
-df <- read.csv("data/clean_df.csv") 
-df$define
-str(df$ses_male_bin)
+df <- read.csv("data/clean_df_full.csv") 
+
+names(df)
 # -----------------------
 # 3. DV & IV
 # -----------------------
@@ -39,75 +41,54 @@ budget_pensions_priority_num
 budget_debt_priority_num
 budget_taxes_priority_num
 
-# Convert to ordered factor forGLM (if we expect distance to vary--which we do)
-# Health
-df$budget_health_rank <- factor(df$budget_health_priority_num, 
-                                levels = c(1, 0.75, 0.5, 0.25, 0), 
-                                ordered = TRUE)
+# --- Convert numeric priority to ordered factors ---
+ordered_levels <- c(1, 0.75, 0.5, 0.25, 0)
 
-# Education priority
-df$budget_education_rank <- factor(df$budget_education_priority_num, 
-                                   levels = c(1, 0.75, 0.5, 0.25, 0), 
-                                   ordered = TRUE)
+df$budget_health_rank <- factor(df$budget_health_priority_num, levels = ordered_levels, ordered = TRUE)
+df$budget_education_rank <- factor(df$budget_education_priority_num, levels = ordered_levels, ordered = TRUE)
+df$budget_pensions_rank <- factor(df$budget_pensions_priority_num, levels = ordered_levels, ordered = TRUE)
+df$budget_debt_rank <- factor(df$budget_debt_priority_num, levels = ordered_levels, ordered = TRUE)
+df$budget_taxes_rank <- factor(df$budget_taxes_priority_num, levels = ordered_levels, ordered = TRUE)
 
-# Pensions priority
-df$budget_pensions_rank <- factor(df$budget_pensions_priority_num, 
-                                  levels = c(1, 0.75, 0.5, 0.25, 0), 
-                                  ordered = TRUE)
+# --- Define formula (to avoid repetition) ---
+formula_ord <- as.formula(
+  budget_rank ~ ideo_right_num. + age34 + age35_54 + ses_male_bin + educBHS + educHS +
+    incomeLow_bin + incomeMid_bin + children_bin + employ_fulltime_bin +
+    ideo_interest_politics_num + trust_social_bin + trust_media_bin
+)
 
-# Debt priority
-df$budget_debt_rank <- factor(df$budget_debt_priority_num, 
-                              levels = c(1, 0.75, 0.5, 0.25, 0), 
-                              ordered = TRUE)
-
-# Taxes priority
-df$budget_taxes_rank <- factor(df$budget_taxes_priority_num, 
-                               levels = c(1, 0.75, 0.5, 0.25, 0), 
-                               ordered = TRUE)
-
-# Models: what do Canadians prioritize (do we care about debt & taxes or policy)
+# --- Run ordinal logistic regressions ---
 mod_ord_health <- polr(
-  budget_health_rank ~ ideo_right_num + ses_french_bin + age34 + age35_54 + ses_male_bin + educBHS + educHS
-  + incomeLow + incomeMed + dependentchildren + ideo_party_them + matStatus_married_bin 
-  + ideo_interest_politics_num,
-  data = df,
+  update(formula_ord, budget_rank ~ .),
+  data = transform(df, budget_rank = budget_health_rank),
   Hess = TRUE
 )
 
 mod_ord_edu <- polr(
-  budget_education_rank ~ ideo_right_num + ses_french_bin + age34 + age35_54 + ses_male_bin + educBHS + educHS
-  + incomeLow + incomeMed + dependentchildren + ideo_party_them + matStatus_married_bin 
-  + ideo_interest_politics_num,
-  data = df,
+  update(formula_ord, budget_rank ~ .),
+  data = transform(df, budget_rank = budget_education_rank),
   Hess = TRUE
 )
 
 mod_ord_pensions <- polr(
-  budget_pensions_rank ~ ideo_right_num + ses_french_bin + age34 + age35_54 + ses_male_bin + educBHS + educHS
-  + incomeLow + incomeMed + dependentchildren + ideo_party_them + matStatus_married_bin 
-  + ideo_interest_politics_num,
-  data = df,
+  update(formula_ord, budget_rank ~ .),
+  data = transform(df, budget_rank = budget_pensions_rank),
   Hess = TRUE
 )
 
 mod_ord_debt <- polr(
-  budget_debt_rank ~ ideo_right_num + ses_french_bin + age34 + age35_54 + ses_male_bin + educBHS + educHS
-  + incomeLow + incomeMed + dependentchildren + ideo_party_them + matStatus_married_bin 
-  + ideo_interest_politics_num,
-  data = df,
+  update(formula_ord, budget_rank ~ .),
+  data = transform(df, budget_rank = budget_debt_rank),
   Hess = TRUE
 )
 
 mod_ord_taxes <- polr(
-  budget_taxes_rank ~ ideo_right_num + ses_french_bin + age34 + age35_54 + ses_male_bin + educBHS + educHS
-  + incomeLow + incomeMed + dependentchildren + ideo_party_them + matStatus_married_bin 
-  + ideo_interest_politics_num,
-  data = df,
+  update(formula_ord, budget_rank ~ .),
+  data = transform(df, budget_rank = budget_taxes_rank),
   Hess = TRUE
 )
 
-df$ideo_right_num
-# Define models with labels
+# --- Store models in a named list ---
 priority_ord_list <- list(
   "Health"    = mod_ord_health,
   "Education" = mod_ord_edu,
@@ -116,36 +97,30 @@ priority_ord_list <- list(
   "Taxes"     = mod_ord_taxes
 )
 
-# Select key predictor to visualize: youngChildren, dependentChildren, employment status age, trust cynicsm, provIdentity
-# Pick variable of interest (e.g., treatment)
-term_to_plot <- df$ideo_right_num.
+# --- Variable to plot ---
+term_to_plot <- "ideo_right_num."  # exact predictor name
 
-# Create plots for each policy model
-priority_plots <- lapply(names(priority_ord_list), function(name) {
+# --- Plot predicted values for each model ---
+for (name in names(priority_ord_list)) {
   model <- priority_ord_list[[name]]
+  
   pred <- ggpredict(model, terms = term_to_plot)
   
-  plot(pred) +
-    ggtitle(paste("Priority for", name, "by", term_to_plot)) +
+  p <- ggplot(pred, aes(x = x, y = predicted)) +
+    geom_line(color = "blue") +
+    geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.2) +
+    labs(
+      x = "Ideology (Right)",
+      y = paste("Predicted Priority for", name),
+      title = paste("Predicted Priority for", name, "by Ideology")
+    ) +
     theme_minimal()
-})
+  
+  # Save plot as PNG in working directory
+  ggsave(filename = paste0("plot_", name, ".png"), plot = p, width = 6, height = 4)
+}
 
-pred_health <- ggpredict(mod_ord_health, terms = "treatment")  # Or another variable
-plot(pred_health) +
-  theme_minimal() +
-  labs(title = "Predicted Probabilities of Ranking Health as High Priority",
-       x = "Treatment Group", y = "Probability")
-
-# Combine into one panel
-wrap_plots(priority_plots, ncol = 1)
-
-#gof_map_df <- data.frame(
-#  raw = c("r.squared", "adj.r.squared", "nobs", "AIC", "BIC"),
-#  clean = c("R²", "Adj. R²", "N", "AIC", "BIC"),
-#  fmt = c("%.2f", "%.2f", "%.0f", "%.2f", "%.2f"),
-#  stringsAsFactors = FALSE
-#)
-
+# --- Create coefficient summary table ---
 model_tbl <- modelsummary(
   priority_ord_list,
   coef_rename = c(
@@ -155,8 +130,8 @@ model_tbl <- modelsummary(
     age35_54                    = "Middle age",
     educBHS                     = "BHS education",
     educHS                      = "HS education",
-    incomeLow                   = "Low income",
-    incomeMid                   = "Middle income",
+    incomeLow_bin               = "Low income",
+    incomeMid_bin               = "Middle income",
     matStatus_married_bin       = "Married",
     home_owned_bin              = "Homeowner",
     children_bin                = "Children",
@@ -167,15 +142,15 @@ model_tbl <- modelsummary(
     ideo_country_bin            = "Not-cynical",
     family_first_union_bin      = "Traditional family",
     ideo_interest_politics_num  = "Political interest",
-    dependentChildren = "",
-    youngChildren = ""
+    dependentChildren           = "Dependent Children",
+    youngChildren               = "Young Children",
+    trust_social_bin            = "Trust Social",
+    trust_media_bin             = "Trust Media"
   ),
   stars = c("***" = 0.001, "**" = 0.01, "*" = 0.05),
-  #title = "",
-  #note = "Survey",
-  output = "latex",
-  digits = 2 #,
-  #gof_map = gof_map_df
+  output = "html",
+  digits = 2,
+  file = "test_mod.html"
 )
 
 # Spending distribution by issue
@@ -186,6 +161,122 @@ budget_spend_prio_costLiving_norm
 budget_spend_prio_health_norm
 budget_spend_prio_seniors_norm
 
+# Step 1: Create ordered factors
+ordered_levels <- c(1, 0.75, 0.5, 0.25, 0)
+df$priorty_childcare_rank    <- factor(df$budget_spend_prio_childcare_norm, levels = ordered_levels, ordered = TRUE)
+df$priorty_climateChange_rank <- factor(df$budget_spend_prio_climateChange_norm, levels = ordered_levels, ordered = TRUE)
+df$priorty_costLiving_rank    <- factor(df$budget_spend_prio_costLiving_norm, levels = ordered_levels, ordered = TRUE)
+df$priorty_health_rank        <- factor(df$budget_spend_prio_health_norm, levels = ordered_levels, ordered = TRUE)
+df$priorty_seniors_rank       <- factor(df$budget_spend_prio_seniors_norm, levels = ordered_levels, ordered = TRUE)
+
+# Step 2: Collapse to fewer categories
+collapse_ranks <- function(x) {
+  case_when(
+    x %in% c(1, 0.75, 0.5) ~ "High",
+    x == 0.25 ~ "Medium",
+    x == 0 ~ "Low",
+    TRUE ~ NA_character_
+  )
+}
+
+df$rank_childcare_collapsed     <- factor(collapse_ranks(df$budget_spend_prio_childcare_norm), levels = c("Low", "Medium", "High"), ordered = TRUE)
+df$rank_climateChange_collapsed <- factor(collapse_ranks(df$budget_spend_prio_climateChange_norm), levels = c("Low", "Medium", "High"), ordered = TRUE)
+df$rank_costLiving_collapsed    <- factor(collapse_ranks(df$budget_spend_prio_costLiving_norm), levels = c("Low", "Medium", "High"), ordered = TRUE)
+df$rank_health_collapsed        <- factor(collapse_ranks(df$budget_spend_prio_health_norm), levels = c("Low", "Medium", "High"), ordered = TRUE)
+df$rank_seniors_collapsed       <- factor(collapse_ranks(df$budget_spend_prio_seniors_norm), levels = c("Low", "Medium", "High"), ordered = TRUE)
+
+# Step 3: Model fitting
+priority_vars <- c(
+  "rank_childcare_collapsed",
+  "rank_climateChange_collapsed",
+  "rank_costLiving_collapsed",
+  "rank_health_collapsed",
+  "rank_seniors_collapsed"
+)
+
+predictors <- c("ideo_right_num.")
+priority_models <- list()
+
+for (var in priority_vars) {
+  cat("Fitting model for:", var, "\n")
+  
+  vars_to_use <- c(var, predictors)
+  df_model <- df[, vars_to_use]
+  df_model <- na.omit(df_model)
+  
+  # Drop unused factor levels
+  df_model[[var]] <- droplevels(df_model[[var]])
+  
+  if (nlevels(df_model[[var]]) > 1) {
+    formula_i <- as.formula(paste(var, "~", paste(predictors, collapse = " + ")))
+    tryCatch({
+      model <- polr(formula_i, data = df_model, Hess = TRUE)
+      priority_models[[var]] <- model
+    }, error = function(e) {
+      message("Error fitting model for ", var, ": ", e$message)
+    })
+  } else {
+    message("Skipping ", var, ": not enough response levels after cleaning.")
+  }
+}
+
+# Step 4: Plot predicted probabilities
+library(ggeffects)
+library(ggplot2)
+
+for (name in names(priority_models)) {
+  model <- priority_models[[name]]
+  
+  pred <- ggpredict(model, terms = "ideo_right_num.")
+  
+  p <- ggplot(pred, aes(x = x, y = predicted, color = response.level, fill = response.level)) +
+    geom_line(size = 1) +
+    geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.2, color = NA) +
+    labs(
+      x = "Ideology (Right)",
+      y = "Predicted Probability",
+      title = paste("Predicted Priority for", gsub("rank_|_collapsed", "", name)),
+      color = "Response Level",
+      fill = "Response Level"
+    ) +
+    theme_minimal() +
+    theme(legend.position = "bottom")
+  
+# Step 5: Summary table
+library(modelsummary)
+
+model_tbl_2 <- modelsummary(
+  priority_models,
+  coef_rename = c(
+    ideo_right_num.             = "Right",
+    ses_french_bin              = "French language",
+    ses_male_bin                = "Gender",
+    age34                       = "Young",
+    age35_54                    = "Middle age",
+    educBHS                     = "BHS education",
+    educHS                      = "HS education",
+    incomeLow_bin               = "Low income",
+    incomeMid_bin               = "Middle income",
+    matStatus_married_bin       = "Married",
+    home_owned_bin              = "Homeowner",
+    children_bin                = "Children",
+    employ_fulltime_bin         = "Employed",
+    ideo_party_them             = "Cynic themselves",
+    ideo_party_bin              = "Cynic party",
+    ideo_country_bin            = "Not-cynical",
+    family_first_union_bin      = "Traditional family",
+    ideo_interest_politics_num  = "Political interest",
+    dependentChildren           = "Dependent Children",
+    youngChildren               = "Young Children",
+    trust_social_bin            = "Trust Social",
+    trust_media_bin             = "Trust Media"
+  ),
+  stars = c("***" = 0.001, "**" = 0.01, "*" = 0.05),
+  output = "html",
+  digits = 2,
+  file = "test_mod_spend.html"
+)
+
 # Policy: childcare spending (low n, why?)
 # What explains priorities for an issue? (Same as above)
 tradeoff_childcare_num                 # control
@@ -193,14 +284,38 @@ tradeoff_childcare_higher_taxes_num    # higher taxes treatment
 tradeoff_childcare_by_cutting_num      # cuts treatment
 tradeoff_childcare_debt_num            # debt treatment
 
-# Models
-mod_tradeoff_control  <- lm(tradeoff_childcare_num ~ age65plus_bin + ses_male_bin + ..., data = df)
-mod_tradeoff_taxes    <- lm(tradeoff_childcare_higher_taxes_num ~ age65plus_bin + ses_male_bin + ..., data = df)
-mod_tradeoff_cuts     <- lm(tradeoff_childcare_by_cutting_num ~ age65plus_bin + ses_male_bin + ..., data = df)
-mod_tradeoff_debt     <- lm(tradeoff_childcare_debt_num ~ age65plus_bin + ses_male_bin + ..., data = df)
+# List of outcome variables
+outcomes <- c(
+  "tradeoff_childcare_num",
+  "tradeoff_childcare_higher_taxes_num",
+  "tradeoff_childcare_by_cutting_num",
+  "tradeoff_childcare_debt_num"
+)
 
-# Plot
-plot(ggpredict(mod_tradeoff_taxes, terms = "ses_male_bin"))
+# Formula with a placeholder for the outcome
+predictors <- "ideo_right_num. + budget_debt_priority_num + budget_taxes_priority_num + budget_spend_prio_childcare_norm"
+
+# Fit models and store in a named list
+models <- lapply(outcomes, function(outcome_var) {
+  df[[outcome_var]] <- ordered(df[[outcome_var]])
+  formula <- as.formula(paste(outcome_var, "~", predictors))
+  polr(formula, data = df, Hess = TRUE)
+})
+names(models) <- outcomes
+
+# Display all models side-by-side in one table
+modelsummary(models,
+             stars = TRUE,
+             statistic = "p.value",
+             title = "Comparison of Polr Models for Childcare Tradeoffs",
+             coef_map = NULL)  # You can specify coef_map to rename predictors if desired
+
+
+# Policy: Green economy
+tradeoff_invest_green_num             # control
+tradeoff_taxes_green_num              # higher taxes treatment
+tradeoff_cutting_for_green_num        # cuts treatment
+tradeoff_debt_green_num               # debt treatment
 
 # Policy: taxes
 # What explains priorities for an issue? (Same as above)
@@ -208,6 +323,8 @@ tradeoff_no_taxes_num                 # control
 tradeoff_taxes_sales_num              # sales tax treatment
 tradeoff_taxes_high_income_num        # income tax treatment
 tradeoff_taxes_wealthy_num            # capital gains treatment
+
+
 
 # Policy: childcare benefits (no treatment, choice)
 tradeoff_childcare_benefits_num       # lower other benefits
@@ -217,7 +334,7 @@ tradeoff_childcare_lowincome_num      # increase price med/high income
 tradeoff_senior_benefits_num         # lower pension benefits
 tradeoff_senior_income_num           # increase price med/high income
 
-# Policy: Green economy
+
 # IV
 ses_french_bin                      # language, FR = 1
 ses_male_bin                        # gender, M = 1
@@ -239,7 +356,6 @@ family_first_union_bin              # "Traditional" family = 1
 ideo_interest_politics_num          # Continuous
 dependentChildren
 youngChildren
-
 
 # IV complex
 ses_french_bin                      # language, FR = 1
