@@ -570,25 +570,48 @@ table(data$ideo_define_YU)
 table(data$ideo_define_QC)
 table(data$ideo_define_SA)
 
-DataClean$define_province_then_canada <- ifelse(
-  data$ideo_define_AL == "First Albertan, second Canadian" |
-    data$ideo_define_BC == "First British Columbian, second Canadian" |
-    data$ideo_define_NB. == "First New Brunswicker, second Canadian" |
-    data$ideo_define_NS == "First Nova Scotian, second Canadian" |
-    data$ideo_define_QC == "First Québécois(e), second Canadian" |
-    data$ideo_define_ON == "First Ontarian, second Canadian" |
-    data$ideo_define_NT == "First Northwest Territorian, second Canadian" |
-    data$ideo_define_NU == "First Nunavummiut, second Canadian" |
-    data$ideo_define_PE == "First Islander, second Canadian" |
-    data$ideo_define_YU == "First Yukoner, second Canadian" |
-    data$ideo_define_NL == "First Newfoundlander and Labradorian, second Canadian" |
-    data$ideo_define_SA == "First Saskatchewanian, second Canadian" |
-    data$ideo_define_MA == "First Manitoban, second Canadian",
-  1, 0
-)
+# ALBERTA
+data$ideo_define_AL_bin <- ifelse(data$ideo_define_AL == "First Albertan, second Canadian", 1, 0)
 
-table(DataClean$define_province_then_canada, useNA = "always")
+# BRITISH COLUMBIA
+data$ideo_define_BC_bin <- ifelse(data$ideo_define_BC == "First British Columbian, second Canadian", 1, 0)
 
+# MANITOBA
+data$ideo_define_MA_bin <- 0  # Aucun répondant n’a cette réponse, donc tout est codé à 0
+
+# NEW BRUNSWICK
+data$ideo_define_NB_bin <- ifelse(data$ideo_define_NB. == "First New Brunswicker, second Canadian", 1, 0)
+
+# NEWFOUNDLAND AND LABRADOR
+data$ideo_define_NL_bin <- 0  # Aucun répondant n’a cette réponse, donc tout est codé à 0
+
+# NORTHWEST TERRITORIES
+data$ideo_define_NT_bin <- 0  # Aucun répondant avec "province d'abord", donc 0
+
+# NOVA SCOTIA
+data$ideo_define_NS_bin <- ifelse(data$ideo_define_NS == "First Nova Scotian, second Canadian", 1, 0)
+
+# NUNAVUT
+data$ideo_define_NU_bin <- 0  # Aucun répondant n’a cette réponse, donc 0
+
+# ONTARIO
+data$ideo_define_ON_bin <- ifelse(data$ideo_define_ON == "First Canadian, second Ontarian", 0,
+                                  ifelse(data$ideo_define_ON == "Solely as Canadian", 0, 0))  # Pas de "First Ontarian", donc 0
+
+# PRINCE EDWARD ISLAND
+data$ideo_define_PE_bin <- 0  # Aucun répondant n’a cette réponse, donc 0
+
+# YUKON
+data$ideo_define_YU_bin <- ifelse(data$ideo_define_YU == "First Yukoner, second Canadian", 1, 0)
+
+# QUEBEC
+data$ideo_define_QC_bin <- ifelse(data$ideo_define_QC == "First Quebecer, second Canadian", 1, 0)
+
+# SASKATCHEWAN
+data$ideo_define_SA_bin <- 0  # Aucun répondant n’a cette réponse, donc 0
+
+table(data$ideo_define_SA_bin)
+table(data$ideo_define_QC_bin)
 #############################################################################################################
 
 
@@ -976,6 +999,161 @@ DataClean$tradeoff_senior_income_num[clean$tradeoff_spend_hc_2 == "Somewhat disa
 DataClean$tradeoff_senior_income_num[clean$tradeoff_spend_hc_2 == "Strongly disagree"] <- 0
 table(DataClean$tradeoff_senior_income_num)
 
+#To what extent do you agree with the following statement? In Canada, people get rewarded for their intelligence and skill.
+table(clean$redis_fei_can1)
+
+DataClean$redis_intelligence_num <- NA_real_
+DataClean$redis_intelligence_num[clean$redis_fei_can1 == "Most of the time"] <- 1
+DataClean$redis_intelligence_num[clean$redis_fei_can1 == "Sometimes"] <- 0.66
+DataClean$redis_intelligence_num[clean$redis_fei_can1 == "Rarely"] <- 0.33
+DataClean$redis_intelligence_num[clean$redis_fei_can1 == "Never"] <- 0
+table(DataClean$redis_intelligence_num)
+
+#To what extent do you agree with the following statement? In Canada, people have equal opportunity to get ahead.
+table(clean$redis_fei_can2.)
+
+DataClean$redis_opportunity_num <- NA_real_
+DataClean$redis_opportunity_num[clean$redis_fei_can2. == "Most of the time"] <- 1
+DataClean$redis_opportunity_num[clean$redis_fei_can2. == "Sometimes"] <- 0.66
+DataClean$redis_opportunity_num[clean$redis_fei_can2. == "Rarely"] <- 0.33
+DataClean$redis_opportunity_num[clean$redis_fei_can2. == "Never"] <- 0
+table(DataClean$redis_opportunity_num)
+
+#In your opinion, what share of rich people are rich for reasons that have nothing to do with how hard they work?
+table(clean$redis_pnvo_rich)
+
+DataClean$redis_reasons_rich_num <- NA_real_
+DataClean$redis_reasons_rich_num[clean$redis_pnvo_rich == "Most of the time"] <- 1
+DataClean$redis_reasons_rich_num[clean$redis_pnvo_rich == "Sometimes"] <- 0.66
+DataClean$redis_reasons_rich_num[clean$redis_pnvo_rich == "Rarely"] <- 0.33
+DataClean$redis_reasons_rich_num[clean$redis_pnvo_rich == "Never"] <- 0
+table(DataClean$redis_reasons_rich_num)
+
+#In your opinion, what share of poor people are poor for reasons that have nothing to do with how hard they work?
+table(clean$redis_pnvo_poor)
+
+DataClean$redis_reasons_poor_num <- NA_real_
+DataClean$redis_reasons_poor_num[clean$redis_pnvo_poor == "Most of the time"] <- 1
+DataClean$redis_reasons_poor_num[clean$redis_pnvo_poor == "Sometimes"] <- 0.66
+DataClean$redis_reasons_poor_num[clean$redis_pnvo_poor == "Rarely"] <- 0.33
+DataClean$redis_reasons_poor_num[clean$redis_pnvo_poor == "Never"] <- 0
+table(DataClean$redis_reasons_poor_num)
+
+#To what extent do you agree with the following statement?  In Canada, income differences are legitimate reflections of differences in people’s  effort.
+table(clean$redis_fid_can)
+
+DataClean$redis_effort_num <- NA_real_
+DataClean$redis_effort_num[clean$redis_fid_can == "Most of the time"] <- 1
+DataClean$redis_effort_num[clean$redis_fid_can == "Sometimes"] <- 0.66
+DataClean$redis_effort_num[clean$redis_fid_can == "Rarely"] <- 0.33
+DataClean$redis_effort_num[clean$redis_fid_can == "Never"] <- 0
+table(DataClean$redis_effort_num)
+
+#To what extent do you agree with the following statement?  People on social benefits do not really have a choice.
+table(clean$redis_prev_freerider)
+
+DataClean$redis_social_benefits_num <- NA_real_
+DataClean$redis_social_benefits_num[clean$redis_prev_freerider == "Most of the time"] <- 1
+DataClean$redis_social_benefits_num[clean$redis_prev_freerider == "Sometimes"] <- 0.66
+DataClean$redis_social_benefits_num[clean$redis_prev_freerider == "Rarely"] <- 0.33
+DataClean$redis_social_benefits_num[clean$redis_prev_freerider == "Never"] <- 0
+table(DataClean$redis_social_benefits_num)
+
+#How often does welfare go to people who do not really deserve it?
+table(clean$redis_iden_freerider)
+
+DataClean$redis_welfare_num <- NA_real_
+DataClean$redis_welfare_num[clean$redis_iden_freerider == "Most of the time"] <- 1
+DataClean$redis_welfare_num[clean$redis_iden_freerider == "Sometimes"] <- 0.66
+DataClean$redis_welfare_num[clean$redis_iden_freerider == "Rarely"] <- 0.33
+DataClean$redis_welfare_num[clean$redis_iden_freerider == "Never"] <- 0
+table(DataClean$redis_welfare_num)
+
+#To what extent can others be trusted to not abuse and cheat the system?
+table(clean$redis_human_nature.)
+
+DataClean$redis_no_cheat_system_num <- NA_real_
+DataClean$redis_no_cheat_system_num[clean$redis_human_nature. == "Most of the time"] <- 1
+DataClean$redis_no_cheat_system_num[clean$redis_human_nature. == "Sometimes"] <- 0.66
+DataClean$redis_no_cheat_system_num[clean$redis_human_nature. == "Rarely"] <- 0.33
+DataClean$redis_no_cheat_system_num[clean$redis_human_nature. == "Never"] <- 0
+table(DataClean$redis_no_cheat_system_num)
+
+
+
+##Generally speaking would you say that most people can be trusted, or, that you need to be very careful when dealing with people? - On a scale of 0 to 10 where 0 means no trust and 10 means complete trust.
+table(data$trust_social_1)
+data$trust_social_bin <- ifelse(data$trust_social_1 >= 6, 1, 
+                                ifelse(data$trust_social_1 <= 5, 0, NA))
+
+DataClean$trust_social_bin <- data$trust_social_bin[match(rownames(DataClean), rownames(data))]
+
+table(DataClean$trust_social_bin, useNA = "ifany")
+
+
+##Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - Political parties
+table(data$trust_institution_1)
+data$trust_pol_parties_bin <- ifelse(data$trust_institution_1 >= 6, 1,
+                                       ifelse(data$trust_institution_1 <= 5, 0, NA))
+
+DataClean$trust_pol_parties_bin <- data$trust_pol_parties_bin[match(rownames(DataClean), rownames(data))]
+
+table(DataClean$trust_pol_parties_bin, useNA = "ifany")
+
+
+##Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - The federal government
+table(data$trust_institution_2)
+
+data$trust_fed_gov_bin <- ifelse(data$trust_institution_1 >= 6, 1,
+                                     ifelse(data$trust_institution_1 <= 5, 0, NA))
+
+DataClean$trust_fed_gov_bin <- data$trust_fed_gov_bin[match(rownames(DataClean), rownames(data))]
+
+table(DataClean$trust_fed_gov_bin, useNA = "ifany")
+##Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - The provincial government
+table(data$trust_institution_3)
+
+data$trust_prov_gov_bin <- ifelse(data$trust_institution_1 >= 6, 1,
+                                 ifelse(data$trust_institution_1 <= 5, 0, NA))
+
+DataClean$trust_prov_gov_bin <- data$trust_prov_gov_bin[match(rownames(DataClean), rownames(data))]
+
+table(DataClean$trust_prov_gov_bin, useNA = "ifany")
+##Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - The mass media
+table(data$trust_institution_4)
+
+data$trust_media_bin <- ifelse(data$trust_institution_1 >= 6, 1,
+                                 ifelse(data$trust_institution_1 <= 5, 0, NA))
+
+DataClean$trust_media_bin <- data$trust_media_bin[match(rownames(DataClean), rownames(data))]
+
+table(DataClean$trust_media_bin, useNA = "ifany")
+
+##Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - Your provincial government
+table(data$trust_institution_5)
+
+data$trust_your_prov_gov_bin <- ifelse(data$trust_institution_1 >= 6, 1,
+                                 ifelse(data$trust_institution_1 <= 5, 0, NA))
+
+DataClean$trust_your_prov_gov_bin <- data$trust_your_prov_gov_bin[match(rownames(DataClean), rownames(data))]
+
+table(DataClean$trust_your_prov_gov_bin, useNA = "ifany")
+##Generally speaking would you say that most people can be trusted, or, that you need to be very careful when dealing with people? - On a scale of 0 to 10 where 0 means no trust and 10 means complete trust.
+table(data$trust_social_terr_1)
+##Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - Political parties
+table(data$trust_institut_terr_1)
+##Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - The federal government
+table(data$trust_institut_terr_2)
+##Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - The provincial government
+table(data$trust_institut_terr_3)
+##Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - The mass media
+table(data$trust_institut_terr_4)
+##Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - Your territorial government
+table(data$trust_institut_terr_5)
+
+
+
+
 ##To what extent do you agree with the following statement: The government should increase spending on green economy.
 #table(clean$tradeoff_invest_ge0.)
 #
@@ -1016,86 +1194,7 @@ table(DataClean$tradeoff_senior_income_num)
 #DataClean$tradeoff_debt_green_num[clean$tradeoff_invest_ge3 == "Strongly disagree"] <- 0
 #table(DataClean$tradeoff_debt_green_num)
 #
-##To what extent do you agree with the following statement? In Canada, people get rewarded for their intelligence and skill.
-#table(clean$redis_fei_can1)
-#
-#DataClean$redis_intelligence_num <- NA_real_
-#DataClean$redis_intelligence_num[clean$redis_fei_can1 == "Most of the time"] <- 1
-#DataClean$redis_intelligence_num[clean$redis_fei_can1 == "Sometimes"] <- 0.66
-#DataClean$redis_intelligence_num[clean$redis_fei_can1 == "Rarely"] <- 0.33
-#DataClean$redis_intelligence_num[clean$redis_fei_can1 == "Never"] <- 0
-#table(DataClean$redis_intelligence_num)
-#
-##To what extent do you agree with the following statement? In Canada, people have equal opportunity to get ahead.
-#table(clean$redis_fei_can2.)
-#
-#DataClean$redis_opportunity_num <- NA_real_
-#DataClean$redis_opportunity_num[clean$redis_fei_can2. == "Most of the time"] <- 1
-#DataClean$redis_opportunity_num[clean$redis_fei_can2. == "Sometimes"] <- 0.66
-#DataClean$redis_opportunity_num[clean$redis_fei_can2. == "Rarely"] <- 0.33
-#DataClean$redis_opportunity_num[clean$redis_fei_can2. == "Never"] <- 0
-#table(DataClean$redis_opportunity_num)
-#
-##In your opinion, what share of rich people are rich for reasons that have nothing to do with how hard they work?
-#table(clean$redis_pnvo_rich)
-#
-#DataClean$redis_reasons_rich_num <- NA_real_
-#DataClean$redis_reasons_rich_num[clean$redis_pnvo_rich == "Most of the time"] <- 1
-#DataClean$redis_reasons_rich_num[clean$redis_pnvo_rich == "Sometimes"] <- 0.66
-#DataClean$redis_reasons_rich_num[clean$redis_pnvo_rich == "Rarely"] <- 0.33
-#DataClean$redis_reasons_rich_num[clean$redis_pnvo_rich == "Never"] <- 0
-#table(DataClean$redis_reasons_rich_num)
-#
-##In your opinion, what share of poor people are poor for reasons that have nothing to do with how hard they work?
-#table(clean$redis_pnvo_poor)
-#
-#DataClean$redis_reasons_poor_num <- NA_real_
-#DataClean$redis_reasons_poor_num[clean$redis_pnvo_poor == "Most of the time"] <- 1
-#DataClean$redis_reasons_poor_num[clean$redis_pnvo_poor == "Sometimes"] <- 0.66
-#DataClean$redis_reasons_poor_num[clean$redis_pnvo_poor == "Rarely"] <- 0.33
-#DataClean$redis_reasons_poor_num[clean$redis_pnvo_poor == "Never"] <- 0
-#table(DataClean$redis_reasons_poor_num)
-#
-##To what extent do you agree with the following statement?  In Canada, income differences are legitimate reflections of differences in people’s  effort.
-#table(clean$redis_fid_can)
-#
-#DataClean$redis_effort_num <- NA_real_
-#DataClean$redis_effort_num[clean$redis_fid_can == "Most of the time"] <- 1
-#DataClean$redis_effort_num[clean$redis_fid_can == "Sometimes"] <- 0.66
-#DataClean$redis_effort_num[clean$redis_fid_can == "Rarely"] <- 0.33
-#DataClean$redis_effort_num[clean$redis_fid_can == "Never"] <- 0
-#table(DataClean$redis_effort_num)
-#
-##To what extent do you agree with the following statement?  People on social benefits do not really have a choice.
-#table(clean$redis_prev_freerider)
-#
-#DataClean$redis_social_benefits_num <- NA_real_
-#DataClean$redis_social_benefits_num[clean$redis_prev_freerider == "Most of the time"] <- 1
-#DataClean$redis_social_benefits_num[clean$redis_prev_freerider == "Sometimes"] <- 0.66
-#DataClean$redis_social_benefits_num[clean$redis_prev_freerider == "Rarely"] <- 0.33
-#DataClean$redis_social_benefits_num[clean$redis_prev_freerider == "Never"] <- 0
-#table(DataClean$redis_social_benefits_num)
-#
-##How often does welfare go to people who do not really deserve it?
-#table(clean$redis_iden_freerider)
-#
-#DataClean$redis_welfare_num <- NA_real_
-#DataClean$redis_welfare_num[clean$redis_iden_freerider == "Most of the time"] <- 1
-#DataClean$redis_welfare_num[clean$redis_iden_freerider == "Sometimes"] <- 0.66
-#DataClean$redis_welfare_num[clean$redis_iden_freerider == "Rarely"] <- 0.33
-#DataClean$redis_welfare_num[clean$redis_iden_freerider == "Never"] <- 0
-#table(DataClean$redis_welfare_num)
-#
-##To what extent can others be trusted to not abuse and cheat the system?
-#table(clean$redis_human_nature.)
-#
-#DataClean$redis_no_cheat_system_num <- NA_real_
-#DataClean$redis_no_cheat_system_num[clean$redis_human_nature. == "Most of the time"] <- 1
-#DataClean$redis_no_cheat_system_num[clean$redis_human_nature. == "Sometimes"] <- 0.66
-#DataClean$redis_no_cheat_system_num[clean$redis_human_nature. == "Rarely"] <- 0.33
-#DataClean$redis_no_cheat_system_num[clean$redis_human_nature. == "Never"] <- 0
-#table(DataClean$redis_no_cheat_system_num)
-#
+
 ##province
 #table(clean$province)
 #
