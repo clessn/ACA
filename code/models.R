@@ -1,7 +1,7 @@
 # ===================================================
 # Models for SASE Conference (July 2025)
 # ===================================================
-# Version: June 4th, 2025
+# Version: June 5th, 2025
 
 # -----------------------
 # 1. Load packages
@@ -9,6 +9,7 @@
 library(tidyverse)
 library(tidyr)
 library(dplyr)
+library(anesrake)
 library(ggplot2)
 library(modelsummary)
 library(stringr)
@@ -25,7 +26,102 @@ library(patchwork)
 # -----------------------
 df <- read.csv("data/clean_df_full.csv") 
 
-names(df)
+# -----------------------
+# 3. Descriptive statistics & weights
+# -----------------------
+# Age, gender, employment, income, region, education, political interest and ideology
+# names(df)
+# prop.table(table(df$ideo_interest_politics_num))
+# hist(df$ideo_interest_politics_num)
+
+# Highly biased anesrake is applied for age, gender, employment, income, 
+# education using 2021 census data (categories not always the same, proportions done by myself)
+
+# Transforming variables as necessary
+# df$age_cat <- with(df, ifelse(age34 == 1, "18-34",
+#                                             ifelse(age35_54 == 1, "35-54", "55+")))
+# df$age_cat <- factor(df$age_cat, levels = c("18-34", "35-54", "55+"))
+# 
+# df$gender <- factor(ifelse(df$ses_male_bin == 1, "Male",
+#                            ifelse(df$ses_male_bin == 0, "Female", NA)),
+#                     levels = c("Male", "Female"))
+
+# df$educ_group <- factor(df$educ_group, levels = c("educBHS", "educHS", "educUniv"))
+# df$ses_income3Cat <- factor(df$ses_income3Cat, levels = c("Low", "Mid", "High"))
+
+# Step 1: Clean and rename
+# Step 1: Clean and rename relevant variables
+df$age <- NA_integer_
+
+df$age[df$age34 == 1] <- 1          # 18-34
+df$age[df$age35_54 == 1] <- 2       # 35-54
+df$age[is.na(df$age) | (df$age34 == 0 & df$age35_54 == 0)] <- 3  # 55+ group
+
+df_rake <- df[!is.na(df$id) & !is.na(df$ses_male_bin) & !is.na(df$age) &
+                !is.na(df$educ_group) & !is.na(df$ses_income3Cat), ]
+
+# Rename variables for consistency
+names(df_rake)[names(df_rake) == "ses_male_bin"] <- "gender"
+names(df_rake)[names(df_rake) == "age"] <- "age"
+names(df_rake)[names(df_rake) == "educ_group"] <- "education"
+names(df_rake)[names(df_rake) == "ses_income3Cat"] <- "income"
+
+# Recode education: combine educBHS and educHS into one category
+df_rake$education <- as.character(df_rake$education)  # convert factor/character to char if needed
+df_rake$education[df_rake$education == 2] <- 1
+df_rake$education[df_rake$education == 3] <- 2
+df_rake$education <- factor(df_rake$education, levels = 1:2)
+
+# Recode income if coded as character
+df_rake$income <- as.character(df_rake$income)
+
+df_rake$income[df_rake$income == "Low"] <- "1"
+df_rake$income[df_rake$income == "Mid"] <- "2"
+df_rake$income[df_rake$income == "High"] <- "3"
+
+# Step 2: Convert all to numeric safely
+# This will preserve levels if already numeric, or convert factor labels correctly
+df_rake$gender <- as.numeric(as.character(df_rake$gender))
+df_rake$age <- as.numeric(as.character(df_rake$age))
+df_rake$income <- as.numeric(as.character(df_rake$income))
+df_rake$education <- as.numeric(as.character(df_rake$education))
+
+
+# Check distribution again
+lapply(df_rake[c("gender", "age", "education", "income")], table)
+
+# Step 4: Define population proportions
+pop.margins <- list(
+  gender    = c("1" = 0.49, "2" = 0.51),
+  age       = c("1" = 0.24, "2" = 0.33, "3" = 0.43),
+  education = c("1" = 0.71, "2" = 0.29),  # ⚠️ Only 2 levels!
+  income    = c("1" = 0.135, "2" = 0.7, "3" = 0.165)
+)
+
+# Step 5: Construct inputter list (numeric vectors with population margins as attributes)
+inputter <- list(
+  gender    = df_rake$gender,
+  age       = df_rake$age,
+  education = df_rake$education,
+  income    = df_rake$income
+)
+
+for (var in names(inputter)) {
+  attr(inputter[[var]], "population") <- pop.margins[[var]]
+}
+
+# Step 6: Run raking
+raking.weights <- anesrake(
+  inputter      = inputter,
+  dataframe     = df_rake,
+  caseid        = df_rake$id,
+  cap           = 5,
+  maxit         = 1000,
+  convcrit      = 1e-4,
+  choosemethod  = "total",
+  verbose       = TRUE
+)
+
 # -----------------------
 # 3. DV & IV
 # -----------------------
@@ -277,12 +373,12 @@ model_tbl_2 <- modelsummary(
   file = "test_mod_spend.html"
 )
 
-# Policy: childcare spending (low n, why?)
+# Policy: childcare spending (low n, because divided with green economy)
 # What explains priorities for an issue? (Same as above)
-tradeoff_childcare_num                 # control
-tradeoff_childcare_higher_taxes_num    # higher taxes treatment
-tradeoff_childcare_by_cutting_num      # cuts treatment
-tradeoff_childcare_debt_num            # debt treatment
+sum(!is.na(df$tradeoff_childcare_num))                 # control
+sum(!is.na(df$tradeoff_childcare_higher_taxes_num))    # higher taxes treatment
+sum(!is.na(df$tradeoff_childcare_by_cutting_num))      # cuts treatment
+sum(!is.na(df$tradeoff_childcare_debt_num))            # debt treatment
 
 # List of outcome variables
 outcomes <- c(
@@ -311,11 +407,11 @@ modelsummary(models,
              coef_map = NULL)  # You can specify coef_map to rename predictors if desired
 
 
-# Policy: Green economy
-tradeoff_invest_green_num             # control
-tradeoff_taxes_green_num              # higher taxes treatment
-tradeoff_cutting_for_green_num        # cuts treatment
-tradeoff_debt_green_num               # debt treatment
+# Policy: Green economy (low n, because divided with child care)
+sum(!is.na(df$tradeoff_invest_green_num))             # control
+sum(!is.na(df$tradeoff_taxes_green_num))              # higher taxes treatment
+sum(!is.na(df$tradeoff_cutting_for_green_num))        # cuts treatment
+sum(!is.na(df$tradeoff_debt_green_num))               # debt treatment
 
 # Policy: taxes
 # What explains priorities for an issue? (Same as above)
@@ -325,7 +421,42 @@ tradeoff_taxes_high_income_num        # income tax treatment
 tradeoff_taxes_wealthy_num            # capital gains treatment
 
 
+# List of outcome variables
+outcomes_taxes <- c(
+  "tradeoff_no_taxes_num",
+  "tradeoff_taxes_sales_num",
+  "tradeoff_taxes_high_income_num",
+  "tradeoff_taxes_wealthy_num"
+)
 
+
+
+# Formula with a placeholder for the outcome
+predictors_taxes <- "ideo_right_num. + age34 + educHS + 
+employ_fulltime_bin + budget_taxes_priority_bin + budget_debt_priority_bin + ideo_country_bin + ideo_interest_politics_num"
+
+df$budget_debt_priority_bin
+ideo_interest_politics_num
+ideo_country_bin
+
+# Fit models and store in a named list
+models_taxes <- lapply(outcomes_taxes, function(outcome_var) {
+  df[[outcome_var]] <- ordered(df[[outcome_var]])
+  formula <- as.formula(paste(outcome_var, "~", predictors_taxes))
+  polr(formula, data = df, Hess = TRUE)
+})
+
+names(models_taxes) <- outcomes_taxes
+
+# Display all models side-by-side in one table
+modelsummary(models_taxes,
+             stars = TRUE,
+             statistic = "p.value",
+             title = "Comparison of Polr Models for Taxation Tradeoffs",
+             coef_map = NULL)  # You can specify coef_map to rename predictors if desired
+
+
+names(df)
 # Policy: childcare benefits (no treatment, choice)
 tradeoff_childcare_benefits_num       # lower other benefits
 tradeoff_childcare_lowincome_num      # increase price med/high income

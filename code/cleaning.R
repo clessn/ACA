@@ -1,7 +1,7 @@
 # ===================================================
 # Cleaning & Wrangling ACA
 # ===================================================
-# Version: June 2nd, 2025
+# Version: June 5th, 2025
 
 # -----------------------
 # 1. Load packages
@@ -16,18 +16,19 @@ library(rlang)
 # -----------------------
 # 2. Load and inspect data
 # -----------------------
-#raw_data <- read.csv("data/ACA_April_30.csv") 
+#raw_data <- read.csv("data/ACA_June_5.csv") 
+
 # -----------------------
 # 2. Remove IPAddress 
 # -----------------------
-#raw_data <- raw_data %>%
-#  select(-IPAddress, -RecipientLastName, -RecipientFirstName,
+#raw_data <- dplyr::select(raw_data,
+#         -IPAddress, -RecipientLastName, -RecipientFirstName,
 #         -RecipientEmail, -LocationLatitude, -LocationLongitude,
 #         -DistributionChannel)
-#
-#write.csv(raw_data, "data/ACA_April_30.csv")
 
-data <- read.csv("data/ACA_April_30.csv") 
+#write.csv(raw_data, "data/ACA_June_5.csv")
+
+data <- read.csv("data/ACA_June_5.csv") 
 # -----------------------
 # 3. Clean metadata rows
 # -----------------------
