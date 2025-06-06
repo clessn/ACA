@@ -134,7 +134,14 @@ mod_ord_health <- polr(
   weights = weightvec,
   Hess = TRUE
 )
-str(df[, all.vars(update(formula_ord, budget_rank ~ .))])
+
+mod_ord_health <- polr(
+  formula_ord,
+  data = transform(df, budget_rank = budget_health_rank),
+  weights = weightvec,
+  Hess = TRUE
+)
+
 mod_ord_edu <- polr(
   update(formula_ord, budget_rank ~ .),
   data = transform(df, budget_rank = budget_education_rank),
@@ -422,7 +429,7 @@ ideo_country_bin
 models_taxes <- lapply(outcomes_taxes, function(outcome_var) {
   df[[outcome_var]] <- ordered(df[[outcome_var]])
   formula <- as.formula(paste(outcome_var, "~", predictors_taxes))
-  polr(formula, data = df, Hess = TRUE)
+  polr(formula, data = df,   weights = weightvec, Hess = TRUE)
 })
 
 names(models_taxes) <- outcomes_taxes
