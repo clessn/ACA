@@ -1,7 +1,7 @@
 # ===================================================
 # Models for SASE Conference (July 2025)
 # ===================================================
-# Version: June 5th, 2025
+# Version: June 6th, 2025
 
 # -----------------------
 # 1. Load packages
@@ -34,93 +34,67 @@ df <- read.csv("data/clean_df_full.csv")
 # prop.table(table(df$ideo_interest_politics_num))
 # hist(df$ideo_interest_politics_num)
 
-# Highly biased anesrake is applied for age, gender, employment, income, 
+# Highly biased, anesrake is applied for age, gender, employment, income, 
 # education using 2021 census data (categories not always the same, proportions done by myself)
 
-# Transforming variables as necessary
-# df$age_cat <- with(df, ifelse(age34 == 1, "18-34",
-#                                             ifelse(age35_54 == 1, "35-54", "55+")))
-# df$age_cat <- factor(df$age_cat, levels = c("18-34", "35-54", "55+"))
-# 
-# df$gender <- factor(ifelse(df$ses_male_bin == 1, "Male",
-#                            ifelse(df$ses_male_bin == 0, "Female", NA)),
-#                     levels = c("Male", "Female"))
-
-# df$educ_group <- factor(df$educ_group, levels = c("educBHS", "educHS", "educUniv"))
-# df$ses_income3Cat <- factor(df$ses_income3Cat, levels = c("Low", "Mid", "High"))
-
 # Step 1: Clean and rename
-# Step 1: Clean and rename relevant variables
-df$age <- NA_integer_
+df$gender <- NA_integer_
+df$gender[df$ses_male_bin == 1] <- 2          # man
+df$gender[df$ses_male_bin == 0] <- 1       # women & other
+table(df$gender)
 
+df$age <- NA_integer_
 df$age[df$age34 == 1] <- 1          # 18-34
 df$age[df$age35_54 == 1] <- 2       # 35-54
 df$age[is.na(df$age) | (df$age34 == 0 & df$age35_54 == 0)] <- 3  # 55+ group
+table(df$age)
 
-df_rake <- df[!is.na(df$id) & !is.na(df$ses_male_bin) & !is.na(df$age) &
-                !is.na(df$educ_group) & !is.na(df$ses_income3Cat), ]
+df$education <- NA_integer_
+df$education[df$educ_group %in% c("educBHS", "educHS")] <- 1
+df$education[df$educ_group == "educUniv"] <- 2     
+table(df$education)
 
-# Rename variables for consistency
-names(df_rake)[names(df_rake) == "ses_male_bin"] <- "gender"
-names(df_rake)[names(df_rake) == "age"] <- "age"
-names(df_rake)[names(df_rake) == "educ_group"] <- "education"
-names(df_rake)[names(df_rake) == "ses_income3Cat"] <- "income"
+df$income <- NA_integer_
+df$income[df$ses_income3Cat == "Low"] <- 1
+df$income[df$ses_income3Cat == "Mid"] <- 2
+df$income[df$ses_income3Cat == "High"] <- 3
+table(df$income)
 
-# Recode education: combine educBHS and educHS into one category
-df_rake$education <- as.character(df_rake$education)  # convert factor/character to char if needed
-df_rake$education[df_rake$education == 2] <- 1
-df_rake$education[df_rake$education == 3] <- 2
-df_rake$education <- factor(df_rake$education, levels = 1:2)
-
-# Recode income if coded as character
-df_rake$income <- as.character(df_rake$income)
-
-df_rake$income[df_rake$income == "Low"] <- "1"
-df_rake$income[df_rake$income == "Mid"] <- "2"
-df_rake$income[df_rake$income == "High"] <- "3"
-
-# Step 2: Convert all to numeric safely
-# This will preserve levels if already numeric, or convert factor labels correctly
-df_rake$gender <- as.numeric(as.character(df_rake$gender))
-df_rake$age <- as.numeric(as.character(df_rake$age))
-df_rake$income <- as.numeric(as.character(df_rake$income))
-df_rake$education <- as.numeric(as.character(df_rake$education))
+# Census info
+gender <- c(.49,.51)
+age  <- c(0.24, 0.33,  0.43)
+education <- c(0.71, 0.29)
+income  <-  c(0.135,  0.7,  0.165)
 
 
-# Check distribution again
-lapply(df_rake[c("gender", "age", "education", "income")], table)
+# definitions of target list
+targets <- list(gender, age, education, income)
+# important: to use the same variable names of the dataset
+names(targets) <- c("gender", "age", "education", "income")
 
-# Step 4: Define population proportions
-pop.margins <- list(
-  gender    = c("1" = 0.49, "2" = 0.51),
-  age       = c("1" = 0.24, "2" = 0.33, "3" = 0.43),
-  education = c("1" = 0.71, "2" = 0.29),  # ⚠️ Only 2 levels!
-  income    = c("1" = 0.135, "2" = 0.7, "3" = 0.165)
-)
+# id variable
+df$caseid <- 1:length(df$gender)
 
-# Step 5: Construct inputter list (numeric vectors with population margins as attributes)
-inputter <- list(
-  gender    = df_rake$gender,
-  age       = df_rake$age,
-  education = df_rake$education,
-  income    = df_rake$income
-)
+anesrakefinder(targets, df, choosemethod = "total")
 
-for (var in names(inputter)) {
-  attr(inputter[[var]], "population") <- pop.margins[[var]]
-}
+outsave <- anesrake(targets, df, caseid = df$caseid,
+                    verbose= FALSE, cap = 5, choosemethod = "total",
+                    type = "pctlim", pctlim = .05 , nlim = 5,
+                    iterate = TRUE , force1 = TRUE)
 
-# Step 6: Run raking
-raking.weights <- anesrake(
-  inputter      = inputter,
-  dataframe     = df_rake,
-  caseid        = df_rake$id,
-  cap           = 5,
-  maxit         = 1000,
-  convcrit      = 1e-4,
-  choosemethod  = "total",
-  verbose       = TRUE
-)
+summary(outsave)
+
+# add weights to the dataset
+df$weightvec  <- unlist(outsave[1])
+
+n  <- length(df$income)
+
+# weighting loss
+((sum(df$weightvec ^ 2) / (sum(df$weightvec)) ^ 2) * n) - 1
+names(df)
+unweighted <-  wpct(df$tradeoff_childcare_benefits_bin)
+weighted  <-  wpct(df$tradeoff_childcare_benefits_bin, df$weightvec)
+tab  <- data.frame(unweighted, weighted)
 
 # -----------------------
 # 3. DV & IV
@@ -157,30 +131,35 @@ formula_ord <- as.formula(
 mod_ord_health <- polr(
   update(formula_ord, budget_rank ~ .),
   data = transform(df, budget_rank = budget_health_rank),
+  weights = weightvec,
   Hess = TRUE
 )
-
+str(df[, all.vars(update(formula_ord, budget_rank ~ .))])
 mod_ord_edu <- polr(
   update(formula_ord, budget_rank ~ .),
   data = transform(df, budget_rank = budget_education_rank),
+  weights = weightvec,
   Hess = TRUE
 )
 
 mod_ord_pensions <- polr(
   update(formula_ord, budget_rank ~ .),
   data = transform(df, budget_rank = budget_pensions_rank),
+  weights = weightvec,
   Hess = TRUE
 )
 
 mod_ord_debt <- polr(
   update(formula_ord, budget_rank ~ .),
   data = transform(df, budget_rank = budget_debt_rank),
+  weights = weightvec,
   Hess = TRUE
 )
 
 mod_ord_taxes <- polr(
   update(formula_ord, budget_rank ~ .),
   data = transform(df, budget_rank = budget_taxes_rank),
+  weights = weightvec,
   Hess = TRUE
 )
 
