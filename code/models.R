@@ -1,7 +1,7 @@
 # ===================================================
 # Models for SASE Conference (July 2025)
 # ===================================================
-# Version: June 6th, 2025
+# Version: June 9th, 2025
 
 # -----------------------
 # 1. Load packages
@@ -9,13 +9,12 @@
 library(tidyverse)
 library(tidyr)
 library(dplyr)
-library(anesrake)
 library(ggplot2)
 library(modelsummary)
 library(stringr)
 library(purrr)
 library(rlang)
-library(MASS)
+library(MASS) # use MASS:polr() to avoid errors with tidyverse
 library(effects)
 library(ggeffects)
 library(sjPlot)
@@ -24,151 +23,77 @@ library(patchwork)
 # -----------------------
 # 2. Load data
 # -----------------------
-df <- read.csv("data/clean_df_full.csv") 
-
-# -----------------------
-# 3. Descriptive statistics & weights
-# -----------------------
-# Age, gender, employment, income, region, education, political interest and ideology
-# names(df)
-# prop.table(table(df$ideo_interest_politics_num))
-# hist(df$ideo_interest_politics_num)
-
-# Highly biased, anesrake is applied for age, gender, employment, income, 
-# education using 2021 census data (categories not always the same, proportions done by myself)
-
-# Step 1: Clean and rename
-df$gender <- NA_integer_
-df$gender[df$ses_male_bin == 1] <- 2          # man
-df$gender[df$ses_male_bin == 0] <- 1       # women & other
-table(df$gender)
-
-df$age <- NA_integer_
-df$age[df$age34 == 1] <- 1          # 18-34
-df$age[df$age35_54 == 1] <- 2       # 35-54
-df$age[is.na(df$age) | (df$age34 == 0 & df$age35_54 == 0)] <- 3  # 55+ group
-table(df$age)
-
-df$education <- NA_integer_
-df$education[df$educ_group %in% c("educBHS", "educHS")] <- 1
-df$education[df$educ_group == "educUniv"] <- 2     
-table(df$education)
-
-df$income <- NA_integer_
-df$income[df$ses_income3Cat == "Low"] <- 1
-df$income[df$ses_income3Cat == "Mid"] <- 2
-df$income[df$ses_income3Cat == "High"] <- 3
-table(df$income)
-
-# Census info
-gender <- c(.49,.51)
-age  <- c(0.24, 0.33,  0.43)
-education <- c(0.71, 0.29)
-income  <-  c(0.135,  0.7,  0.165)
-
-
-# definitions of target list
-targets <- list(gender, age, education, income)
-# important: to use the same variable names of the dataset
-names(targets) <- c("gender", "age", "education", "income")
-
-# id variable
-df$caseid <- 1:length(df$gender)
-
-anesrakefinder(targets, df, choosemethod = "total")
-
-outsave <- anesrake(targets, df, caseid = df$caseid,
-                    verbose= FALSE, cap = 5, choosemethod = "total",
-                    type = "pctlim", pctlim = .05 , nlim = 5,
-                    iterate = TRUE , force1 = TRUE)
-
-summary(outsave)
-
-# add weights to the dataset
-df$weightvec  <- unlist(outsave[1])
-
-n  <- length(df$income)
-
-# weighting loss
-((sum(df$weightvec ^ 2) / (sum(df$weightvec)) ^ 2) * n) - 1
+df <- read.csv("data/ACA_weighted.csv") 
 names(df)
-unweighted <-  wpct(df$tradeoff_childcare_benefits_bin)
-weighted  <-  wpct(df$tradeoff_childcare_benefits_bin, df$weightvec)
-tab  <- data.frame(unweighted, weighted)
-
 # -----------------------
-# 3. DV & IV
+# 3. Models
 # -----------------------
-
-# Models
-# Priority issue (continuous)
+# Budgetary priority question
 # What predicts assigning a higher priority to this specific policy (e.g., health)?
 
-# OLS regression is we expect distance between scales to be equivalent
-budget_health_priority_num
-budget_education_priority_num
-budget_pensions_priority_num
-budget_debt_priority_num
-budget_taxes_priority_num
-
-# --- Convert numeric priority to ordered factors ---
+# --- Convert numeric priority to ordered factors for ordinal logistic regression  ---
+# Define the priority levels: 1 = highest, 0 lowest
 ordered_levels <- c(1, 0.75, 0.5, 0.25, 0)
 
-df$budget_health_rank <- factor(df$budget_health_priority_num, levels = ordered_levels, ordered = TRUE)
-df$budget_education_rank <- factor(df$budget_education_priority_num, levels = ordered_levels, ordered = TRUE)
-df$budget_pensions_rank <- factor(df$budget_pensions_priority_num, levels = ordered_levels, ordered = TRUE)
-df$budget_debt_rank <- factor(df$budget_debt_priority_num, levels = ordered_levels, ordered = TRUE)
-df$budget_taxes_rank <- factor(df$budget_taxes_priority_num, levels = ordered_levels, ordered = TRUE)
+# Convert to ordered factor (safer and clearer)
+df$budget_health_rank    <- ordered(df$budget_health_priority_num, levels = ordered_levels)
+df$budget_education_rank <- ordered(df$budget_education_priority_num, levels = ordered_levels)
+df$budget_pensions_rank  <- ordered(df$budget_pensions_priority_num, levels = ordered_levels)
+df$budget_debt_rank      <- ordered(df$budget_debt_priority_num, levels = ordered_levels)
+df$budget_taxes_rank     <- ordered(df$budget_taxes_priority_num, levels = ordered_levels)
+
+# --- Create new dataframe to avoid issues with weights
+df2 <- df  # copy original data frame
+df2$budget_rank <- NA  # initialize column (optional)
+df2$w <- df2$weightvec  # Add the weights as a column with a standard name
 
 # --- Define formula (to avoid repetition) ---
+# One formula to compare ranking across health, education, pensions, debt and taxes
 formula_ord <- as.formula(
-  budget_rank ~ ideo_right_num. + age34 + age35_54 + ses_male_bin + educBHS + educHS +
-    incomeLow_bin + incomeMid_bin + children_bin + employ_fulltime_bin +
-    ideo_interest_politics_num + trust_social_bin + trust_media_bin
+  budget_rank ~ ideo_right_num. + ideo_interest_politics_num + gender + age + education + income)
+
+# --- Helper function
+run_polr_model <- function(data, dv_var, formula) {
+  data$budget_rank <- data[[dv_var]]
+  
+  model <- MASS::polr(
+    formula = update(formula, budget_rank ~ .),
+    data = data,
+    weights = w,  # must match the column name
+    Hess = TRUE
+  )
+  
+  return(model)
+}
+
+# --- Run ordinal logistic regressions using the function ---
+mod_ord_health <- run_polr_model(df2, "budget_health_rank", formula_ord)
+mod_ord_edu    <- run_polr_model(df2, "budget_education_rank", formula_ord)
+mod_ord_pensions <- run_polr_model(df2, "budget_pensions_rank", formula_ord)
+mod_ord_debt   <- run_polr_model(df2, "budget_debt_rank", formula_ord)
+mod_ord_taxes  <- run_polr_model(df2, "budget_taxes_rank", formula_ord)
+
+# --- Runs models for debt
+debt_ord_list <- list(
+  "Health"    = mod_ord_health,
+  "Education" = mod_ord_edu,
+  "Pensions"  = mod_ord_pensions,
+  "Debt"      = mod_ord_debt,
+  "Taxes"     = mod_ord_taxes
 )
 
-# --- Run ordinal logistic regressions ---
-mod_ord_health <- polr(
-  update(formula_ord, budget_rank ~ .),
-  data = transform(df, budget_rank = budget_health_rank),
-  weights = weightvec,
-  Hess = TRUE
-)
-
-mod_ord_health <- polr(
-  formula_ord,
-  data = transform(df, budget_rank = budget_health_rank),
-  weights = weightvec,
-  Hess = TRUE
-)
-
-mod_ord_edu <- polr(
-  update(formula_ord, budget_rank ~ .),
-  data = transform(df, budget_rank = budget_education_rank),
-  weights = weightvec,
-  Hess = TRUE
-)
-
-mod_ord_pensions <- polr(
-  update(formula_ord, budget_rank ~ .),
-  data = transform(df, budget_rank = budget_pensions_rank),
-  weights = weightvec,
-  Hess = TRUE
-)
-
-mod_ord_debt <- polr(
-  update(formula_ord, budget_rank ~ .),
-  data = transform(df, budget_rank = budget_debt_rank),
-  weights = weightvec,
-  Hess = TRUE
-)
-
-mod_ord_taxes <- polr(
-  update(formula_ord, budget_rank ~ .),
-  data = transform(df, budget_rank = budget_taxes_rank),
-  weights = weightvec,
-  Hess = TRUE
-)
+# -- p-values in polr
+tidy_polr_with_p <- function(model) {
+  coef_table <- coef(summary(model))
+  p_values <- 2 * (1 - pnorm(abs(coef_table[, "t value"])))
+  tidy_df <- as.data.frame(coef_table)
+  tidy_df$p.value <- p_values
+  tidy_df$term <- rownames(tidy_df)
+  rownames(tidy_df) <- NULL
+  tidy_df <- tidy_df[, c("term", "Estimate", "Std. Error", "p.value")]
+  colnames(tidy_df) <- c("term", "estimate", "std.error", "p.value")
+  return(tidy_df)
+}
 
 # --- Store models in a named list ---
 priority_ord_list <- list(
@@ -179,6 +104,60 @@ priority_ord_list <- list(
   "Taxes"     = mod_ord_taxes
 )
 
+# --- Create coefficient summary table ---
+model_tbl <- modelsummary(
+  priority_ord_list,
+  tidy = tidy_polr_with_p,
+  coef_rename = c(
+    ideo_right_num.             = "Right",
+    ideo_interest_politics_num  = "Political interest"
+  ),
+  stars = TRUE,              # this works when p.value is present
+  statistic = "p.value",     # this tells modelsummary to show p-values
+  intercept = TRUE,
+  output = "html",
+  digits = 2,
+  file = "test_mod.html"
+)
+
+# --- Comparing simple & multivariate models for debt and taxes individually
+formula_ord_1 <- as.formula(
+  budget_rank ~ ideo_right_num.)
+
+formula_ord_2 <- as.formula(
+  budget_rank ~ ideo_right_num. + gender + age + education + income)
+
+formula_ord_3 <- as.formula(
+  budget_rank ~ ideo_party_them + gender + age + education + income)
+
+# --- Debt models
+mod_debt_1   <- run_polr_model(df2, "budget_debt_rank", formula_ord_1)
+mod_debt_2   <- run_polr_model(df2, "budget_debt_rank", formula_ord_2)
+mod_debt_3   <- run_polr_model(df2, "budget_debt_rank", formula_ord_3)
+
+# --- Store models in a named list ---
+priority_debt_list <- list(
+  "(1)"    = mod_debt_1,
+  "(2)"    = mod_debt_2,
+  "(3)"    = mod_debt_3
+)
+
+# --- Create coefficient summary table ---
+model_debt <- modelsummary(
+  priority_debt_list,
+  tidy = tidy_polr_with_p,
+  coef_rename = c(
+    ideo_right_num.             = "Right",
+    ideo_interest_politics_num  = "Political interest"
+  ),
+  stars = TRUE,              # this works when p.value is present
+  statistic = "p.value",     # this tells modelsummary to show p-values
+  intercept = TRUE,
+  output = "html",
+  digits = 2,
+  file = "test_mod.html"
+)
+
 # --- Variable to plot ---
 term_to_plot <- "ideo_right_num."  # exact predictor name
 
@@ -187,53 +166,21 @@ for (name in names(priority_ord_list)) {
   model <- priority_ord_list[[name]]
   
   pred <- ggpredict(model, terms = term_to_plot)
-  
-  p <- ggplot(pred, aes(x = x, y = predicted)) +
-    geom_line(color = "blue") +
-    geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.2) +
-    labs(
-      x = "Ideology (Right)",
-      y = paste("Predicted Priority for", name),
-      title = paste("Predicted Priority for", name, "by Ideology")
-    ) +
-    theme_minimal()
-  
-  # Save plot as PNG in working directory
-  ggsave(filename = paste0("plot_", name, ".png"), plot = p, width = 6, height = 4)
 }
 
-# --- Create coefficient summary table ---
-model_tbl <- modelsummary(
-  priority_ord_list,
-  coef_rename = c(
-    ses_french_bin              = "French language",
-    ses_male_bin                = "Gender",
-    age34                       = "Young",
-    age35_54                    = "Middle age",
-    educBHS                     = "BHS education",
-    educHS                      = "HS education",
-    incomeLow_bin               = "Low income",
-    incomeMid_bin               = "Middle income",
-    matStatus_married_bin       = "Married",
-    home_owned_bin              = "Homeowner",
-    children_bin                = "Children",
-    employ_fulltime_bin         = "Employed",
-    ideo_right_num.             = "Right",
-    ideo_party_them             = "Cynic themselves",
-    ideo_party_bin              = "Cynic party",
-    ideo_country_bin            = "Not-cynical",
-    family_first_union_bin      = "Traditional family",
-    ideo_interest_politics_num  = "Political interest",
-    dependentChildren           = "Dependent Children",
-    youngChildren               = "Young Children",
-    trust_social_bin            = "Trust Social",
-    trust_media_bin             = "Trust Media"
-  ),
-  stars = c("***" = 0.001, "**" = 0.01, "*" = 0.05),
-  output = "html",
-  digits = 2,
-  file = "test_mod.html"
-)
+p <- ggplot(pred, aes(x = x, y = predicted)) +
+  geom_line(color = "blue") +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = 0.2) +
+  labs(
+    x = "Ideology (Right)",
+    y = paste("Predicted Priority for", name),
+    title = paste("Predicted Priority for", name, "by Ideology")
+  ) +
+  theme_minimal()
+
+# Save plot as PNG in working directory
+ggsave(filename = paste0("plot_", name, ".png"), plot = p, width = 6, height = 4)
+
 
 # Spending distribution by issue
 # What explains priorities for an issue? (Same as above)
@@ -429,7 +376,7 @@ ideo_country_bin
 models_taxes <- lapply(outcomes_taxes, function(outcome_var) {
   df[[outcome_var]] <- ordered(df[[outcome_var]])
   formula <- as.formula(paste(outcome_var, "~", predictors_taxes))
-  polr(formula, data = df,   weights = weightvec, Hess = TRUE)
+  polr(formula, data = df,   weights = df$weightvec, Hess = TRUE)
 })
 
 names(models_taxes) <- outcomes_taxes
