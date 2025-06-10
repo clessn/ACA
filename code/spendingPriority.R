@@ -1,7 +1,7 @@
 # ===================================================
 # Binary Logistic Regression Models and Plots
 # ===================================================
-# Version: June 10th, 2025
+# Version: June 11th, 2025
 #
 
 # -- 1. Load packages
@@ -83,13 +83,35 @@ var_labels <- c(
   income_high_bin       = "Income (high)",
   education_bin         = "University Education",
   home_owned_bin        = "Homeowner",
-  children_bin         = "Children",
+  children_bin          = "Children",
   employ_fulltime_bin   = "Employed full time",
   ideo_right_bin        = "Right ideology",
   ideo_country_bin      = "Identify as Canadian first",
   trust_social_bin      = "Trust in society",
   trust_pol_parties_bin = "Trust in political parties"
 )
+
+# Fit models safely
+safe_glm <- safely(function(dv) {
+  frm <- as.formula(paste(dv, "~", paste(ivs, collapse = " + ")))
+  glm(frm, data = df, family = binomial(), weights = weightvec)
+})
+
+# Apply safe fitting
+safe_models <- map(dvs, safe_glm)
+
+# Extract only successfully fitted models
+models <- map(safe_models, "result")
+model_errors <- map(safe_models, "error")
+
+# Check which models failed
+failed_models <- dvs[!map_lgl(models, ~ !is.null(.x))]
+
+# Name the successful ones
+names(models) <- dv_labels
+
+# Drop failed ones
+models_clean <- compact(models)
 
 # -- 4. Fit logistic regression models with survey weights
 models <- map(dvs, function(dv) {
@@ -118,7 +140,7 @@ coef_plot <- coef_df %>%
   mutate(
     term = recode(term, !!!var_labels),  # Apply recoding
     term = factor(term, levels = unique(unname(var_labels))),  # Set levels to only the visible labels
-    outcome = factor(outcome, levels = dv_labels)
+    outcome = factor(outcome, unname(dv_labels))
   )%>%
   ggplot(aes(x = estimate, y = term, color = outcome)) +
   geom_vline(xintercept = 0, linetype = "dashed", color = "grey50") +

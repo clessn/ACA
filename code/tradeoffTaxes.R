@@ -59,7 +59,7 @@
    "income_high_bin", # Income (High)
    "education_bin", # Education
    "home_owned_bin", # Homeowner
-   "dependentChildren", # Children
+   "children_bin", # Children
    "employ_fulltime_bin", # Employed full time
    "ideo_right_bin", # Right ideology
    "ideo_country_bin", # Identify as Canadian first
@@ -78,12 +78,12 @@
  var_labels <- c(
    ses_male_bin          = "Male",
    age_young_bin         = "Age (18-34)",
-   income_high_bin      = "Income (high)",
-   education_bin          = "University Education",
+   income_high_bin       = "Income (high)",
+   education_bin         = "University Education",
    home_owned_bin        = "Homeowner",
-   dependentChildren      = "Dependent Children",
+   children_bin         = "Children",
    employ_fulltime_bin   = "Employed full time",
-   ideo_right_bin       = "Right ideology",
+   ideo_right_bin        = "Right ideology",
    ideo_country_bin      = "Identify as Canadian first",
    trust_social_bin      = "Trust in society",
    trust_pol_parties_bin = "Trust in political parties"
@@ -104,7 +104,7 @@
    stars    = TRUE,
    coef_map = var_labels,
    output   = "html",
-   file     = "modelsummary/codex_2_models.html"
+   file     = "modelsummary/tradeoffTaxes.html"
  )
 
  # -- 6. Tidy model outputs and combine for plotting
