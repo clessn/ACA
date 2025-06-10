@@ -6,7 +6,7 @@ weightvec
 
 # --- Binary DV
 # Priority
-budget_health_priority_num
+budget_health_priority_bin
 budget_education_priority_bin
 budget_pensions_priority_bin
 budget_taxes_priority_bin
@@ -67,7 +67,7 @@ trust_fed_gov_bin
 trust_prov_gov_bin                  
 trust_media_bin
 
-# SES coded binary, don'T think I need this format
+# SES coded binary, don't think I need this format
 # userFR_bin                          
 # ses_male_bin                        
 # ses_age                             
