@@ -8,7 +8,7 @@
 library(tidyverse)
 library(modelsummary)
 library(broom)
-library(ggplot2)
+library(ggplot2) 
 
 # -- 2. Load data & create binary IV 
 df <- read.csv("data/ACA_weighted.csv")

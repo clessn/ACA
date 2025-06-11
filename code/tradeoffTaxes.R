@@ -63,7 +63,9 @@
    "ideo_right_bin", # Right ideology
    "ideo_country_bin", # Identify as Canadian first
    "trust_social_bin", # Trust in society
-   "trust_pol_parties_bin" # Trust in political parties
+   "trust_pol_parties_bin", # Trust in political parties
+   "budget_taxes_priority_bin", # Priority for taxes
+   "budget_debt_priority_bin" # Priority for debt
  )
 
  # -- 3a. Define labels for outcomes and predictors
@@ -85,7 +87,9 @@
    ideo_right_bin        = "Right ideology",
    ideo_country_bin      = "Identify as Canadian first",
    trust_social_bin      = "Trust in society",
-   trust_pol_parties_bin = "Trust in political parties"
+   trust_pol_parties_bin = "Trust in political parties",
+   budget_taxes_priority_bin = "Priorty taxes", # Priority for taxes
+   budget_debt_priority_bin= "Priority debt" # Priority for debt
  )
 
  # -- 4. Fit logistic regression models with survey weights
