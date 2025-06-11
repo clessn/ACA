@@ -64,7 +64,11 @@ ivs <- c(
   "ideo_right_bin", # Right ideology
   "ideo_country_bin", # Identify as Canadian first
   "trust_social_bin", # Trust in society
-  "trust_pol_parties_bin" # Trust in political parties
+  "trust_pol_parties_bin",# Trust in political parties
+  "budget_health_priority_bin", # Health priority
+  "budget_pensions_priority_bin", # Pensions priority
+  "budget_spend_prio_health_bin", # Health spending
+  "budget_spend_prio_seniors_bin" # Seniors spending
 )
 
 # -- 3a. Define labels for outcomes and predictors
@@ -84,7 +88,11 @@ var_labels <- c(
   ideo_right_bin        = "Right ideology",
   ideo_country_bin      = "Identify as Canadian first",
   trust_social_bin      = "Trust in society",
-  trust_pol_parties_bin = "Trust in political parties"
+  trust_pol_parties_bin = "Trust in political parties",
+  budget_health_priority_bin = "Health priority",
+  budget_pensions_priority_bin = "Pensions priority",
+  budget_spend_prio_health_bin = "Health spending",
+  budget_spend_prio_seniors_bi = "Seniors spending"
 )
 
 # -- 4. Fit logistic regression models with survey weights
