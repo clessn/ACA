@@ -13,7 +13,6 @@
  # -- 2. Load data & create binary IV 
  df <- read.csv("data/ACA_weighted.csv")
  
- 
  df$education_bin <- ifelse(df$education == "University", 1, 0)
  df$age_young_bin <- ifelse(df$age == "18–34", 1, 0)
  df$income_high_bin <- ifelse(df$income == "High", 1, 0)

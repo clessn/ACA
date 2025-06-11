@@ -69,8 +69,8 @@ ivs <- c(
 
 # -- 3a. Define labels for outcomes and predictors
 dv_labels <- c(
-  tradeoff_childcare_lowincome_bin = "Cut, but not for lower income",
-  tradeoff_childcare_benefits_bin = "Cut, but for all"
+  tradeoff_childcare_lowincome_bin = "Subsidize child care, \n but lower family benefits",
+  tradeoff_childcare_benefits_bin = "Subsidize child care for low-income, \n increase for middle- and upper-class"
 )
 
 var_labels <- c(
