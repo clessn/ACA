@@ -1,7 +1,7 @@
 # ===================================================
 # Plots
 # ===================================================
-# Version: June 11th, 2025
+# Version: June 12th, 2025
 #
 
 # -- 1. Load packages
@@ -30,7 +30,7 @@ dvs <- c(
 
 # Labels for plotting
 dv_labels <- c(
-  tradeoff_invest_green_num = "Control, increase green \n economy spending",
+  tradeoff_invest_green_num = "Control",
   tradeoff_taxes_green_num = "Higher taxes",
   tradeoff_cutting_for_green_num = "Cuts",
   tradeoff_debt_green_num = "More debt"
@@ -49,7 +49,8 @@ ivs <- c(
   "ideo_right_bin",         # Right ideology
   "ideo_country_bin",       # Identify as Canadian first
   "trust_social_bin",       # Trust in society
-  "trust_pol_parties_bin"   # Trust in political parties
+  "trust_pol_parties_bin",  # Trust in political parties
+  "budget_spend_prio_climateChange_bin" # Prioritization of climate change spending
 )
 
 # === 2. Fit models ===
@@ -93,6 +94,8 @@ pred_all$treatment <- factor(pred_all$treatment, levels = rev(dv_labels))  # ord
 
 # Order
 pred_all$treatment <- factor(pred_all$treatment, levels = dv_labels)
+pred_all$model <- factor(pred_all$model, levels = c("Without Covariates", "With Covariates"))
+
 # === 4. Plot ===
 plot <- ggplot(pred_all, aes(x = treatment, y = estimate, color = model, shape = model)) +
   geom_point(position = position_dodge(width = 0.5), size = 3) +
@@ -101,19 +104,55 @@ plot <- ggplot(pred_all, aes(x = treatment, y = estimate, color = model, shape =
     position = position_dodge(width = 0.5),
     width = 0.15
   ) +
-  scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
+  #scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
+  scale_color_manual(
+    values = c(
+      "Without Covariates" = "black",
+      "With Covariates" = "grey50"
+    )
+  ) +
+  scale_shape_manual(
+    values = c(
+      "Without Covariates" = 16,  # solid circle
+      "With Covariates" = 17      # solid triangle
+    )
+    ) +
   labs(
-    title = "Average Support for Policy by Tradeoff",
-    subtitle = "OLS predicted means with and without covariates (95% CIs)",
-    x = "Tradeoff",
-    y = "Predicted Support (0–1 scale)",
+   # title = "Average Support for Policy by Tradeoff",
+   # subtitle = "OLS predicted means with and without covariates (95% CIs)",
+    x = " ",
+    y = "Predicted Support \n (0–1 scale)",
     color = "Model Type",
     shape = "Model Type",
-    caption = "Note: Covariate-adjusted models include: age, gender, education, employment, children, homeownership, ideology, and trust."
+    caption = "Covariate-adjusted models include: age, gender, education, employment, children, \n homeownership, ideology, trust, and priority for climate change spending."
   ) +
-  theme_minimal(base_size = 13) 
-
+  theme_minimal(base_size = 13) +
+  theme(
+    plot.caption.position = "plot",  # ensures caption aligns with the plot area
+    plot.caption = element_text(hjust = 0)  # left-justify the caption
+  )
 plot
+# !!! To help me visualize
+#control_vals <- pred_all %>% 
+#  filter(treatment == "Control")
+
+#plot + 
+#  geom_rect(
+#    data = control_vals,
+#    aes(
+#      xmin = -Inf, xmax = Inf,
+#      ymin = conf.low, ymax = conf.high,
+#      fill = model
+#    ),
+#    alpha = 0.1,
+#    inherit.aes = FALSE
+#  ) +
+#  scale_fill_manual(values = c(
+#    "Without Covariates" = "black",
+#    "With Covariates" = "grey70"
+#  ))
+#  )
+
 # -- 8. Save the coefficient plot
 ggsave(
   filename = "graphs/avgSupport_experimentGE.png",

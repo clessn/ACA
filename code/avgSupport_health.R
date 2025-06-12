@@ -22,20 +22,14 @@ df <- df %>%
 # === 1. Setup ===
 # Dependent variables
 dvs <- c(
-  "budget_spend_prio_health_norm",
-  "budget_spend_prio_seniors_norm",
-  "budget_spend_prio_childcare_norm",
-  "budget_spend_prio_costLiving_norm",
-  "budget_spend_prio_climateChange_norm"
+  "budget_health_priority_num",
+  "budget_spend_prio_health_norm"
 )
 
 # Labels for plotting
 dv_labels <- c(
-  budget_spend_prio_health_norm = "Health", 
-  budget_spend_prio_seniors_norm = "Seniors",
-  budget_spend_prio_childcare_norm = "Child care",
-  budget_spend_prio_costLiving_norm = "Cost of Living",
-  budget_spend_prio_climateChange_norm = "Climate Change"
+  budget_health_priority_num = "Health as Top Priority", 
+  budget_spend_prio_health_norm = "Health Point Allocation"
 )
 
 # Independent variables (covariates)
@@ -117,12 +111,12 @@ plot <- ggplot(pred_all, aes(x = treatment, y = estimate, color = model, shape =
       "With Covariates" = 17      # solid triangle
     )
   ) +
-  scale_y_continuous(limits = c(0, 0.4), breaks = seq(0, 0.4, 0.2)) +
+  scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
   labs(
-   # title = "Average Support for Spending Increases by Treatment",
-   #  subtitle = "OLS predicted means with and without covariates (95% CIs)",
+    # title = "Average Support for Spending Increases by Treatment",
+    # subtitle = "OLS predicted means with and without covariates (95% CIs)",
     x = " ",
-    y = "Predicted Support \n (0–1 scale)",
+    y = "Predicted Priority/Support \n (0–1 scale)",
     color = "Model Type",
     shape = "Model Type",
     caption = "Covariate-adjusted models include: age, gender, education, employment, children, homeownership, ideology, and trust."
@@ -133,11 +127,49 @@ plot <- ggplot(pred_all, aes(x = treatment, y = estimate, color = model, shape =
     plot.caption = element_text(hjust = 0)  # left-justify the caption
   )
 
-plot
+plot 
+
 # -- 8. Save the coefficient plot
 ggsave(
-  filename = "graphs/avgSupport_spendingPriority.png",
+  filename = "graphs/avgSupport_health.png",
   plot     = plot,
+  width    = 10,
+  height   = 8,
+  dpi      = 300
+)
+
+
+####
+
+df$health_ranked_top <- ifelse(df$budget_health_priority_num == 1, "Ranked Health #1", "Did Not Rank Health #1")
+
+plot2 <- ggplot(df, aes(x = health_ranked_top, y = budget_spend_prio_health_norm)) +
+  stat_summary(
+    fun = mean,
+    fun.min = function(x) mean(x) - qt(0.975, df=length(x)-1)*sd(x)/sqrt(length(x)),
+    fun.max = function(x) mean(x) + qt(0.975, df=length(x)-1)*sd(x)/sqrt(length(x)),
+    geom = "bar", fill = "grey80", color = "black"
+  ) +
+  stat_summary(
+    fun.data = mean_cl_normal, geom = "errorbar", width = 0.15
+  ) +
+  labs(
+   # title = "Point Allocations to Health Policy by Stated Priority Ranking",
+   # subtitle = "Respondents who ranked health as their top priority allocated more points to health",
+    x = "",
+    y = "Mean Points Allocated to Health \n (0–1 scale)",
+    caption = "Bars show 95% confidence intervals around the mean"
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    plot.caption.position = "plot",  # ensures caption aligns with the plot area
+    plot.caption = element_text(hjust = 0)  # left-justify the caption
+  )
+
+# -- Save the coefficient plot
+ggsave(
+  filename = "graphs/avgSupport_healthPointsvsRank.png",
+  plot     = plot2,
   width    = 10,
   height   = 8,
   dpi      = 300

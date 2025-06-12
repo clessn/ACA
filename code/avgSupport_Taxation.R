@@ -48,7 +48,9 @@ ivs <- c(
   "ideo_right_bin",         # Right ideology
   "ideo_country_bin",       # Identify as Canadian first
   "trust_social_bin",       # Trust in society
-  "trust_pol_parties_bin"   # Trust in political parties
+  "trust_pol_parties_bin",   # Trust in political parties
+  "budget_debt_priority_bin", # Debt priority
+  "budget_taxes_priority_bin" # Taxes priority
 )
 
 # === 2. Fit models ===
@@ -92,6 +94,9 @@ pred_all$treatment <- factor(pred_all$treatment, levels = rev(dv_labels))  # ord
 
 # Order
 pred_all$treatment <- factor(pred_all$treatment, levels = dv_labels)
+pred_all$model <- factor(pred_all$model, levels = c("Without Covariates", "With Covariates"))
+
+
 # === 4. Plot ===
 plot <- ggplot(pred_all, aes(x = treatment, y = estimate, color = model, shape = model)) +
   geom_point(position = position_dodge(width = 0.5), size = 3) +
@@ -100,17 +105,35 @@ plot <- ggplot(pred_all, aes(x = treatment, y = estimate, color = model, shape =
     position = position_dodge(width = 0.5),
     width = 0.15
   ) +
+  scale_color_manual(
+    values = c(
+      "Without Covariates" = "black",
+      "With Covariates" = "grey50"
+    )
+  ) +
+  scale_shape_manual(
+    values = c(
+      "Without Covariates" = 16,  # solid circle
+      "With Covariates" = 17      # solid triangle
+    )
+  ) +
   scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
   labs(
-    title = "Average Support for Spending Increases by Treatment",
-    subtitle = "OLS predicted means with and without covariates (95% CIs)",
-    x = "Treatment",
-    y = "Predicted Support (0–1 scale)",
+   # title = "Average Support for Spending Increases by Treatment",
+   # subtitle = "OLS predicted means with and without covariates (95% CIs)",
+    x = " ",
+    y = "Predicted Support \n (0–1 scale)",
     color = "Model Type",
     shape = "Model Type",
-    caption = "Note: Covariate-adjusted models include: age, gender, education, employment, children, homeownership, ideology, and trust."
+    caption = "Covariate-adjusted models include: age, gender, education, employment, children, homeownership, ideology, and trust."
   ) +
-  theme_minimal(base_size = 13) 
+  theme_minimal(base_size = 13) +
+  theme(
+    plot.caption.position = "plot",  # ensures caption aligns with the plot area
+    plot.caption = element_text(hjust = 0)  # left-justify the caption
+  )
+
+plot
 
 
 # -- 8. Save the coefficient plot
