@@ -13,43 +13,12 @@
  # -- 2. Load data & create binary IV 
  df <- read.csv("data/ACA_weighted.csv")
  
- df$education_bin <- ifelse(df$education == "University", 1, 0)
- df$age_young_bin <- ifelse(df$age == "18–34", 1, 0)
- df$income_high_bin <- ifelse(df$income == "High", 1, 0)
- df <- df %>%
-   mutate(ideo_right_bin = if_else(ideo_right_num. >= 0.5, 1, 0))
- 
-
  # -- 3. Define dependent variables (binary outcomes) and predictors
  dvs <- c(
-  # "budget_education_priority_bin",
-  # "budget_pensions_priority_bin",
-  # "budget_taxes_priority_bin",
-  # "budget_debt_priority_bin",
-  # "budget_spend_prio_health_bin",
-  # "budget_spend_prio_seniors_bin",
-  # "budget_spend_prio_childcare_bin",
-  # "budget_spend_prio_costLiving_bin",
-  # "budget_spend_prio_climateChange_bin",
-  # "tradeoff_childcare_num_bin", 
-  # "tradeoff_childcare_higher_taxes_bin",
-  # "tradeoff_childcare_by_cutting_bin",
-  # "tradeoff_childcare_debt_bin",
   "tradeoff_no_taxes_bin", # Increase to Taxation (control)
   "tradeoff_taxes_sales_bin", # Increase to taxation, sales tax
   "tradeoff_taxes_high_income_bin", # Increase to taxation, high incomes
   "tradeoff_taxes_wealthy_bin" # Increase to taxation, wealth tax
-  # "tradeoff_childcare_lowincome_bin",
-  # "tradeoff_childcare_benefits_bin",
-  # "tradeoff_senior_benefits_bin",
-  # "tradeoff_senior_income_bin",
-  # "redis_opportunity_bin",
-  # "redis_reasons_rich_bin",
-  # "redis_reasons_poor_bin",
-  # "redis_effort_bin",
-  # "redis_social_benefits_bin",
-  # "redis_welfare_bin",
-  # "redis_no_cheat_system_bin"
  )
 
  ivs <- c(
@@ -57,23 +26,25 @@
    "age_young_bin", # Age 
    "income_high_bin", # Income (High)
    "education_bin", # Education
-   "home_owned_bin", # Homeowner
-   "children_bin", # Children
+   #"home_owned_bin", # Homeowner
+   #"children_bin", # Children
    "employ_fulltime_bin", # Employed full time
    "ideo_right_bin", # Right ideology
    "ideo_country_bin", # Identify as Canadian first
-   "trust_social_bin", # Trust in society
+   #"trust_social_bin", # Trust in society
    "trust_pol_parties_bin", # Trust in political parties
    "budget_taxes_priority_bin", # Priority for taxes
-   "budget_debt_priority_bin" # Priority for debt
+   "budget_debt_priority_bin", # Priority for debt
+   "reciprocity_index", 
+   "redis_effort_bin"
  )
 
  # -- 3a. Define labels for outcomes and predictors
  dv_labels <- c(
-   tradeoff_no_taxes_bin    = "Increase to Taxation (control)",
-   tradeoff_taxes_sales_bin = "Increase to taxation, sales tax",
-   tradeoff_taxes_high_income_bin = "Increase to taxation, high incomes",
-   tradeoff_taxes_wealthy_bin = "Increase to taxation, wealth tax"
+   tradeoff_no_taxes_bin    = "Control (no increase)",
+   tradeoff_taxes_sales_bin = "No increase, unless sales tax",
+   tradeoff_taxes_high_income_bin = "No increase, unless on high incomes",
+   tradeoff_taxes_wealthy_bin = "No increase, unless a wealth tax"
  )
 
  var_labels <- c(
@@ -81,16 +52,18 @@
    age_young_bin         = "Age (18-34)",
    income_high_bin       = "Income (high)",
    education_bin         = "University Education",
-   home_owned_bin        = "Homeowner",
-   children_bin         = "Children",
+   #home_owned_bin        = "Homeowner",
+   #children_bin         = "Children",
    employ_fulltime_bin   = "Employed full time",
    ideo_right_bin        = "Right ideology",
    ideo_country_bin      = "Identify as Canadian first",
-   trust_social_bin      = "Trust in society",
+   #trust_social_bin      = "Trust in society",
    trust_pol_parties_bin = "Trust in political parties",
    budget_taxes_priority_bin = "Priorty taxes", # Priority for taxes
-   budget_debt_priority_bin= "Priority debt" # Priority for debt
- )
+   budget_debt_priority_bin= "Priority debt", # Priority for debt
+   reciprocity_index = "Reciprocity Index",
+   redis_effort_bin = "Proportionality"  
+    )
 
  # -- 4. Fit logistic regression models with survey weights
  models <- map(dvs, function(dv) {
@@ -112,28 +85,48 @@
 
  # -- 6. Tidy model outputs and combine for plotting
  coef_df <- map_df(models, ~ tidy(.x, conf.int = TRUE), .id = "outcome")
-
+ 
  # -- 7. Plot coefficient estimates for all models
+ # Define manual styles by outcome
+ color_vals <- c("black", "grey50", "black", "grey50")
+ shape_vals <- c(16, 17, 15, 18)  # solid circle, triangle, square, diamond
+ linetype_vals <- c("solid", "solid", "dashed", "dashed")
+ 
+ # Ensure the outcome factor matches this order
  coef_plot <- coef_df %>%
    filter(term != "(Intercept)") %>%
    mutate(
-     term = recode(term, !!!var_labels),  # Apply recoding
-     term = factor(term, levels = unique(unname(var_labels))),  # Set levels to only the visible labels
-     outcome = factor(outcome, levels = dv_labels)
-   )%>%
-   ggplot(aes(x = estimate, y = term, color = outcome)) +
-     geom_vline(xintercept = 0, linetype = "dashed", color = "grey50") +
-     geom_point(position = position_dodge(width = 0.7)) +
-     geom_errorbarh(aes(xmin = conf.low, xmax = conf.high),
-                    position = position_dodge(width = 0.7), height = 0) +
-     labs(
-       x     = "Coefficient Estimate",
-       y     = "Predictor",
-       color = "Outcome",
-       title = "Logistic Regression Coefficients for Binary Outcomes"
-     ) +
-     theme_minimal()
-
+     term = recode(term, !!!var_labels),
+     term = factor(term, levels = unique(unname(var_labels))),
+     outcome = factor(outcome, levels = dv_labels)  # order must match above vectors
+   ) %>%
+   ggplot(aes(
+     x = estimate,
+     y = term,
+     color = outcome,
+     shape = outcome,
+     linetype = outcome
+   )) +
+   geom_vline(xintercept = 0, linetype = "dashed", color = "grey50") +
+   geom_point(position = position_dodge(width = 0.7), size = 2) +
+   geom_errorbarh(
+     aes(xmin = conf.low, xmax = conf.high),
+     position = position_dodge(width = 0.7),
+     height = 0
+   ) +
+   scale_color_manual(values = color_vals) +
+   scale_shape_manual(values = shape_vals) +
+   scale_linetype_manual(values = linetype_vals) +
+   labs(
+     x = "Coefficient Estimate",
+     y = "Predictor",
+     color = "Outcome",
+     shape = "Outcome",
+     linetype = "Outcome",
+     title = "Logistic Regression Coefficients for Binary Outcomes"
+   ) +
+   theme_minimal()
+ 
  coef_plot
  # -- 8. Save the coefficient plot
  ggsave(

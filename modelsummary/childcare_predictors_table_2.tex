@@ -1,0 +1,41 @@
+\begin{talltblr}[         %% tabularray outer open
+entry=none,label=none,
+note{}={+ p \num{< 0.1}, * p \num{< 0.05}, ** p \num{< 0.01}, *** p \num{< 0.001}},
+]                     %% tabularray outer close
+{                     %% tabularray inner open
+colspec={Q[]Q[]Q[]Q[]Q[]Q[]},
+column{2,3,4,5,6}={}{halign=c,},
+column{1}={}{halign=l,},
+hline{24}={1,2,3,4,5,6}{solid, black, 0.05em},
+}                     %% tabularray inner close
+\toprule
+& Right Ideology & Country Identification  & Trust in Political Parties & Reciprocity Index & Proportionality \\ \midrule %% TinyTableHeader
+Male & \num{0.734}** & \num{0.744}** & \num{0.823}*** & \num{0.761}** & \num{0.728}** \\
+& (\num{0.002}) & (\num{0.002}) & (\num{<0.001}) & (\num{0.002}) & (\num{0.002}) \\
+Age (18-34) & \num{0.174} & \num{0.035} & \num{0.116} & \num{0.018} & \num{0.095} \\
+& (\num{0.543}) & (\num{0.899}) & (\num{0.682}) & (\num{0.948}) & (\num{0.732}) \\
+Income (high) & \num{-0.755}* & \num{-0.728}* & \num{-0.873}* & \num{-0.725}* & \num{-0.769}* \\
+& (\num{0.030}) & (\num{0.036}) & (\num{0.013}) & (\num{0.038}) & (\num{0.027}) \\
+University education & \num{0.402} & \num{0.355} & \num{0.383} & \num{0.578}* & \num{0.454}+ \\
+& (\num{0.148}) & (\num{0.188}) & (\num{0.161}) & (\num{0.038}) & (\num{0.093}) \\
+Employed full time & \num{0.219} & \num{0.291} & \num{0.367} & \num{0.146} & \num{0.268} \\
+& (\num{0.364}) & (\num{0.215}) & (\num{0.121}) & (\num{0.547}) & (\num{0.256}) \\
+Children & \num{-0.260} & \num{-0.258} & \num{-0.173} & \num{-0.223} & \num{-0.160} \\
+& (\num{0.313}) & (\num{0.316}) & (\num{0.496}) & (\num{0.383}) & (\num{0.529}) \\
+Right ideology & \num{0.280} &  &  &  &  \\
+& (\num{0.272}) &  &  &  &  \\
+Identify as Canadian first &  & \num{-0.426}+ &  &  &  \\
+&  & (\num{0.098}) &  &  &  \\
+Trust in political parties &  &  & \num{-1.344}** &  &  \\
+&  &  & (\num{0.002}) &  &  \\
+Reciprocity Index &  &  &  & \num{-1.688}** &  \\
+&  &  &  & (\num{0.007}) &  \\
+Proportionality &  &  &  &  & \num{0.438}+ \\
+&  &  &  &  & (\num{0.061}) \\
+Num.Obs. & \num{453} & \num{466} & \num{466} & \num{466} & \num{466} \\
+AIC & \num{439.3} & \num{445.7} & \num{435.5} & \num{441.1} & \num{446.4} \\
+BIC & \num{472.3} & \num{478.8} & \num{468.6} & \num{474.2} & \num{479.6} \\
+Log.Lik. & \num{-211.675} & \num{-214.830} & \num{-209.745} & \num{-212.543} & \num{-215.201} \\
+RMSE & \num{0.44} & \num{0.44} & \num{0.44} & \num{0.45} & \num{0.44} \\
+\bottomrule
+\end{talltblr}

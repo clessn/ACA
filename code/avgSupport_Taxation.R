@@ -13,11 +13,11 @@ library(ggplot2)
 # -- 2. Load data & create binary IV 
 df <- read.csv("data/ACA_weighted.csv")
 
-df$education_bin <- ifelse(df$education == "University", 1, 0)
-df$age_young_bin <- ifelse(df$age == "18–34", 1, 0)
-df$income_high_bin <- ifelse(df$income == "High", 1, 0)
-df <- df %>%
-  mutate(ideo_right_bin = if_else(ideo_right_num. >= 0.5, 1, 0))
+#df$education_bin <- ifelse(df$education == "University", 1, 0)
+#df$age_young_bin <- ifelse(df$age == "18–34", 1, 0)
+#df$income_high_bin <- ifelse(df$income == "High", 1, 0)
+#df <- df %>%
+#  mutate(ideo_right_bin = if_else(ideo_right_num. >= 0.5, 1, 0))
 
 # === 1. Setup ===
 # Dependent variables
@@ -30,7 +30,7 @@ dvs <- c(
 
 # Labels for plotting
 dv_labels <- c(
-  tradeoff_no_taxes_num           = "Increase to Taxation \n (control)",
+  tradeoff_no_taxes_num           = "No increase (control)",
   tradeoff_taxes_sales_num        = "Increase to taxation, \n sales tax",
   tradeoff_taxes_high_income_num  = "Increase to taxation, \n high incomes",
   tradeoff_taxes_wealthy_num      = "Increase to taxation, \n wealth tax"

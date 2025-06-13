@@ -14,43 +14,10 @@ library(ggplot2)
 df <- read.csv("data/ACA_weighted.csv")
 
 
-df$education_bin <- ifelse(df$education == "University", 1, 0)
-df$age_young_bin <- ifelse(df$age == "18–34", 1, 0)
-df$income_high_bin <- ifelse(df$income == "High", 1, 0)
-df <- df %>%
-  mutate(ideo_right_bin = if_else(ideo_right_num. >= 0.5, 1, 0))
-
-
 # -- 3. Define dependent variables (binary outcomes) and predictors
 dvs <- c(
-  # "budget_education_priority_bin",
-  # "budget_pensions_priority_bin",
-  # "budget_taxes_priority_bin",
-  # "budget_debt_priority_bin",
-  # "budget_spend_prio_health_bin",
-  # "budget_spend_prio_seniors_bin",
-  # "budget_spend_prio_childcare_bin",
-  # "budget_spend_prio_costLiving_bin",
-  # "budget_spend_prio_climateChange_bin",
-  # "tradeoff_childcare_num_bin", 
-  # "tradeoff_childcare_higher_taxes_bin",
-  # "tradeoff_childcare_by_cutting_bin",
-  # "tradeoff_childcare_debt_bin",
-  #"tradeoff_no_taxes_bin", # Increase to Taxation (control)
-  #"tradeoff_taxes_sales_bin", # Increase to taxation, sales tax
-  #"tradeoff_taxes_high_income_bin", # Increase to taxation, high incomes
-  #"tradeoff_taxes_wealthy_bin", # Increase to taxation, wealth tax
    "tradeoff_childcare_lowincome_bin",
    "tradeoff_childcare_benefits_bin"
-  # "tradeoff_senior_benefits_bin"
-  # "tradeoff_senior_income_bin",
-  # "redis_opportunity_bin",
-  # "redis_reasons_rich_bin",
-  # "redis_reasons_poor_bin",
-  # "redis_effort_bin",
-  # "redis_social_benefits_bin",
-  # "redis_welfare_bin",
-  # "redis_no_cheat_system_bin"
 )
 
 ivs <- c(
@@ -63,16 +30,15 @@ ivs <- c(
   "employ_fulltime_bin", # Employed full time
   "ideo_right_bin", # Right ideology
   "ideo_country_bin", # Identify as Canadian first
-  "trust_social_bin", # Trust in society
   "trust_pol_parties_bin", # Trust in political parties
-  "budget_education_priority_bin", # Priority education
-  "budget_spend_prio_childcare_bin" # Childcare spending
-)
+  "reciprocity_index",
+  "redis_effort_bin"
+  )
 
 # -- 3a. Define labels for outcomes and predictors
 dv_labels <- c(
   tradeoff_childcare_lowincome_bin = "Subsidize child care, \n but lower family benefits",
-  tradeoff_childcare_benefits_bin = "Subsidize child care for low-income, \n increase for middle- and upper-class"
+  tradeoff_childcare_benefits_bin = "Subsidize child care for low-income, \n increase cost for middle- and upper-class"
 )
 
 var_labels <- c(
@@ -85,10 +51,9 @@ var_labels <- c(
   employ_fulltime_bin   = "Employed full time",
   ideo_right_bin        = "Right ideology",
   ideo_country_bin      = "Identify as Canadian first",
-  trust_social_bin      = "Trust in society",
   trust_pol_parties_bin = "Trust in political parties",
-  budget_education_priority_bin = "Priority Education",
-  budget_spend_prio_childcare_bin = "Child care spending"
+  reciprocity_index = "Reciprocity Index",
+  redis_effort_bin = "Proportionality"  
 )
 
 # -- 4. Fit logistic regression models with survey weights
@@ -116,19 +81,26 @@ coef_df <- map_df(models, ~ tidy(.x, conf.int = TRUE), .id = "outcome")
 coef_plot <- coef_df %>%
   filter(term != "(Intercept)") %>%
   mutate(
-    term = recode(term, !!!var_labels),  # Apply recoding
-    term = factor(term, levels = unique(unname(var_labels))),  # Set levels to only the visible labels
-    outcome = factor(outcome, levels = dv_labels)
-  )%>%
-  ggplot(aes(x = estimate, y = term, color = outcome)) +
+    term = recode(term, !!!var_labels),
+    term = factor(term, levels = unique(unname(var_labels))),
+    outcome = factor(outcome, levels = rev(dv_labels))  # reverse order here
+  ) %>%
+  ggplot(aes(x = estimate, y = term, color = outcome, shape = outcome)) +
   geom_vline(xintercept = 0, linetype = "dashed", color = "grey50") +
-  geom_point(position = position_dodge(width = 0.7)) +
+  geom_point(position = position_dodge(width = 0.7), size = 3) +
   geom_errorbarh(aes(xmin = conf.low, xmax = conf.high),
                  position = position_dodge(width = 0.7), height = 0) +
+  scale_color_manual(
+    values = c("black", "grey50")
+  ) +
+  scale_shape_manual(
+    values = c(16, 17)  # 16 = solid circle, 17 = solid triangle
+  ) +
   labs(
     x     = "Coefficient Estimate",
     y     = "Predictor",
     color = "Outcome",
+    shape = "Outcome",
     title = "Logistic Regression Coefficients for Binary Outcomes"
   ) +
   theme_minimal()

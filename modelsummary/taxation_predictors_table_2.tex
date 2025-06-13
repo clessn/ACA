@@ -1,0 +1,43 @@
+\begin{talltblr}[         %% tabularray outer open
+entry=none,label=none,
+note{}={+ p \num{< 0.1}, * p \num{< 0.05}, ** p \num{< 0.01}, *** p \num{< 0.001}},
+]                     %% tabularray outer close
+{                     %% tabularray inner open
+colspec={Q[]Q[]Q[]Q[]Q[]Q[]Q[]Q[]},
+column{2,3,4,5,6,7,8}={}{halign=c,},
+column{1}={}{halign=l,},
+hline{26}={1,2,3,4,5,6,7,8}{solid, black, 0.05em},
+}                     %% tabularray inner close
+\toprule
+& Right Ideology & Country Identification  & Trust in Political Parties & Priority Taxes & Priority Budget  & Reciprocity Index &  Proportionality \\ \midrule %% TinyTableHeader
+Male & \num{0.967}** & \num{0.998}** & \num{1.007}** & \num{1.146}** & \num{0.937}* & \num{1.008}** & \num{0.980}** \\
+& (\num{0.010}) & (\num{0.007}) & (\num{0.007}) & (\num{0.002}) & (\num{0.013}) & (\num{0.006}) & (\num{0.008}) \\
+Age (18–34) & \num{-2.494}* & \num{-2.634}* & \num{-2.691}* & \num{-2.583}* & \num{-2.591}* & \num{-2.652}* & \num{-2.694}* \\
+& (\num{0.025}) & (\num{0.018}) & (\num{0.016}) & (\num{0.020}) & (\num{0.020}) & (\num{0.017}) & (\num{0.015}) \\
+Income (high) & \num{-1.326} & \num{-1.318} & \num{-1.253} & \num{-1.165} & \num{-1.321} & \num{-1.351} & \num{-1.244} \\
+& (\num{0.120}) & (\num{0.122}) & (\num{0.143}) & (\num{0.174}) & (\num{0.121}) & (\num{0.113}) & (\num{0.145}) \\
+University education & \num{0.167} & \num{0.161} & \num{0.146} & \num{0.193} & \num{0.197} & \num{0.213} & \num{0.144} \\
+& (\num{0.708}) & (\num{0.714}) & (\num{0.740}) & (\num{0.662}) & (\num{0.654}) & (\num{0.631}) & (\num{0.743}) \\
+Employed full time & \num{-0.736}+ & \num{-0.730}+ & \num{-0.791}* & \num{-0.735}+ & \num{-0.661}+ & \num{-0.814}* & \num{-0.701}+ \\
+& (\num{0.058}) & (\num{0.059}) & (\num{0.043}) & (\num{0.056}) & (\num{0.088}) & (\num{0.038}) & (\num{0.067}) \\
+Right ideology & \num{0.065} &  &  &  &  &  &  \\
+& (\num{0.870}) &  &  &  &  &  &  \\
+Identify as Canadian first &  & \num{-0.006} &  &  &  &  &  \\
+&  & (\num{0.988}) &  &  &  &  &  \\
+Trust in political parties &  &  & \num{0.411} &  &  &  &  \\
+&  &  & (\num{0.385}) &  &  &  &  \\
+Priority: reduce taxes &  &  &  & \num{-2.172}+ &  &  &  \\
+&  &  &  & (\num{0.073}) &  &  &  \\
+Priority: reduce debt &  &  &  &  & \num{0.534} &  &  \\
+&  &  &  &  & (\num{0.190}) &  &  \\
+Reciprocity Index &  &  &  &  &  & \num{-0.886} &  \\
+&  &  &  &  &  & (\num{0.362}) &  \\
+Proportionality &  &  &  &  &  &  & \num{-0.566} \\
+&  &  &  &  &  &  & (\num{0.140}) \\
+Num.Obs. & \num{453} & \num{466} & \num{466} & \num{466} & \num{466} & \num{466} & \num{466} \\
+AIC & \num{214.9} & \num{215.7} & \num{214.9} & \num{207.6} & \num{213.7} & \num{214.5} & \num{213.1} \\
+BIC & \num{243.7} & \num{244.7} & \num{243.9} & \num{236.6} & \num{242.7} & \num{243.5} & \num{242.1} \\
+Log.Lik. & \num{-100.440} & \num{-100.841} & \num{-100.442} & \num{-96.787} & \num{-99.826} & \num{-100.251} & \num{-99.533} \\
+RMSE & \num{0.30} & \num{0.30} & \num{0.30} & \num{0.30} & \num{0.30} & \num{0.30} & \num{0.30} \\
+\bottomrule
+\end{talltblr}
