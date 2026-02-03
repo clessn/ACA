@@ -46,7 +46,7 @@ clean <- clean %>%
  dplyr::select(-Finished, - consent, -consent_end_1, -consent_end_2)
 
 # -----------------------
-# 2. Clean metadata rows for codebook
+# 3. Clean metadata rows for codebook
 # -----------------------
 questions <- clean[1, ]
 values <- clean[2, ]
@@ -76,5 +76,6 @@ write.csv(
   row.names = FALSE
 )
 
-saveRDS(codebook, file = "codebook.rds")
+saveRDS(codebook, file = "codebook_ethics.rds")
+
 # Move to aca_wrangling_W26.R script for rest

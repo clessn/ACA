@@ -3,7 +3,21 @@
 # ===================================================
 # Version: Feb 3, 2026 
 
-clean <- read.csv("data/aca_ethics_W26.csv")
+# -----------------------
+# Load packages
+# -----------------------
+library(tidyverse)
+library(tidyr)
+library(dplyr)
+library(stringr)
+library(purrr)
+library(rlang)
+
+# -----------------------
+# Preliminary cleaning by Shannon to collpase prov var
+# -----------------------
+
+# clean <- read.csv("data/aca_ethics_W26.csv")
 
 # Collapse language, ideo_vote/define and trust_ variables (varied according to province/ter)
 # Collapse language
@@ -131,9 +145,34 @@ write.csv(
 )
 
 # -----------------------
-# Rename variables and check for coding
+# 2. Clean metadata rows for codebook
+# -----------------------
+questions <- clean[1, ]
+values <- clean[2, ]
+
+data <- clean[-c(1,2), ]
+names(clean) <- names(questions)
+# -----------------------
+# 4. Generate codebook
+# -----------------------
+# Create the `values` column with unique values per variable
+values <- map_chr(clean, ~ paste(unique(.x), collapse = ", "))
+
+# Assuming `questions` is defined and has the same length as `data`
+codebook <- tibble(
+  variable = names(clean),
+  question = as.character(questions),
+  values = values
+)
+
+saveRDS(codebook, file = "codebook_clean.rds")
+
+# -----------------------
+# ELSA : Rename variables and check for coding
 -------------------------
+clean <- read.csv("data/aca_clean_W26.csv")
   
+    
   ##Cleaning Elsa
   DataClean <- data.frame(id = 1:nrow(clean))
 
