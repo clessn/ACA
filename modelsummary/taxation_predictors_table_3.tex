@@ -3,41 +3,45 @@ entry=none,label=none,
 note{}={+ p \num{< 0.1}, * p \num{< 0.05}, ** p \num{< 0.01}, *** p \num{< 0.001}},
 ]                     %% tabularray outer close
 {                     %% tabularray inner open
-colspec={Q[]Q[]Q[]Q[]Q[]Q[]Q[]Q[]},
-column{2,3,4,5,6,7,8}={}{halign=c,},
+colspec={Q[]Q[]Q[]Q[]Q[]Q[]Q[]Q[]Q[]Q[]},
+column{2,3,4,5,6,7,8,9,10}={}{halign=c,},
 column{1}={}{halign=l,},
-hline{26}={1,2,3,4,5,6,7,8}{solid, black, 0.05em},
+hline{30}={1,2,3,4,5,6,7,8,9,10}{solid, black, 0.05em},
 }                     %% tabularray inner close
 \toprule
-& Right Ideology & Country Identification  & Trust in Political Parties & Priority Taxes & Priority Budget  & Reciprocity Index &  Proportionality \\ \midrule %% TinyTableHeader
-Male & \num{-0.098} & \num{-0.223} & \num{-0.192} & \num{-0.207} & \num{-0.128} & \num{-0.215} & \num{-0.215} \\
-& (\num{0.705}) & (\num{0.384}) & (\num{0.453}) & (\num{0.430}) & (\num{0.619}) & (\num{0.398}) & (\num{0.401}) \\
-Age (18–34) & \num{0.305} & \num{0.264} & \num{0.307} & \num{0.301} & \num{0.274} & \num{0.292} & \num{0.288} \\
-& (\num{0.326}) & (\num{0.370}) & (\num{0.297}) & (\num{0.306}) & (\num{0.353}) & (\num{0.320}) & (\num{0.329}) \\
-Income (high) & \num{-0.277} & \num{-0.293} & \num{-0.333} & \num{-0.290} & \num{-0.299} & \num{-0.295} & \num{-0.280} \\
-& (\num{0.441}) & (\num{0.408}) & (\num{0.348}) & (\num{0.412}) & (\num{0.400}) & (\num{0.403}) & (\num{0.430}) \\
-University education & \num{0.104} & \num{0.285} & \num{0.306} & \num{0.302} & \num{0.272} & \num{0.341} & \num{0.286} \\
-& (\num{0.727}) & (\num{0.314}) & (\num{0.277}) & (\num{0.283}) & (\num{0.336}) & (\num{0.243}) & (\num{0.315}) \\
-Employed full time & \num{0.252} & \num{0.072} & \num{0.105} & \num{0.097} & \num{0.034} & \num{0.064} & \num{0.104} \\
-& (\num{0.332}) & (\num{0.772}) & (\num{0.672}) & (\num{0.696}) & (\num{0.892}) & (\num{0.803}) & (\num{0.677}) \\
-Right ideology & \num{-0.762}* &  &  &  &  &  &  \\
-& (\num{0.016}) &  &  &  &  &  &  \\
-Identify as Canadian first &  & \num{-0.437} &  &  &  &  &  \\
-&  & (\num{0.114}) &  &  &  &  &  \\
-Trust in political parties &  &  & \num{-0.362} &  &  &  &  \\
-&  &  & (\num{0.339}) &  &  &  &  \\
-Priority: reduce taxes &  &  &  & \num{-0.059} &  &  &  \\
-&  &  &  & (\num{0.880}) &  &  &  \\
-Priority: reduce debt &  &  &  &  & \num{-1.041}* &  &  \\
-&  &  &  &  & (\num{0.027}) &  &  \\
-Reciprocity Index &  &  &  &  &  & \num{-0.325} &  \\
-&  &  &  &  &  & (\num{0.623}) &  \\
-Proportionality &  &  &  &  &  &  & \num{-0.094} \\
-&  &  &  &  &  &  & (\num{0.715}) \\
-Num.Obs. & \num{453} & \num{466} & \num{466} & \num{466} & \num{466} & \num{466} & \num{466} \\
-AIC & \num{390.8} & \num{402.5} & \num{403.7} & \num{404.6} & \num{396.6} & \num{404.0} & \num{404.6} \\
-BIC & \num{419.6} & \num{431.5} & \num{432.7} & \num{433.6} & \num{425.6} & \num{433.1} & \num{433.6} \\
-Log.Lik. & \num{-188.394} & \num{-194.237} & \num{-194.831} & \num{-195.277} & \num{-191.307} & \num{-195.023} & \num{-195.305} \\
-RMSE & \num{0.40} & \num{0.40} & \num{0.40} & \num{0.40} & \num{0.40} & \num{0.40} & \num{0.40} \\
+& Right Ideology & Province Identification  & Trust in Political Parties & Priority Taxes & Priority Budget  & Reciprocity Index &  Proportionality & High income × Reciprocity & High income × Proportionality \\ \midrule %% TinyTableHeader
+Male & \num{-0.098} & \num{-0.099} & \num{-0.192} & \num{-0.207} & \num{-0.128} & \num{-0.215} & \num{-0.215} & \num{-0.218} & \num{-0.238} \\
+& (\num{0.705}) & (\num{0.701}) & (\num{0.453}) & (\num{0.430}) & (\num{0.619}) & (\num{0.398}) & (\num{0.401}) & (\num{0.394}) & (\num{0.358}) \\
+Age (18–34) & \num{0.305} & \num{0.316} & \num{0.307} & \num{0.301} & \num{0.274} & \num{0.292} & \num{0.288} & \num{0.302} & \num{0.261} \\
+& (\num{0.326}) & (\num{0.285}) & (\num{0.297}) & (\num{0.306}) & (\num{0.353}) & (\num{0.320}) & (\num{0.329}) & (\num{0.304}) & (\num{0.380}) \\
+Income (high) & \num{-0.277} & \num{-0.468} & \num{-0.333} & \num{-0.290} & \num{-0.299} & \num{-0.295} & \num{-0.280} & \num{-1.386} & \num{0.355} \\
+& (\num{0.441}) & (\num{0.193}) & (\num{0.348}) & (\num{0.412}) & (\num{0.400}) & (\num{0.403}) & (\num{0.430}) & (\num{0.240}) & (\num{0.384}) \\
+University education & \num{0.104} & \num{0.419} & \num{0.306} & \num{0.302} & \num{0.272} & \num{0.341} & \num{0.286} & \num{0.265} & \num{0.243} \\
+& (\num{0.727}) & (\num{0.140}) & (\num{0.277}) & (\num{0.283}) & (\num{0.336}) & (\num{0.243}) & (\num{0.315}) & (\num{0.350}) & (\num{0.396}) \\
+Employed full time & \num{0.252} & \num{0.038} & \num{0.105} & \num{0.097} & \num{0.034} & \num{0.064} & \num{0.104} & \num{0.111} & \num{0.104} \\
+& (\num{0.332}) & (\num{0.880}) & (\num{0.672}) & (\num{0.696}) & (\num{0.892}) & (\num{0.803}) & (\num{0.677}) & (\num{0.655}) & (\num{0.675}) \\
+Right ideology & \num{-0.762}* &  &  &  &  &  &  &  &  \\
+& (\num{0.016}) &  &  &  &  &  &  &  &  \\
+Identify with province &  & \num{-0.829}** &  &  &  &  &  &  &  \\
+&  & (\num{0.001}) &  &  &  &  &  &  &  \\
+Trust in political parties &  &  & \num{-0.362} &  &  &  &  &  &  \\
+&  &  & (\num{0.339}) &  &  &  &  &  &  \\
+Priority: reduce taxes &  &  &  & \num{-0.059} &  &  &  &  &  \\
+&  &  &  & (\num{0.880}) &  &  &  &  &  \\
+Priority: reduce debt &  &  &  &  & \num{-1.041}* &  &  &  &  \\
+&  &  &  &  & (\num{0.027}) &  &  &  &  \\
+Reciprocity Index &  &  &  &  &  & \num{-0.325} &  &  &  \\
+&  &  &  &  &  & (\num{0.623}) &  &  &  \\
+Proportionality &  &  &  &  &  &  & \num{-0.094} &  &  \\
+&  &  &  &  &  &  & (\num{0.715}) &  &  \\
+High income × Reciprocity &  &  &  &  &  &  &  & \num{1.710} &  \\
+&  &  &  &  &  &  &  & (\num{0.314}) &  \\
+High income × Proportionality &  &  &  &  &  &  &  &  & \num{-1.823}* \\
+&  &  &  &  &  &  &  &  & (\num{0.025}) \\
+Num.Obs. & \num{453} & \num{466} & \num{466} & \num{466} & \num{466} & \num{466} & \num{466} & \num{466} & \num{466} \\
+AIC & \num{390.8} & \num{391.2} & \num{403.7} & \num{404.6} & \num{396.6} & \num{404.0} & \num{404.6} & \num{403.2} & \num{396.2} \\
+BIC & \num{419.6} & \num{420.2} & \num{432.7} & \num{433.6} & \num{425.6} & \num{433.1} & \num{433.6} & \num{432.2} & \num{425.3} \\
+Log.Lik. & \num{-188.394} & \num{-188.612} & \num{-194.831} & \num{-195.277} & \num{-191.307} & \num{-195.023} & \num{-195.305} & \num{-194.576} & \num{-191.125} \\
+RMSE & \num{0.40} & \num{0.40} & \num{0.40} & \num{0.40} & \num{0.40} & \num{0.40} & \num{0.40} & \num{0.40} & \num{0.41} \\
 \bottomrule
 \end{talltblr}

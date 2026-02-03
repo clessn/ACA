@@ -29,10 +29,12 @@ ivs <- c(
   "children_bin", # Children
   "employ_fulltime_bin", # Employed full time
   "ideo_right_bin", # Right ideology
-  "ideo_country_bin", # Identify as Canadian first
+  "terr_identity_bin", # Identify as Canadian first
   "trust_pol_parties_bin", # Trust in political parties
   "reciprocity_index",
-  "redis_effort_bin"
+  "redis_effort_bin",
+  "income_reciprocity",
+  "income_proportionality"
   )
 
 # -- 3a. Define labels for outcomes and predictors
@@ -50,10 +52,12 @@ var_labels <- c(
   children_bin          = "Children",
   employ_fulltime_bin   = "Employed full time",
   ideo_right_bin        = "Right ideology",
-  ideo_country_bin      = "Identify as Canadian first",
+  terr_identity_bin      = "Identify with province",
   trust_pol_parties_bin = "Trust in political parties",
-  reciprocity_index = "Reciprocity Index",
-  redis_effort_bin = "Proportionality"  
+  reciprocity_index     = "Reciprocity Index",
+  redis_effort_bin      = "Proportionality",
+  income_reciprocity    = "High income × Reciprocity",
+  income_proportionality = "High income × Proportionality"
 )
 
 # -- 4. Fit logistic regression models with survey weights
@@ -131,7 +135,8 @@ baseline <- df %>%
   }))
 
 # --- Step 3: Create newdata varying key predictors
-predictors_to_vary <- c("trust_social_bin", "trust_pol_parties_bin", "ideo_country_bin", "ideo_right_bin")
+predictors_to_vary <- c("trust_pol_parties_bin", "terr_identity_bin", "ideo_right_bin",
+                        "reciprocity_index", "redis_effort_bin", "income_reciprocity","income_proportionality")
 
 newdata_list <- lapply(predictors_to_vary, function(var) {
   baseline_exp <- baseline[rep(1, ifelse(var == "ideo_right_num.", 5, 2)), ]
@@ -175,7 +180,7 @@ pred_df %>%
     varied  = recode(varied,
                      trust_social_bin = "Trust in society",
                      trust_pol_parties_bin = "Trust in political parties",
-                     ideo_country_bin = "Identify as Canadian first",
+                     terr_identity_bin = "Identify as Canadian first",
                      `ideo_right_num.` = "Right ideology"
     )
   ) %>%

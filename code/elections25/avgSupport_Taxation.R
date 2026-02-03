@@ -13,25 +13,28 @@ library(ggplot2)
 # -- 2. Load data & create binary IV 
 df <- read.csv("data/ACA_weighted.csv")
 
-df$education_bin <- ifelse(df$education == "University", 1, 0)
-df$age_young_bin <- ifelse(df$age == "18–34", 1, 0)
-df$income_high_bin <- ifelse(df$income == "High", 1, 0)
-df <- df %>%
-  mutate(ideo_right_bin = if_else(ideo_right_num. >= 0.5, 1, 0))
+#df$education_bin <- ifelse(df$education == "University", 1, 0)
+#df$age_young_bin <- ifelse(df$age == "18–34", 1, 0)
+#df$income_high_bin <- ifelse(df$income == "High", 1, 0)
+#df <- df %>%
+#  mutate(ideo_right_bin = if_else(ideo_right_num. >= 0.5, 1, 0))
 
 # === 1. Setup ===
 # Dependent variables
 dvs <- c(
-  "tradeoff_childcare_lowincome_num",
-  "tradeoff_childcare_benefits_num"
+  "tradeoff_no_taxes_num",           # Control
+  "tradeoff_taxes_sales_num",        # Sales tax
+  "tradeoff_taxes_high_income_num",  # High income tax
+  "tradeoff_taxes_wealthy_num"       # Wealth tax
 )
 
 # Labels for plotting
 dv_labels <- c(
-  tradeoff_childcare_lowincome_num = "Subsidize child care for all, \n but lower family benefits",
-  tradeoff_childcare_benefits_num = "Subsidize child care for low-income, \n but increase cost for middle- and upper-class"
+  tradeoff_no_taxes_num           = "No increase (control)",
+  tradeoff_taxes_sales_num        = "Increase to taxation, \n sales tax",
+  tradeoff_taxes_high_income_num  = "Increase to taxation, \n high incomes",
+  tradeoff_taxes_wealthy_num      = "Increase to taxation, \n wealth tax"
 )
-
 
 # Independent variables (covariates)
 ivs <- c(
@@ -45,10 +48,9 @@ ivs <- c(
   "ideo_right_bin",         # Right ideology
   "ideo_country_bin",       # Identify as Canadian first
   "trust_social_bin",       # Trust in society
-  "trust_pol_parties_bin",  # Trust in political parties
-  "budget_spend_prio_childcare_bin", # Priority for childcare spending
-  "redis_effort_num", # Proportionality beliefs: Fairness of the \n income distribution
-  "redis_no_cheat_system_num" # Reciprocity beliefs: Trust not to cheat system
+  "trust_pol_parties_bin",   # Trust in political parties
+  "budget_debt_priority_bin", # Debt priority
+  "budget_taxes_priority_bin" # Taxes priority
 )
 
 # === 2. Fit models ===
@@ -94,7 +96,46 @@ pred_all$treatment <- factor(pred_all$treatment, levels = rev(dv_labels))  # ord
 pred_all$treatment <- factor(pred_all$treatment, levels = dv_labels)
 pred_all$model <- factor(pred_all$model, levels = c("Without Covariates", "With Covariates"))
 
-# === 4. Plot ===
+# === 4. Plot difference with control ===
+control_vals <- pred_all %>% 
+  filter(treatment == "No increase (control)") %>%
+  select(model, estimate)
+
+
+plot_data <- pred_all %>% 
+  filter(treatment != "No increase (control)")
+
+plot2 <- ggplot(plot_data, aes(x = treatment, y = estimate, color = model, shape = model)) +
+  geom_hline(data = control_vals, aes(yintercept = estimate, color = model),
+             linetype = "dashed", show.legend = FALSE) +
+  geom_point(position = position_dodge(width = 0.5), size = 3) +
+  geom_errorbar(
+    aes(ymin = conf.low, ymax = conf.high),
+    position = position_dodge(width = 0.5),
+    width = 0.15
+  ) +
+  scale_color_manual(
+    values = c("Without Covariates" = "black", "With Covariates" = "grey50")
+  ) +
+  scale_shape_manual(
+    values = c("Without Covariates" = 16, "With Covariates" = 17)
+  ) +
+  scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
+  labs(
+    x = NULL,
+    y = "Predicted Support \n(0–1 scale)",
+    color = "Model Type",
+    shape = "Model Type",
+    caption = "Dashed line = predicted support in control condition. \n Covariate-adjusted models include: age, gender, education, employment, children, homeownership, ideology, and trust."
+  ) +
+  theme_minimal(base_size = 13) +
+  theme(
+    plot.caption.position = "plot",
+    plot.caption = element_text(hjust = 0),
+    axis.text.x = element_text(margin = margin(t = 5))
+  )
+
+# === 4. Plot all ===
 plot <- ggplot(pred_all, aes(x = treatment, y = estimate, color = model, shape = model)) +
   geom_point(position = position_dodge(width = 0.5), size = 3) +
   geom_errorbar(
@@ -116,14 +157,13 @@ plot <- ggplot(pred_all, aes(x = treatment, y = estimate, color = model, shape =
   ) +
   scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
   labs(
-   # title = "Average Support for Policy by Tradeoff",
+   # title = "Average Support for Spending Increases by Treatment",
    # subtitle = "OLS predicted means with and without covariates (95% CIs)",
     x = " ",
     y = "Predicted Support \n (0–1 scale)",
     color = "Model Type",
     shape = "Model Type",
-    caption = "Covariate-adjusted models include: age, gender, education, employment, children,
-    homeownership, ideology,trust, proprotionality of and reciprocity of beliefs, and priority for child care spending."
+    caption = "Covariate-adjusted models include: age, gender, education, employment, children, homeownership, ideology, and trust."
   ) +
   theme_minimal(base_size = 13) +
   theme(
@@ -133,10 +173,11 @@ plot <- ggplot(pred_all, aes(x = treatment, y = estimate, color = model, shape =
 
 plot
 
+
 # -- 8. Save the coefficient plot
 ggsave(
-  filename = "graphs/avgSupport_tradeoffCC.png",
-  plot     = plot,
+  filename = "graphs/avgSupport_Taxation_reference.png",
+  plot     = plot2,
   width    = 10,
   height   = 8,
   dpi      = 300

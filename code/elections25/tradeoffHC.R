@@ -1,7 +1,7 @@
 # ===================================================
 # Binary Logistic Regression Models and Plots
 # ===================================================
-# Version: June 10th, 2025
+# Version: June 17th, 2025
 #
 
 # -- 1. Load packages
@@ -12,7 +12,6 @@ library(ggplot2)
 
 # -- 2. Load data & create binary IV 
 df <- read.csv("data/ACA_weighted.csv")
-
 
 #df$education_bin <- ifelse(df$education == "University", 1, 0)
 #df$age_young_bin <- ifelse(df$age == "18–34", 1, 0)
@@ -36,15 +35,21 @@ ivs <- c(
   #"children_bin", # Children
   "employ_fulltime_bin", # Employed full time
   "ideo_right_bin", # Right ideology
-  "ideo_country_bin", # Identify as Canadian first
+  "terr_identity_bin", # Identify as Canadian first
   #"trust_fed_gov_bin", # Trust in federal government
   "trust_pol_parties_bin",# Trust in political parties
   #"budget_health_priority_bin", # Health priority
   "budget_pensions_priority_bin", # Pensions priority
   #"budget_spend_prio_health_bin", # Health spending
   #"budget_spend_prio_seniors_bin", # Seniors spending
-  "reciprocity_index" # Reciprocity index
+  "reciprocity_index", # Reciprocity index
+  "redis_effort_bin",
+  "income_reciprocity",
+  "income_proportionality"
 )
+
+# Add it to your list of predictors
+#ivs_with_interaction <- c(ivs, interaction_term_1, interaction_term_2)
 
 # -- 3a. Define labels for outcomes and predictors
 dv_labels <- c(
@@ -61,15 +66,17 @@ var_labels <- c(
   #children_bin          = "Children",
   employ_fulltime_bin   = "Employed full time",
   ideo_right_bin        = "Right ideology",
-  ideo_country_bin      = "Identify as Canadian first",
+  terr_identity_bin      = "Identify with province",
   #trust_social_bin      = "Trust in society",
   trust_pol_parties_bin = "Trust in political parties",
   #budget_health_priority_bin = "Health priority",
   budget_pensions_priority_bin = "Pensions priority",
   #budget_spend_prio_health_bin = "Health spending",
   #budget_spend_prio_seniors_bin = "Seniors spending",
-  reciprocity_index = "Reciprocity Index",
-  redis_effort_bin = "Proportionality"  
+  reciprocity_index     = "Reciprocity Index",
+  redis_effort_bin      = "Proportionality",
+  income_reciprocity    = "High income × Reciprocity",
+  income_proportionality = "High income × Proportionality"
 )
 
 # -- 4. Fit logistic regression models with survey weights
@@ -148,7 +155,8 @@ baseline <- df %>%
   }))
 
 # --- Step 3: Create newdata varying key predictors
-predictors_to_vary <- c("trust_social_bin", "trust_pol_parties_bin", "ideo_country_bin", "ideo_right_bin")
+predictors_to_vary <- c("trust_pol_parties_bin", "terr_identity_bin", "ideo_right_bin",
+                        "reciprocity_index", "redis_effort_bin", "income_reciprocity","income_proportionality")
 
 newdata_list <- lapply(predictors_to_vary, function(var) {
   baseline_exp <- baseline[rep(1, ifelse(var == "ideo_right_num.", 5, 2)), ]
@@ -192,7 +200,7 @@ pred_df %>%
     varied  = recode(varied,
                      trust_social_bin = "Trust in society",
                      trust_pol_parties_bin = "Trust in political parties",
-                     ideo_country_bin = "Identify as Canadian first",
+                     terr_identity_bin = "Identify as Canadian first",
                      `ideo_right_num.` = "Right ideology"
     )
   ) %>%

@@ -29,18 +29,22 @@ var_labels <- c(
   education_bin = "University education",
   employ_fulltime_bin = "Employed full time",
   ideo_right_bin = "Right ideology",
-  ideo_country_bin = "Identify as Canadian first",
+  terr_identity_bin = "Identify with province",
   trust_pol_parties_bin = "Trust in political parties",
    budget_spend_prio_seniors_bin = "Priority Senior Spending",
-  #budget_pensions_priority_bin = "Priorty Pensions Ranking",
+  #budget_pensions_priority_bin = "Priority Pensions Ranking",
   reciprocity_index = "Reciprocity Index",
-  redis_effort_bin = "Proportionality"   
+  redis_effort_bin = "Proportionality" ,
+  income_reciprocity    = "High income × Reciprocity",
+  income_proportionality = "High income × Proportionality"  
 )
 # Three key predictors to test separately
-key_preds <- c("ideo_right_bin", "ideo_country_bin", "trust_pol_parties_bin", 
+key_preds <- c("ideo_right_bin", "terr_identity_bin", "trust_pol_parties_bin", 
                #"budget_pensions_priority_bin",
                "budget_spend_prio_seniors_bin",
-               "reciprocity_index", "redis_effort_bin")
+               "reciprocity_index", "redis_effort_bin",
+               "income_reciprocity",
+               "income_proportionality")
 
 # Prepare a named list to store models
 all_models <- list()
@@ -72,16 +76,17 @@ print(var_labels_sub)
 # Optional: tidy up model names for presentation
 model_labels <- c(
   tradeoff_senior_income_bin_ideo_right_bin      = "Right ideology",
-  tradeoff_senior_income_bin_ideo_country_bin   = "Ideology Country",
+  tradeoff_senior_income_bin_terr_identity_bin   = "Ideology Country",
   tradeoff_senior_income_bin_trust_pol_parties_bin = "Trust in political parties",
   #tradeoff_senior_income_bin_budget_pensions_priority_bin = "Priority Pensions Ranking",
  tradeoff_senior_income_bin_budget_spend_prio_seniors_bin = "Priority Senior Spending",
   tradeoff_senior_income_bin_reciprocity_index     = "Reciprocity Index",
-  tradeoff_senior_income_bin_redis_effort_bin =  "Proportionality"
+  tradeoff_senior_income_bin_redis_effort_bin =  "Proportionality",
+ 
 )
 
 # Create modelsummary table comparing all models side-by-side
-#!!!!! Changine file name 1 or 2
+#!!!!! Change file name 1 or 2
 modelsummary(
   all_models,
   coef_map = var_labels_sub,
@@ -90,5 +95,42 @@ modelsummary(
   stars = TRUE,
   statistic = c("p.value"),
   fmt = 3,
-  title = "Comparison of Key Predictors on Senior Care Attitudes",
+  #title = "Comparison of Key Predictors on Senior Care Attitudes",
+)
+
+### Predicted probabilities for interaction effects
+
+# With this, for interaction terms:   
+#"tradeoff_senior_benefits_bin"
+#"tradeoff_senior_income_bin"
+mod <- glm(
+  tradeoff_senior_income_bin ~ 
+    ses_male_bin + age_young_bin + income_high_bin + education_bin + 
+    employ_fulltime_bin + 
+    income_high_bin * reciprocity_index,
+  data = df, 
+  family = binomial(), 
+  weights = weightvec
+)
+
+# Preds (can change with redis_effort_bin/reciprocity_index)
+preds <- ggpredict(mod, terms = c("reciprocity_index", "income_high_bin"))
+
+# Plot
+pp <- plot(preds) + 
+  labs(
+    x = "Prop Beliefs",
+    y = "Predicted Probability",
+    color = "High Income",
+    title = "Interaction: High Income × Prop"
+  ) +
+  theme_minimal()
+
+#Save 
+ggsave(
+  filename = "graphs/predictedProp_tradeoffCC_lowIncome.png",
+  plot     = pp,
+  width    = 10,
+  height   = 8,
+  dpi      = 300
 )

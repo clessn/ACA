@@ -1,6 +1,16 @@
 library(psych)
 library(mice)
 
+
+# Are proportionality and reciprocity negatively correlated?
+
+
+# Basic correlation test
+cor_test_result <- cor.test(df$reciprocity_index, df$redis_effort_num, use = "complete.obs", method = "pearson")
+
+# Print the results
+print(cor_test_result)
+
 # Recode where necessary 
  df$indic_rich_num <- 1 - df$redis_reasons_rich_num        
  df$indic_poor_num <- 1 - df$redis_reasons_poor_num  

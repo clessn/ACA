@@ -13,27 +13,23 @@ library(ggplot2)
 # -- 2. Load data & create binary IV 
 df <- read.csv("data/ACA_weighted.csv")
 
-df$education_bin <- ifelse(df$education == "University", 1, 0)
-df$age_young_bin <- ifelse(df$age == "18–34", 1, 0)
-df$income_high_bin <- ifelse(df$income == "High", 1, 0)
-df <- df %>%
-  mutate(ideo_right_bin = if_else(ideo_right_num. >= 0.5, 1, 0))
+#df$education_bin <- ifelse(df$education == "University", 1, 0)
+#df$age_young_bin <- ifelse(df$age == "18–34", 1, 0)
+#df$income_high_bin <- ifelse(df$income == "High", 1, 0)
+#df <- df %>%
+#  mutate(ideo_right_bin = if_else(ideo_right_num. >= 0.5, 1, 0))
 
 # === 1. Setup ===
 # Dependent variables
 dvs <- c(
-  "tradeoff_childcare_num", # "Control"
-  "tradeoff_childcare_higher_taxes_num", #"Higher taxes"
-  "tradeoff_childcare_by_cutting_num", # "Cuts"
-  "tradeoff_childcare_debt_num" # "More debt
+  "tradeoff_childcare_lowincome_num",
+  "tradeoff_childcare_benefits_num"
 )
 
 # Labels for plotting
 dv_labels <- c(
-  tradeoff_childcare_num = "Control",
-  tradeoff_childcare_higher_taxes_num = "Higher taxes",
-  tradeoff_childcare_by_cutting_num = "Cuts",
-  tradeoff_childcare_debt_num = "More debt"
+  tradeoff_childcare_lowincome_num = "Subsidize child care for all, \n but lower family benefits",
+  tradeoff_childcare_benefits_num = "Subsidize child care for low-income, \n but increase cost for middle- and upper-class"
 )
 
 
@@ -50,7 +46,9 @@ ivs <- c(
   "ideo_country_bin",       # Identify as Canadian first
   "trust_social_bin",       # Trust in society
   "trust_pol_parties_bin",  # Trust in political parties
-  "budget_spend_prio_childcare_bin" # Priority for childcare spending
+  "budget_spend_prio_childcare_bin", # Priority for childcare spending
+  "redis_effort_num", # Proportionality beliefs: Fairness of the \n income distribution
+  "redis_no_cheat_system_num" # Reciprocity beliefs: Trust not to cheat system
 )
 
 # === 2. Fit models ===
@@ -118,13 +116,14 @@ plot <- ggplot(pred_all, aes(x = treatment, y = estimate, color = model, shape =
   ) +
   scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2)) +
   labs(
-    #title = "Average Support for Policy by Tradeoff",
-    #subtitle = "OLS predicted means with and without covariates (95% CIs)",
+   # title = "Average Support for Policy by Tradeoff",
+   # subtitle = "OLS predicted means with and without covariates (95% CIs)",
     x = " ",
     y = "Predicted Support \n (0–1 scale)",
     color = "Model Type",
     shape = "Model Type",
-    caption = "Covariate-adjusted models include: age, gender, education, employment, children, \n homeownership, ideology,trust, and priority for child care spending."
+    caption = "Covariate-adjusted models include: age, gender, education, employment, children,
+    homeownership, ideology,trust, proprotionality of and reciprocity of beliefs, and priority for child care spending."
   ) +
   theme_minimal(base_size = 13) +
   theme(
@@ -134,31 +133,10 @@ plot <- ggplot(pred_all, aes(x = treatment, y = estimate, color = model, shape =
 
 plot
 
-# !!! To help me visualize
-control_vals <- pred_all %>% 
-  filter(treatment == "Control")
-
-plot + 
-  geom_rect(
-    data = control_vals,
-    aes(
-      xmin = -Inf, xmax = Inf,
-      ymin = conf.low, ymax = conf.high,
-      fill = model
-    ),
-    alpha = 0.1,
-    inherit.aes = FALSE
-  ) +
-  scale_fill_manual(values = c(
-    "Without Covariates" = "black",
-    "With Covariates" = "grey70"
-  ))
-  )
-
 # -- 8. Save the coefficient plot
 ggsave(
-  filename = "graphs/avgSupport_experimentCC.png",
-  plot     = plot,
+  filename = "graphs/avgSupport_tradeoffCC_reference.png",
+  plot     = plot2,
   width    = 10,
   height   = 8,
   dpi      = 300
