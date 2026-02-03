@@ -165,6 +165,7 @@ codebook <- tibble(
   values = values
 )
 
+list(codebook$variable)
 saveRDS(codebook, file = "codebook_clean.rds")
 
 # -----------------------
@@ -208,7 +209,8 @@ DataClean$age35_54 <- ifelse(DataClean$ses_age >= 35 & DataClean$ses_age <= 54, 
 table(DataClean$ses_age)
 table(DataClean$age35_54)
 
-# ! Check in the new survey, provinces include : AB, ON, QC, NB, NL, NS, PEI
+# ! Check in the new survey, provinces include : AB, ON, QC, NB, NL, NS, PEI 
+#          (to become a categorical variable (AB, ON, QC, EC & a bin for each, e.g. reg_ab [0,1]))
 
 # In which province or territory are you currently living?-------------------------------------------------------------
 attributes(clean$ses_region.)
@@ -219,7 +221,6 @@ DataClean$bcolumbia_bin <- ifelse(clean$ses_region. == "British Columbia", 1, 0)
 DataClean$nova_scotia_bin <- ifelse(clean$ses_region. == "Nova Scotia", 1, 0)
 DataClean$ontario_bin <- ifelse(clean$ses_region. == "Ontario", 1, 0)
 DataClean$quebec_bin <- ifelse(clean$ses_region. == "Quebec", 1, 0)
-DataClean$yukon_bin <- ifelse(clean$ses_region. == "Yukon", 1, 0)
 
 table(DataClean$alberta_bin)
 table(DataClean$quebec_bin)
@@ -271,7 +272,6 @@ table(clean$ses_income)
 DataClean$ses_income_char <- NA
 DataClean$ses_income3Cat <- NA
 
-
 # Nettoyage des réponses income en format texte propre
 DataClean$ses_income_char[clean$ses_income == "$1 to $30,000"]             <- "1_to_30000"
 DataClean$ses_income_char[clean$ses_income == "$30,001 to $60,000"]        <- "30001_to_60000"
@@ -313,36 +313,6 @@ table(clean$ses_postal_code)
 DataClean$ses_postalCode <- NA
 DataClean$ses_postalCode <- clean$ses_postal_code
 table(DataClean$ses_postalCode)
-
-# What is your marital status?-------------------------------------------------------------------------------------
-attributes(clean$ses_marital_status)
-table(clean$ses_marital_status)
-DataClean$ses_matStatus_char <- NA
-
-DataClean$ses_matStatus_char[clean$ses_marital_status == "Single"]                  <- "single"
-DataClean$ses_matStatus_char[clean$ses_marital_status == "Married"]                 <- "married"
-DataClean$ses_matStatus_char[clean$ses_marital_status == "Common-law relationship"] <- "common_law"
-DataClean$ses_matStatus_char[clean$ses_marital_status == "Widower/widow"]           <- "widower"
-DataClean$ses_matStatus_char[clean$ses_marital_status == "Divorced/separated"]      <- "divorced"
-
-# Création de la variable binaire : 1 = marié, 0 = autres
-DataClean$matStatus_married_bin <- ifelse(DataClean$ses_matStatus_char == "married", 1, 0)
-
-table(DataClean$matStatus_married_bin)
-
-#Is the home you currently live in------------------------------------------------------------
-attributes(clean$ses_home_ownership)
-table(clean$ses_home_ownership)
-
-DataClean$ses_home_ownership_char <- NA
-DataClean$ses_home_ownership_char[clean$ses_home_ownership == "Owned by your family or a member of your household"] <- "owned_by_your_family_or_a_member_of_your_household"
-DataClean$ses_home_ownership_char[clean$ses_home_ownership == "Rented"] <- "rented"
-
-DataClean$home_owned_bin  <- ifelse(DataClean$ses_home_ownership_char == "owned_by_your_family_or_a_member_of_your_household", 1, 0)
-DataClean$home_rented_bin <- ifelse(DataClean$ses_home_ownership_char == "rented", 1, 0)
-
-table(DataClean$home_owned_bin)
-table(DataClean$home_rented_bin)
 
 # Do you live...----------------------------------------------------------------------
 attributes(clean$ses_children.)
@@ -390,25 +360,6 @@ DataClean$employ_fulltime_bin <- ifelse(DataClean$ses_employ_status_char == "wor
 
 # Vérification
 table(DataClean$employ_fulltime_bin, useNA = "always")
-
-
-#Which option best describes your current family structure-----------------------------------------------------------------
-table(clean$ses_family_structure)
-
-# Nettoyage de la variable sur la structure familiale
-DataClean$ses_family_structure_char <- NA
-DataClean$ses_family_structure_char[clean$ses_family_structure == "Single parent"] <- "single_parent"
-DataClean$ses_family_structure_char[clean$ses_family_structure == "Two parents in a relationship but living separately"] <- "separate_parents"
-DataClean$ses_family_structure_char[clean$ses_family_structure == "Two parents in a relationship in a first union (marriage or common-law)"] <- "first_union"
-DataClean$ses_family_structure_char[clean$ses_family_structure == "Two parents in a relationship in a second union (marriage or common-law)"] <- "second_union"
-DataClean$ses_family_structure_char[clean$ses_family_structure == "Other/Prefer not to answer"] <- "other"
-
-# Variable binaire : 1 = première union, 0 = le reste
-DataClean$family_first_union_bin <- ifelse(DataClean$ses_family_structure_char == "first_union", 1, 0)
-
-# Vérification
-table(DataClean$family_first_union_bin, useNA = "always")
-
 
 #How many children do you have in each of the following age groups currently living with you in your household? - Ages 0 to 5--------------
 table(clean$ses_household_compo._1)
@@ -515,29 +466,6 @@ DataClean$ideo_interest_politics_num[clean$ideo_interest_1 == 1] <- 0.1
 DataClean$ideo_interest_politics_num[clean$ideo_interest_1 == 0] <- 0
 table(DataClean$ideo_interest_politics_num)
 
-#Do you think the politicians are out merely for themselves, for their party, or to do their best for their country?
-table(clean$ideo_cynicism)
-DataClean$ideo_cynicism <- clean$ideo_cynicism
-
-# Nettoyage de la variable ideo_cynicism
-DataClean$ideo_cynicism_char <- NA
-DataClean$ideo_cynicism_char[clean$ideo_cynicism == "Themselves"]   <- "themselves"
-DataClean$ideo_cynicism_char[clean$ideo_cynicism == "Their party"]  <- "their_party"
-DataClean$ideo_cynicism_char[clean$ideo_cynicism == "The country"]  <- "the_country"
-DataClean$ideo_cynicism_char[clean$ideo_cynicism == "Don’t know"]   <- "dont_know"
-
-# Variables binaires
-DataClean$ideo_party_them <- ifelse(DataClean$ideo_cynicism_char == "themselves", 1, 0)
-DataClean$ideo_party_bin    <- ifelse(DataClean$ideo_cynicism_char == "their_party", 1, 0)
-DataClean$ideo_country_bin  <- ifelse(DataClean$ideo_cynicism_char == "the_country", 1, 0)
-
-# Vérification
-table(DataClean$ideo_party_them, useNA = "always")
-table(DataClean$ideo_party_bin, useNA = "always")
-table(DataClean$ideo_country_bin, useNA = "always")
-
-
-
 #People have different ways of defining themselves. What do you consider yourself?
 table(clean$ideo_define_clean)
 # Clean better for full survey!
@@ -546,41 +474,25 @@ DataClean$ideo_define_num[clean$ideo_define_clean == "Solely as Canadian"] <- 1
 DataClean$ideo_define_num[clean$ideo_define_clean == "First Canadian, second Albertan"] <- 0.75
 DataClean$ideo_define_num[clean$ideo_define_clean == "First Canadian, second Ontarian"] <- 0.75
 DataClean$ideo_define_num[clean$ideo_define_clean == "First Quebecer, second Canadian"] <- 0.75
-DataClean$ideo_define_num[clean$ideo_define_clean == "First British Columbian, second Canadian"] <- 0.75
 DataClean$ideo_define_num[clean$ideo_define_clean == "First Canadian, second Nova Scotian"] <- 0.75
 DataClean$ideo_define_num[clean$ideo_define_clean == "Equally Canadian and Albertan"] <- 0.5
 DataClean$ideo_define_num[clean$ideo_define_clean == "Equally Canadian and Ontarian"] <- 0.5
 DataClean$ideo_define_num[clean$ideo_define_clean == "Equally Canadian and Quebecer"] <- 0.5
-DataClean$ideo_define_num[clean$ideo_define_clean == "Equally Canadian and British Columbian "] <- 0.5
-DataClean$ideo_define_num[clean$ideo_define_clean == "First Yukoner, second Canadian "] <- 0.25
 DataClean$ideo_define_num[clean$ideo_define_clean == "First Quebecer, second Canadian"] <- 0.25
-DataClean$ideo_define_num[clean$ideo_define_clean == "Solely as British Columbian"] <- 0
 DataClean$ideo_define_num[clean$ideo_define_clean == "Solely as Quebecer"] <- 0
 table(DataClean$ideo_define_num)
 
 #NE FONCTIONNE PAS ENCORE
 table(data$ideo_define_AL)
-table(data$ideo_define_BC)
-table(data$ideo_define_MA)
 table(data$ideo_define_NB.)
 table(data$ideo_define_NL)
-table(data$ideo_define_NT)
 table(data$ideo_define_NS)
-table(data$ideo_define_NU)
 table(data$ideo_define_ON)
 table(data$ideo_define_PE)
-table(data$ideo_define_YU)
 table(data$ideo_define_QC)
-table(data$ideo_define_SA)
 
 # ALBERTA
 data$ideo_define_AL_bin <- ifelse(data$ideo_define_AL == "First Albertan, second Canadian", 1, 0)
-
-# BRITISH COLUMBIA
-data$ideo_define_BC_bin <- ifelse(data$ideo_define_BC == "First British Columbian, second Canadian", 1, 0)
-
-# MANITOBA
-data$ideo_define_MA_bin <- 0  # Aucun répondant n’a cette réponse, donc tout est codé à 0
 
 # NEW BRUNSWICK
 data$ideo_define_NB_bin <- ifelse(data$ideo_define_NB. == "First New Brunswicker, second Canadian", 1, 0)
@@ -588,14 +500,8 @@ data$ideo_define_NB_bin <- ifelse(data$ideo_define_NB. == "First New Brunswicker
 # NEWFOUNDLAND AND LABRADOR
 data$ideo_define_NL_bin <- 0  # Aucun répondant n’a cette réponse, donc tout est codé à 0
 
-# NORTHWEST TERRITORIES
-data$ideo_define_NT_bin <- 0  # Aucun répondant avec "province d'abord", donc 0
-
 # NOVA SCOTIA
 data$ideo_define_NS_bin <- ifelse(data$ideo_define_NS == "First Nova Scotian, second Canadian", 1, 0)
-
-# NUNAVUT
-data$ideo_define_NU_bin <- 0  # Aucun répondant n’a cette réponse, donc 0
 
 # ONTARIO
 data$ideo_define_ON_bin <- ifelse(data$ideo_define_ON == "First Canadian, second Ontarian", 0,
@@ -604,21 +510,14 @@ data$ideo_define_ON_bin <- ifelse(data$ideo_define_ON == "First Canadian, second
 # PRINCE EDWARD ISLAND
 data$ideo_define_PE_bin <- 0  # Aucun répondant n’a cette réponse, donc 0
 
-# YUKON
-data$ideo_define_YU_bin <- ifelse(data$ideo_define_YU == "First Yukoner, second Canadian", 1, 0)
-
 # QUEBEC
 data$ideo_define_QC_bin <- ifelse(data$ideo_define_QC == "First Quebecer, second Canadian", 1, 0)
 
-# SASKATCHEWAN
-data$ideo_define_SA_bin <- 0  # Aucun répondant n’a cette réponse, donc 0
-
-table(data$ideo_define_SA_bin)
 table(data$ideo_define_QC_bin)
 
 
 #############################################################################################################
-DataClean <- read.csv("data/clean_df_full.csv")
+DataClean <- read.csv("data/aca_wrangled_W26.csv")
 
 #Now we would like to ask you about public finance questions. Please remember to read closely and pay attention. You will be asked questions to check your memory and comprehension. Please arrange the following policy issues by order of importance - Health
 table(clean$budget_issue_imp_1)
