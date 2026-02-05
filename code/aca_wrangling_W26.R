@@ -13,12 +13,12 @@ library(stringr)
 library(purrr)
 library(rlang)
 
-read_rds("/Users/shannondinan/Library/CloudStorage/Dropbox/_RESEARCH/_COLLABORATIONS/_GitHub/ACA/data/codebook_clean.rds")
+read_rds("data/codebook_clean.rds")
 # -----------------------
 # Preliminary cleaning by Shannon to collapse prov var
 # -----------------------
 
-# clean <- read.csv("data/aca_ethics_W26.csv")
+ clean <- read.csv("data/aca_ethics_W26.csv")
 
 # Collapse language, ideo_vote/define and trust_ variables (varied according to province/ter)
 # Collapse language
@@ -171,11 +171,11 @@ saveRDS(codebook, file = "codebook_clean.rds")
 
 # -----------------------
 # ELSA : Rename variables and check for coding
--------------------------
+#-------------------------
 clean <- read.csv("data/aca_clean_W26.csv")
   
     
-  ##Cleaning Elsa
+##Cleaning Elsa
   DataClean <- data.frame(id = 1:nrow(clean))
 
 
@@ -222,9 +222,44 @@ DataClean$bcolumbia_bin <- ifelse(clean$ses_region. == "British Columbia", 1, 0)
 DataClean$nova_scotia_bin <- ifelse(clean$ses_region. == "Nova Scotia", 1, 0)
 DataClean$ontario_bin <- ifelse(clean$ses_region. == "Ontario", 1, 0)
 DataClean$quebec_bin <- ifelse(clean$ses_region. == "Quebec", 1, 0)
+DataClean$newfound_lab_bin <- ifelse(clean$ses_region. == "Newfoundland and Labrador", 1, 0)
+DataClean$prince_edward_bin <- ifelse(clean$ses_region. == "Prince Edward Island", 1, 0)
 
 table(DataClean$alberta_bin)
 table(DataClean$quebec_bin)
+table(DataClean$prince_edward_bin)
+
+#AB, ON, QC, EC---------------------------------------------------------------------------------------------------------
+attributes(clean$ses_region.)
+table(clean$ses_region.)
+
+# Nettoyage catégoriel ses_region. -> 4 catégories
+
+clean$ses_region. <- trimws(as.character(clean$ses_region.))
+clean$ses_region.[clean$ses_region. == ""] <- NA
+
+main_regions <- c("Alberta", "Quebec", "Ontario")
+east_coast_regions <- c("New Brunswick", "Nova Scotia",
+                        "Newfoundland and Labrador", "Prince Edward Island")
+
+clean$ses_region_cat <- NA_character_
+
+mask_main <- clean$ses_region. %in% main_regions
+mask_east <- clean$ses_region. %in% east_coast_regions
+
+clean$ses_region_cat[mask_main] <- clean$ses_region.[mask_main]
+clean$ses_region_cat[mask_east] <- "East Coast"
+
+clean$ses_region_cat <- factor(clean$ses_region_cat,
+                               levels = c("Alberta","Quebec","Ontario","East Coast"))
+
+
+table(clean$ses_region., useNA="ifany")
+table(clean$ses_region_cat, useNA="ifany")
+
+DataClean$ses_region_cat <- clean$ses_region_cat
+
+table(DataClean$ses_region_cat)
 
 # What language do you speak most often at home?-------------------------------------------------------------------------
 attributes(clean$ses_language)
