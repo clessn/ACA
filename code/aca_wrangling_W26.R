@@ -259,7 +259,6 @@ table(clean$ses_region_cat, useNA="ifany")
 
 DataClean$ses_region_cat <- clean$ses_region_cat
 
-table(DataClean$ses_region_cat)
 
 # What language do you speak most often at home?-------------------------------------------------------------------------
 attributes(clean$ses_language)
@@ -344,22 +343,24 @@ table(DataClean$incomeMid_bin, useNA = "always")
 
 
 # What are the first three characters of your postal code?-----------------------------------------------------
-attributes(clean$ses_postal_code)
-table(clean$ses_postal_code)
-DataClean$ses_postalCode <- NA
-DataClean$ses_postalCode <- clean$ses_postal_code
-table(DataClean$ses_postalCode)
+#attributes(clean$ses_postal_code)
+#table(clean$ses_postal_code)
+#DataClean$ses_postalCode <- NA
+#DataClean$ses_postalCode <- clean$ses_postal_code
+#table(DataClean$ses_postalCode)
 
 # Do you live...----------------------------------------------------------------------
 attributes(clean$ses_children.)
-table(clean$ses_children.)
+table(clean$ses_children)
 
 # Nettoyage de la variable enfants
 DataClean$ses_children_char <- NA
-DataClean$ses_children_char[clean$ses_children. == "Alone with children"]        <- "alone_with_children"
-DataClean$ses_children_char[clean$ses_children. == "Alone without children"]     <- "alone_without_children"
-DataClean$ses_children_char[clean$ses_children. == "In couple with children"]    <- "in_couple_with_children"
-DataClean$ses_children_char[clean$ses_children. == "In couple without children"] <- "in_couple_without_children"
+DataClean$ses_children_char[clean$ses_children == "Alone with children"]        <- "alone_with_children"
+DataClean$ses_children_char[clean$ses_children == "Alone without children"]     <- "alone_without_children"
+DataClean$ses_children_char[clean$ses_children == "In couple with children"]    <- "in_couple_with_children"
+DataClean$ses_children_char[clean$ses_children == "In couple without children"] <- "in_couple_without_children"
+
+table(DataClean$ses_children_char)
 
 # Variable binaire : 1 = avec enfants, 0 = sans enfants
 DataClean$children_bin <- ifelse(DataClean$ses_children_char %in% c(
