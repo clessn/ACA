@@ -13,8 +13,9 @@ library(stringr)
 library(purrr)
 library(rlang)
 
+read_rds("/Users/shannondinan/Library/CloudStorage/Dropbox/_RESEARCH/_COLLABORATIONS/_GitHub/ACA/data/codebook_clean.rds")
 # -----------------------
-# Preliminary cleaning by Shannon to collpase prov var
+# Preliminary cleaning by Shannon to collapse prov var
 # -----------------------
 
 # clean <- read.csv("data/aca_ethics_W26.csv")
