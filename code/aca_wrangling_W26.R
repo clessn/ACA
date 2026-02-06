@@ -374,91 +374,146 @@ table(clean$ses_citizen_status)
 DataClean$ses_citizenYes_bin <- ifelse(clean$ses_citizen_status == "Yes", 1, 0)
 table(DataClean$ses_citizenYes_bin)
 
-#What best describes your current employment status?----------------------------------------------------------
-attributes(clean$ses_employ_status.)
-table(clean$ses_employ_status.)
+## What best describes your current employment status? ------------------------
 
-# Nettoyage de la variable de statut d'emploi
-DataClean$ses_employ_status_char <- NA
+attributes(clean$ses_employ_status)
+table(clean$ses_employ_status, useNA = "ifany")
 
-DataClean$ses_employ_status_char[clean$ses_employ_status. == "A caregiver or homemaker"] <- "caregiver_or_homemaker"
-DataClean$ses_employ_status_char[clean$ses_employ_status. == "A student attending school"] <- "student_attending_school"
-DataClean$ses_employ_status_char[clean$ses_employ_status. == "Not working due to illness/disability, or not looking for work"] <- "not_working_due_to_illness_disability_or_not_looking_for_work"
-DataClean$ses_employ_status_char[clean$ses_employ_status. == "Retired"] <- "retired"
-DataClean$ses_employ_status_char[clean$ses_employ_status. == "Seasonal work"] <- "seasonal_work"
-DataClean$ses_employ_status_char[clean$ses_employ_status. == "Self-employed"] <- "self_employed"
-DataClean$ses_employ_status_char[clean$ses_employ_status. == "Temporarily not working (e.g. parental leave, seasonal worker, in the process of changing jobs)"] <- "temporarily_not_working"
-DataClean$ses_employ_status_char[clean$ses_employ_status. == "Unemployed, and looking for work"] <- "unemployed"
-DataClean$ses_employ_status_char[clean$ses_employ_status. == "Working full-time (35 or more hours per week)"] <- "working_full_time"
-DataClean$ses_employ_status_char[clean$ses_employ_status. == "Working part-time (less than 35 hours per week)"] <- "working_part_time"
+DataClean$ses_employ_status <- NA
 
-# Variable binaire : 1 = employé à temps plein, 0 = tout le reste
-DataClean$employ_fulltime_bin <- ifelse(DataClean$ses_employ_status_char == "working_full_time", 1, 0)
+emp_std <- trimws(as.character(clean$ses_employ_status))
 
-# Vérification
+DataClean$ses_employ_status[emp_std == "A caregiver or homemaker"] <- "caregiver_or_homemaker"
+DataClean$ses_employ_status[emp_std == "A student attending school"] <- "student_attending_school"
+DataClean$ses_employ_status[emp_std == "Not working due to illness/disability, or not looking for work"] <- "not_working_due_to_illness_disability_or_not_looking_for_work"
+DataClean$ses_employ_status[emp_std == "Retired"] <- "retired"
+DataClean$ses_employ_status[emp_std == "Seasonal work"] <- "seasonal_work"
+DataClean$ses_employ_status[emp_std == "Self-employed"] <- "self_employed"
+DataClean$ses_employ_status[emp_std == "Temporarily not working (e.g. parental leave, seasonal worker, in the process of changing jobs)"] <- "temporarily_not_working"
+DataClean$ses_employ_status[emp_std == "Unemployed, and looking for work"] <- "unemployed"
+DataClean$ses_employ_status[emp_std == "Working full-time (35 or more hours per week)"] <- "working_full_time"
+DataClean$ses_employ_status[emp_std == "Working part-time (less than 35 hours per week)"] <- "working_part_time"
+
+# 4) Convertir en facteur (avec niveaux)
+DataClean$ses_employ_status <- factor(
+  DataClean$ses_employ_status,
+  levels = c(
+    "caregiver_or_homemaker",
+    "student_attending_school",
+    "not_working_due_to_illness_disability_or_not_looking_for_work",
+    "retired",
+    "seasonal_work",
+    "self_employed",
+    "temporarily_not_working",
+    "unemployed",
+    "working_full_time",
+    "working_part_time"
+  )
+)
+
+# 5) Vérifier
+table(DataClean$ses_employ_status, useNA = "ifany")
+
+# 6) Variable binaire
+DataClean$employ_fulltime_bin <- NA
+DataClean$employ_fulltime_bin[DataClean$ses_employ_status == "working_full_time"] <- 1
+DataClean$employ_fulltime_bin[DataClean$ses_employ_status != "working_full_time" &
+                                !is.na(DataClean$ses_employ_status)] <- 0
+
+# 7) Vérification
 table(DataClean$employ_fulltime_bin, useNA = "always")
 
+#-----------------------------------------------------------------------------------------------------------------------------
 #How many children do you have in each of the following age groups currently living with you in your household? - Ages 0 to 5--------------
-table(clean$ses_household_compo._1)
 
-# Nettoyage de la variable enfants 0-5 ans
-DataClean$ses_children05_char <- NA
-DataClean$ses_children05_char[clean$ses_household_compo._1 == 0] <- "0 enfant 0-5 ans"
-DataClean$ses_children05_char[clean$ses_household_compo._1 == 1] <- "1 enfant 0-5 ans"
-DataClean$ses_children05_char[clean$ses_household_compo._1 == 2] <- "2 enfants 0-5 ans"
-DataClean$ses_children05_char[clean$ses_household_compo._1 == 3] <- "3 enfants 0-5 ans"
+# 1)
+attributes(clean$ses_household_compo_1)
+table(clean$ses_household_compo_1, useNA = "ifany")
 
-# Variable binaire : 1 = au moins 1 enfant 0-5 ans, 0 = aucun
-DataClean$youngChildren <- ifelse(clean$ses_household_compo._1 > 0, 1, 0)
+# 2) Créer la variable clean
+DataClean$ses_children05 <- NA
 
-# Vérification
+# 3) Recoder (codes numériques -> labels)
+DataClean$ses_children05[clean$ses_household_compo_1 == 0] <- "0_child_0_5"
+DataClean$ses_children05[clean$ses_household_compo_1 == 1] <- "1_child_0_5"
+DataClean$ses_children05[clean$ses_household_compo_1 == 2] <- "2_children_0_5"
+DataClean$ses_children05[clean$ses_household_compo_1 == 3] <- "3_children_0_5"
+
+
+DataClean$ses_children05[clean$ses_household_compo_1 >= 4] <- "4plus_children_0_5"
+
+# 4) Factor + levels
+DataClean$ses_children05 <- factor(
+  DataClean$ses_children05,
+  levels = c("0_child_0_5",
+             "1_child_0_5",
+             "2_children_0_5",
+             "3_children_0_5",
+             "4plus_children_0_5")
+)
+
+# 5) Vérifier
+table(DataClean$ses_children05, useNA = "ifany")
+
+# 6) Binaire 
+DataClean$youngChildren <- NA
+DataClean$youngChildren[clean$ses_household_compo_1 == 0] <- 0
+DataClean$youngChildren[clean$ses_household_compo_1 > 0]  <- 1
+
+# 7) Vérification
 table(DataClean$youngChildren, useNA = "always")
 
 
 #How many children do you have in each of the following age groups currently living with you in your household? - Ages 6-12-----------------
-table(clean$ses_household_compo._2)
+table(clean$ses_household_compo_2)
 
 # Nettoyage de la variable enfants 6-12 ans
 DataClean$ses_children612_char <- NA
-DataClean$ses_children612_char[clean$ses_household_compo._2 == 0] <- "0 enfant 6-12 ans"
-DataClean$ses_children612_char[clean$ses_household_compo._2 == 1] <- "1 enfant 6-12 ans"
-DataClean$ses_children612_char[clean$ses_household_compo._2 == 2] <- "2 enfants 6-12 ans"
-DataClean$ses_children612_char[clean$ses_household_compo._2 == 3] <- "3 enfants 6-12 ans"
+DataClean$ses_children612_char[clean$ses_household_compo_2 == 0] <- "0 enfant 6-12 ans"
+DataClean$ses_children612_char[clean$ses_household_compo_2 == 1] <- "1 enfant 6-12 ans"
+DataClean$ses_children612_char[clean$ses_household_compo_2 == 2] <- "2 enfants 6-12 ans"
+DataClean$ses_children612_char[clean$ses_household_compo_2 == 3] <- "3 enfants 6-12 ans"
+
+table(DataClean$ses_children612_char)
 
 # Variable binaire : 1 = au moins 1 enfant 6-12 ans, 0 = aucun
-DataClean$dependentChildren <- ifelse(clean$ses_household_compo._2 > 0, 1, 0)
+DataClean$dependentChildren <- ifelse(clean$ses_household_compo_2 > 0, 1, 0)
 
 # Vérification
 table(DataClean$dependentChildren, useNA = "always")
 
 
 #How many children do you have in each of the following age groups currently living with you in your household? - Ages 13-17-----------------
-table(clean$ses_household_compo._3)
+table(clean$ses_household_compo_3)
 
 # Nettoyage de la variable enfants 13-17 ans
 DataClean$ses_children1317_char <- NA
-DataClean$ses_children1317_char[clean$ses_household_compo._3 == 0] <- "0 enfant 13-17 ans"
-DataClean$ses_children1317_char[clean$ses_household_compo._3 == 1] <- "1 enfant 13-17 ans"
-DataClean$ses_children1317_char[clean$ses_household_compo._3 == 2] <- "2 enfants 13-17 ans"
-DataClean$ses_children1317_char[clean$ses_household_compo._3 == 3] <- "3 enfants 13-17 ans"
-DataClean$ses_children1317_char[clean$ses_household_compo._3 == 4] <- "4 enfants 13-17 ans"
+DataClean$ses_children1317_char[clean$ses_household_compo_3 == 0] <- "0 enfant 13-17 ans"
+DataClean$ses_children1317_char[clean$ses_household_compo_3 == 1] <- "1 enfant 13-17 ans"
+DataClean$ses_children1317_char[clean$ses_household_compo_3 == 2] <- "2 enfants 13-17 ans"
+DataClean$ses_children1317_char[clean$ses_household_compo_3 == 3] <- "3 enfants 13-17 ans"
+DataClean$ses_children1317_char[clean$ses_household_compo_3 == 4] <- "4 enfants 13-17 ans"
+
+table(DataClean$ses_children1317_char)
 
 # Variable binaire : 1 = au moins 1 enfant 13-17 ans, 0 = aucun
-DataClean$teenChildren <- ifelse(clean$ses_household_compo._3 > 0, 1, 0)
+DataClean$teenChildren <- ifelse(clean$ses_household_compo_3 > 0, 1, 0)
 
 # Vérification
 table(DataClean$teenChildren, useNA = "always")
 
 
 #How many children do you have in each of the following age groups currently living with you in your household? - Ages 18+------------------
-table(clean$ses_household_compo._4)
+table(clean$ses_household_compo_4)
 
 DataClean$ses_children18_char <- NA
-DataClean$ses_children18_char[clean$ses_household_compo._4 == 0] <- "0 enfant 18+ ans"
-DataClean$ses_children18_char[clean$ses_household_compo._4 == 1] <- "1 enfant 18+ ans"
-DataClean$ses_children18_char[clean$ses_household_compo._4 == 2] <- "2 enfants 18+ ans"
-DataClean$ses_children18_char[clean$ses_household_compo._4 == 3] <- "3 enfants 18+ ans"
-DataClean$ses_children18_char[clean$ses_household_compo._4 == 4] <- "4 enfants 18+ ans"
+DataClean$ses_children18_char[clean$ses_household_compo_4 == 0] <- "0 enfant 18+ ans"
+DataClean$ses_children18_char[clean$ses_household_compo_4 == 1] <- "1 enfant 18+ ans"
+DataClean$ses_children18_char[clean$ses_household_compo_4 == 2] <- "2 enfants 18+ ans"
+DataClean$ses_children18_char[clean$ses_household_compo_4 == 3] <- "3 enfants 18+ ans"
+DataClean$ses_children18_char[clean$ses_household_compo_4 == 4] <- "4 enfants 18+ ans"
+table(DataClean$ses_children18_char)
+
 #binaires
 DataClean$ses_0children18_bin <- ifelse(DataClean$ses_children18_char == "0 enfant 18+ ans", 1, 0)
 DataClean$ses_1children18_bin <- ifelse(DataClean$ses_children18_char == "1 enfant 18+ ans", 1, 0)
@@ -473,34 +528,36 @@ table(DataClean$ses_3children18_bin)
 #In politics, people sometimes talk of left and right. - Where would you place yourself on this scale with 0 being entirely to the left and 10 being entirely to the right?
 table(clean$ideo_left_right_1)
 
-DataClean$ideo_right_num. <- NA
-DataClean$ideo_right_num.[clean$ideo_left_right_1 == 10] <- 1
-DataClean$ideo_right_num.[clean$ideo_left_right_1 == 9] <- 0.88
-DataClean$ideo_right_num.[clean$ideo_left_right_1 == 8] <- 0.77
-DataClean$ideo_right_num.[clean$ideo_left_right_1 == 7] <- 0.66
-DataClean$ideo_right_num.[clean$ideo_left_right_1 == 6] <- 0.55
-DataClean$ideo_right_num.[clean$ideo_left_right_1 == 5] <- 0.44
-DataClean$ideo_right_num.[clean$ideo_left_right_1 == 4] <- 0.33
-DataClean$ideo_right_num.[clean$ideo_left_right_1 == 3] <- 0.22
-DataClean$ideo_right_num.[clean$ideo_left_right_1 == 2] <- 0.11
-DataClean$ideo_right_num.[clean$ideo_left_right_1 == 1] <- 0
-table(DataClean$ideo_right_num.)
+DataClean$ideo_right_num <- NA
+DataClean$ideo_right_num[clean$ideo_left_right_1 == 10] <- 1
+DataClean$ideo_right_num[clean$ideo_left_right_1 == 9] <- 0.9
+DataClean$ideo_right_num[clean$ideo_left_right_1 == 8] <- 0.8
+DataClean$ideo_right_num[clean$ideo_left_right_1 == 7] <- 0.7
+DataClean$ideo_right_num[clean$ideo_left_right_1 == 6] <- 0.6
+DataClean$ideo_right_num[clean$ideo_left_right_1 == 5] <- 0.5
+DataClean$ideo_right_num[clean$ideo_left_right_1 == 4] <- 0.4
+DataClean$ideo_right_num[clean$ideo_left_right_1 == 3] <- 0.3
+DataClean$ideo_right_num[clean$ideo_left_right_1 == 2] <- 0.2
+DataClean$ideo_right_num[clean$ideo_left_right_1 == 1] <- 0.1
+DataClean$ideo_right_num[clean$ideo_left_right_1 == 0] <- 0
+
+table(DataClean$ideo_right_num)
 
 #How interested are you in politics generally? - Select a number from 0 to 10, where 0 means no interest at all, and 10 means a great deal of interest.
-table(clean$ideo_interest_1)
+table(clean$ideo_interest._1)
 
 DataClean$ideo_interest_politics_num <- NA
-DataClean$ideo_interest_politics_num[clean$ideo_interest_1 == 10] <- 1
-DataClean$ideo_interest_politics_num[clean$ideo_interest_1 == 9] <- 0.9
-DataClean$ideo_interest_politics_num[clean$ideo_interest_1 == 8] <- 0.8
-DataClean$ideo_interest_politics_num[clean$ideo_interest_1 == 7] <- 0.7
-DataClean$ideo_interest_politics_num[clean$ideo_interest_1 == 6] <- 0.6
-DataClean$ideo_interest_politics_num[clean$ideo_interest_1 == 5] <- 0.5
-DataClean$ideo_interest_politics_num[clean$ideo_interest_1 == 4] <- 0.4
-DataClean$ideo_interest_politics_num[clean$ideo_interest_1 == 3] <- 0.3
-DataClean$ideo_interest_politics_num[clean$ideo_interest_1 == 2] <- 0.2
-DataClean$ideo_interest_politics_num[clean$ideo_interest_1 == 1] <- 0.1
-DataClean$ideo_interest_politics_num[clean$ideo_interest_1 == 0] <- 0
+DataClean$ideo_interest_politics_num[clean$ideo_interest._1 == 10] <- 1
+DataClean$ideo_interest_politics_num[clean$ideo_interest._1 == 9] <- 0.9
+DataClean$ideo_interest_politics_num[clean$ideo_interest._1 == 8] <- 0.8
+DataClean$ideo_interest_politics_num[clean$ideo_interest._1 == 7] <- 0.7
+DataClean$ideo_interest_politics_num[clean$ideo_interest._1 == 6] <- 0.6
+DataClean$ideo_interest_politics_num[clean$ideo_interest._1 == 5] <- 0.5
+DataClean$ideo_interest_politics_num[clean$ideo_interest._1 == 4] <- 0.4
+DataClean$ideo_interest_politics_num[clean$ideo_interest._1 == 3] <- 0.3
+DataClean$ideo_interest_politics_num[clean$ideo_interest._1 == 2] <- 0.2
+DataClean$ideo_interest_politics_num[clean$ideo_interest._1 == 1] <- 0.1
+DataClean$ideo_interest_politics_num[clean$ideo_interest._1 == 0] <- 0
 table(DataClean$ideo_interest_politics_num)
 
 #People have different ways of defining themselves. What do you consider yourself?
@@ -519,42 +576,66 @@ DataClean$ideo_define_num[clean$ideo_define_clean == "First Quebecer, second Can
 DataClean$ideo_define_num[clean$ideo_define_clean == "Solely as Quebecer"] <- 0
 table(DataClean$ideo_define_num)
 
-#NE FONCTIONNE PAS ENCORE
-table(data$ideo_define_AL)
-table(data$ideo_define_NB.)
-table(data$ideo_define_NL)
-table(data$ideo_define_NS)
-table(data$ideo_define_ON)
-table(data$ideo_define_PE)
-table(data$ideo_define_QC)
+#binaire
 
-# ALBERTA
-data$ideo_define_AL_bin <- ifelse(data$ideo_define_AL == "First Albertan, second Canadian", 1, 0)
 
-# NEW BRUNSWICK
-data$ideo_define_NB_bin <- ifelse(data$ideo_define_NB. == "First New Brunswicker, second Canadian", 1, 0)
+# 1) 
+table(clean$ideo_define_clean, useNA = "ifany")
 
-# NEWFOUNDLAND AND LABRADOR
-data$ideo_define_NL_bin <- 0  # Aucun répondant n’a cette réponse, donc tout est codé à 0
+# 2) QUEBEC
+DataClean$ideo_define_QC_first_bin <- NA
+DataClean$ideo_define_QC_first_bin[clean$ideo_define_clean == "First Quebecer, second Canadian"] <- 1
+DataClean$ideo_define_QC_first_bin[clean$ideo_define_clean != "First Quebecer, second Canadian" &
+                                     !is.na(clean$ideo_define_clean)] <- 0
+table(DataClean$ideo_define_QC_first_bin, useNA = "always")
 
-# NOVA SCOTIA
-data$ideo_define_NS_bin <- ifelse(data$ideo_define_NS == "First Nova Scotian, second Canadian", 1, 0)
+# 3) ONTARIO
+DataClean$ideo_define_ON_first_bin <- NA
+DataClean$ideo_define_ON_first_bin[clean$ideo_define_clean == "First Ontarian, second Canadian"] <- 1
+DataClean$ideo_define_ON_first_bin[clean$ideo_define_clean != "First Ontarian, second Canadian" &
+                                     !is.na(clean$ideo_define_clean)] <- 0
+table(DataClean$ideo_define_ON_first_bin, useNA = "always")
 
-# ONTARIO
-data$ideo_define_ON_bin <- ifelse(data$ideo_define_ON == "First Canadian, second Ontarian", 0,
-                                  ifelse(data$ideo_define_ON == "Solely as Canadian", 0, 0))  # Pas de "First Ontarian", donc 0
+# 4) ALBERTA
+DataClean$ideo_define_AL_first_bin <- NA
+DataClean$ideo_define_AL_first_bin[clean$ideo_define_clean == "First Albertan, second Canadian"] <- 1
+DataClean$ideo_define_AL_first_bin[clean$ideo_define_clean != "First Albertan, second Canadian" &
+                                     !is.na(clean$ideo_define_clean)] <- 0
+table(DataClean$ideo_define_AL_first_bin, useNA = "always")
 
-# PRINCE EDWARD ISLAND
-data$ideo_define_PE_bin <- 0  # Aucun répondant n’a cette réponse, donc 0
+# 5) NEW BRUNSWICK
+DataClean$ideo_define_NB_first_bin <- NA
+DataClean$ideo_define_NB_first_bin[clean$ideo_define_clean == "First New Brunswicker, second Canadian"] <- 1
+DataClean$ideo_define_NB_first_bin[clean$ideo_define_clean != "First New Brunswicker, second Canadian" &
+                                     !is.na(clean$ideo_define_clean)] <- 0
+table(DataClean$ideo_define_NB_first_bin, useNA = "always")
 
-# QUEBEC
-data$ideo_define_QC_bin <- ifelse(data$ideo_define_QC == "First Quebecer, second Canadian", 1, 0)
+# 6) NOVA SCOTIA
+DataClean$ideo_define_NS_first_bin <- NA
+DataClean$ideo_define_NS_first_bin[clean$ideo_define_clean == "First Nova Scotian, second Canadian"] <- 1
+DataClean$ideo_define_NS_first_bin[clean$ideo_define_clean != "First Nova Scotian, second Canadian" &
+                                     !is.na(clean$ideo_define_clean)] <- 0
+table(DataClean$ideo_define_NS_first_bin, useNA = "always")
 
-table(data$ideo_define_QC_bin)
+# 7) NEWFOUNDLAND AND LABRADOR
+DataClean$ideo_define_NL_first_bin <- NA
+DataClean$ideo_define_NL_first_bin[clean$ideo_define_clean == "First Newfoundlander, second Canadian"] <- 1
+DataClean$ideo_define_NL_first_bin[clean$ideo_define_clean != "First Newfoundlander, second Canadian" &
+                                     !is.na(clean$ideo_define_clean)] <- 0
+table(DataClean$ideo_define_NL_first_bin, useNA = "always")
+
+# 8) PRINCE EDWARD ISLAND
+DataClean$ideo_define_PE_first_bin <- NA
+DataClean$ideo_define_PE_first_bin[clean$ideo_define_clean == "First Prince Edward Islander, second Canadian"] <- 1
+DataClean$ideo_define_PE_first_bin[clean$ideo_define_clean != "First Prince Edward Islander, second Canadian" &
+                                     !is.na(clean$ideo_define_clean)] <- 0
+table(DataClean$ideo_define_PE_first_bin, useNA = "always")
 
 
 #############################################################################################################
-DataClean <- read.csv("data/aca_wrangled_W26.csv")
+#DataClean <- read.csv("data/aca_wrangled_W26.csv")
+
+
 
 #Now we would like to ask you about public finance questions. Please remember to read closely and pay attention. You will be asked questions to check your memory and comprehension. Please arrange the following policy issues by order of importance - Health
 table(clean$budget_issue_imp_1)
@@ -655,13 +736,13 @@ table(DataClean$budget_debt_priority_bin, useNA = "always")
 #Imagine the government has the means to increase spending in some areas, but not all. Among the following policy areas, which are most important to you? You can allocate 100 points. Give more points to the areas you consider to be most important and less to those you consider to be less important. The government should: - increase access to healthcare
 ##healthcare
 
-attributes(clean$budget_spend_prio._6)
-class(clean$budget_spend_prio._6)
-table(clean$budget_spend_prio._6, useNA = "always")
+attributes(clean$budget_spend_prio_6)
+class(clean$budget_spend_prio_6)
+table(clean$budget_spend_prio_6, useNA = "always")
 
 clean <- clean %>%
   mutate(
-    budget_spend_prio_health_num = as.numeric(budget_spend_prio._6),
+    budget_spend_prio_health_num = as.numeric(budget_spend_prio_6),
     budget_spend_prio_health_raw = budget_spend_prio_health_num / 100,
     budget_spend_prio_health_norm = case_when(
       is.na(budget_spend_prio_health_raw) ~ NA_real_,
