@@ -331,15 +331,34 @@ DataClean$ses_income3Cat[DataClean$ses_income_char %in% c(
   "more_than_200000"
 )] <- "High"  # Référence
 
-# Création des variables binaires avec High comme référence
-DataClean$incomeLow_bin <- ifelse(DataClean$ses_income3Cat == "Low", 1, 0)
-DataClean$incomeMid_bin <- ifelse(DataClean$ses_income3Cat == "Mid", 1, 0)
-# Pas de variable pour "High" → référence implicite
+## Vérifier
+table(DataClean$ses_income3Cat, useNA = "ifany")
+
+# Low
+DataClean$incomeLow_bin <- NA
+DataClean$incomeLow_bin[DataClean$ses_income3Cat == "Low"] <- 1
+DataClean$incomeLow_bin[DataClean$ses_income3Cat != "Low" & !is.na(DataClean$ses_income3Cat)] <- 0
+table(DataClean$incomeLow_bin, useNA = "always")
+
+# Mid
+DataClean$incomeMid_bin <- NA
+DataClean$incomeMid_bin[DataClean$ses_income3Cat == "Mid"] <- 1
+DataClean$incomeMid_bin[DataClean$ses_income3Cat != "Mid" & !is.na(DataClean$ses_income3Cat)] <- 0
+table(DataClean$incomeMid_bin, useNA = "always")
+
+# High
+DataClean$incomeHigh_bin <- NA
+DataClean$incomeHigh_bin[DataClean$ses_income3Cat == "High"] <- 1
+DataClean$incomeHigh_bin[DataClean$ses_income3Cat != "High" & !is.na(DataClean$ses_income3Cat)] <- 0
+table(DataClean$incomeHigh_bin, useNA = "always")
+
 
 # Vérification
 table(DataClean$ses_income3Cat, useNA = "always")
 table(DataClean$incomeLow_bin, useNA = "always")
 table(DataClean$incomeMid_bin, useNA = "always")
+table(DataClean$incomeHigh_bin, useNA = "always")
+
 
 
 # What are the first three characters of your postal code?-----------------------------------------------------
@@ -423,6 +442,75 @@ DataClean$employ_fulltime_bin[DataClean$ses_employ_status != "working_full_time"
 # 7) Vérification
 table(DataClean$employ_fulltime_bin, useNA = "always")
 
+#  Binaires pour CHAQUE catégorie 
+
+# caregiver_or_homemaker
+DataClean$employ_caregiver_bin <- NA
+DataClean$employ_caregiver_bin[DataClean$ses_employ_status == "caregiver_or_homemaker"] <- 1
+DataClean$employ_caregiver_bin[DataClean$ses_employ_status != "caregiver_or_homemaker" &
+                                 !is.na(DataClean$ses_employ_status)] <- 0
+table(DataClean$employ_caregiver_bin, useNA = "always")
+
+# student_attending_school
+DataClean$employ_student_bin <- NA
+DataClean$employ_student_bin[DataClean$ses_employ_status == "student_attending_school"] <- 1
+DataClean$employ_student_bin[DataClean$ses_employ_status != "student_attending_school" &
+                               !is.na(DataClean$ses_employ_status)] <- 0
+table(DataClean$employ_student_bin, useNA = "always")
+
+# not_working_due_to_illness_disability_or_not_looking_for_work
+DataClean$employ_notworking_health_bin <- NA
+DataClean$employ_notworking_health_bin[
+  DataClean$ses_employ_status == "not_working_due_to_illness_disability_or_not_looking_for_work"
+] <- 1
+DataClean$employ_notworking_health_bin[
+  DataClean$ses_employ_status != "not_working_due_to_illness_disability_or_not_looking_for_work" &
+    !is.na(DataClean$ses_employ_status)
+] <- 0
+table(DataClean$employ_notworking_health_bin, useNA = "always")
+
+# retired  
+DataClean$employ_retired_bin <- NA
+DataClean$employ_retired_bin[DataClean$ses_employ_status == "retired"] <- 1
+DataClean$employ_retired_bin[DataClean$ses_employ_status != "retired" &
+                               !is.na(DataClean$ses_employ_status)] <- 0
+table(DataClean$employ_retired_bin, useNA = "always")
+
+# seasonal_work
+DataClean$employ_seasonal_bin <- NA
+DataClean$employ_seasonal_bin[DataClean$ses_employ_status == "seasonal_work"] <- 1
+DataClean$employ_seasonal_bin[DataClean$ses_employ_status != "seasonal_work" &
+                                !is.na(DataClean$ses_employ_status)] <- 0
+table(DataClean$employ_seasonal_bin, useNA = "always")
+
+# self_employed
+DataClean$employ_selfemployed_bin <- NA
+DataClean$employ_selfemployed_bin[DataClean$ses_employ_status == "self_employed"] <- 1
+DataClean$employ_selfemployed_bin[DataClean$ses_employ_status != "self_employed" &
+                                    !is.na(DataClean$ses_employ_status)] <- 0
+table(DataClean$employ_selfemployed_bin, useNA = "always")
+
+# temporarily_not_working
+DataClean$employ_tempnotworking_bin <- NA
+DataClean$employ_tempnotworking_bin[DataClean$ses_employ_status == "temporarily_not_working"] <- 1
+DataClean$employ_tempnotworking_bin[DataClean$ses_employ_status != "temporarily_not_working" &
+                                      !is.na(DataClean$ses_employ_status)] <- 0
+table(DataClean$employ_tempnotworking_bin, useNA = "always")
+
+# unemployed
+DataClean$employ_unemployed_bin <- NA
+DataClean$employ_unemployed_bin[DataClean$ses_employ_status == "unemployed"] <- 1
+DataClean$employ_unemployed_bin[DataClean$ses_employ_status != "unemployed" &
+                                  !is.na(DataClean$ses_employ_status)] <- 0
+table(DataClean$employ_unemployed_bin, useNA = "always")
+
+# working_part_time
+DataClean$employ_parttime_bin <- NA
+DataClean$employ_parttime_bin[DataClean$ses_employ_status == "working_part_time"] <- 1
+DataClean$employ_parttime_bin[DataClean$ses_employ_status != "working_part_time" &
+                                !is.na(DataClean$ses_employ_status)] <- 0
+table(DataClean$employ_parttime_bin, useNA = "always")
+
 #-----------------------------------------------------------------------------------------------------------------------------
 #How many children do you have in each of the following age groups currently living with you in your household? - Ages 0 to 5--------------
 
@@ -456,12 +544,12 @@ DataClean$ses_children05 <- factor(
 table(DataClean$ses_children05, useNA = "ifany")
 
 # 6) Binaire 
-DataClean$youngChildren <- NA
-DataClean$youngChildren[clean$ses_household_compo_1 == 0] <- 0
-DataClean$youngChildren[clean$ses_household_compo_1 > 0]  <- 1
+DataClean$children_preschool_bin <- NA
+DataClean$children_preschool_bin[clean$ses_household_compo_1 == 0] <- 0
+DataClean$children_preschool_bin[clean$ses_household_compo_1 > 0]  <- 1
 
 # 7) Vérification
-table(DataClean$youngChildren, useNA = "always")
+table(DataClean$children_preschool_bin, useNA = "always")
 
 
 #How many children do you have in each of the following age groups currently living with you in your household? - Ages 6-12-----------------
@@ -477,10 +565,10 @@ DataClean$ses_children612_char[clean$ses_household_compo_2 == 3] <- "3 enfants 6
 table(DataClean$ses_children612_char)
 
 # Variable binaire : 1 = au moins 1 enfant 6-12 ans, 0 = aucun
-DataClean$dependentChildren <- ifelse(clean$ses_household_compo_2 > 0, 1, 0)
+DataClean$children_elementary_bin <- ifelse(clean$ses_household_compo_2 > 0, 1, 0)
 
 # Vérification
-table(DataClean$dependentChildren, useNA = "always")
+table(DataClean$children_elementary_bin, useNA = "always")
 
 
 #How many children do you have in each of the following age groups currently living with you in your household? - Ages 13-17-----------------
@@ -497,33 +585,32 @@ DataClean$ses_children1317_char[clean$ses_household_compo_3 == 4] <- "4 enfants 
 table(DataClean$ses_children1317_char)
 
 # Variable binaire : 1 = au moins 1 enfant 13-17 ans, 0 = aucun
-DataClean$teenChildren <- ifelse(clean$ses_household_compo_3 > 0, 1, 0)
+DataClean$children_teen_bin <- ifelse(clean$ses_household_compo_3 > 0, 1, 0)
 
 # Vérification
-table(DataClean$teenChildren, useNA = "always")
+table(DataClean$children_teen_bin, useNA = "always")
 
 
 #How many children do you have in each of the following age groups currently living with you in your household? - Ages 18+------------------
 table(clean$ses_household_compo_4)
 
+
+# 2) Variable label (comme tu l'as déjà)
 DataClean$ses_children18_char <- NA
 DataClean$ses_children18_char[clean$ses_household_compo_4 == 0] <- "0 enfant 18+ ans"
 DataClean$ses_children18_char[clean$ses_household_compo_4 == 1] <- "1 enfant 18+ ans"
 DataClean$ses_children18_char[clean$ses_household_compo_4 == 2] <- "2 enfants 18+ ans"
 DataClean$ses_children18_char[clean$ses_household_compo_4 == 3] <- "3 enfants 18+ ans"
 DataClean$ses_children18_char[clean$ses_household_compo_4 == 4] <- "4 enfants 18+ ans"
-table(DataClean$ses_children18_char)
+DataClean$ses_children18_char[clean$ses_household_compo_4 >= 5] <- "5+ enfants 18+ ans"
+table(DataClean$ses_children18_char, useNA = "ifany")
 
-#binaires
-DataClean$ses_0children18_bin <- ifelse(DataClean$ses_children18_char == "0 enfant 18+ ans", 1, 0)
-DataClean$ses_1children18_bin <- ifelse(DataClean$ses_children18_char == "1 enfant 18+ ans", 1, 0)
-DataClean$ses_2children18_bin <- ifelse(DataClean$ses_children18_char == "2 enfants 18+ ans", 1, 0)
-DataClean$ses_3children18_bin <- ifelse(DataClean$ses_children18_char == "3 enfants 18+ ans", 1, 0)
-DataClean$ses_4children18_bin <- ifelse(DataClean$ses_children18_char == "4 enfants 18+ ans", 1, 0)
+# 3) Binaire 
+DataClean$children18plus_bin <- NA
+DataClean$children18plus_bin[clean$ses_household_compo_4 == 0] <- 0
+DataClean$children18plus_bin[clean$ses_household_compo_4 > 0]  <- 1
+table(DataClean$children18plus_bin, useNA = "always")
 
-
-# Vérification
-table(DataClean$ses_3children18_bin)
 
 #In politics, people sometimes talk of left and right. - Where would you place yourself on this scale with 0 being entirely to the left and 10 being entirely to the right?
 table(clean$ideo_left_right_1)
@@ -576,8 +663,7 @@ DataClean$ideo_define_num[clean$ideo_define_clean == "First Quebecer, second Can
 DataClean$ideo_define_num[clean$ideo_define_clean == "Solely as Quebecer"] <- 0
 table(DataClean$ideo_define_num)
 
-#binaire
-
+#binaire province
 
 # 1) 
 table(clean$ideo_define_clean, useNA = "ifany")
@@ -631,6 +717,59 @@ DataClean$ideo_define_PE_first_bin[clean$ideo_define_clean != "First Prince Edwa
                                      !is.na(clean$ideo_define_clean)] <- 0
 table(DataClean$ideo_define_PE_first_bin, useNA = "always")
 
+#binaire canada
+
+# 1) Vérifier les modalités
+table(clean$ideo_define_clean, useNA = "ifany")
+
+# 2) ALBERTA — First Canadian, second Albertan
+DataClean$ideo_define_canAL_bin <- NA
+DataClean$ideo_define_canAL_bin[clean$ideo_define_clean == "First Canadian, second Albertan"] <- 1
+DataClean$ideo_define_canAL_bin[clean$ideo_define_clean != "First Canadian, second Albertan" &
+                                  !is.na(clean$ideo_define_clean)] <- 0
+table(DataClean$ideo_define_canAL_bin, useNA = "always")
+
+# 3) NEW BRUNSWICK — First Canadian, second New Brunswicker
+DataClean$ideo_define_canNB_bin <- NA
+DataClean$ideo_define_canNB_bin[clean$ideo_define_clean == "First Canadian, second New Brunswicker"] <- 1
+DataClean$ideo_define_canNB_bin[clean$ideo_define_clean != "First Canadian, second New Brunswicker" &
+                                  !is.na(clean$ideo_define_clean)] <- 0
+table(DataClean$ideo_define_canNB_bin, useNA = "always")
+
+# 4) NEWFOUNDLAND & LABRADOR — First Canadian, second Newfoundlander and/or Labradorian
+DataClean$ideo_define_canNL_bin <- NA
+DataClean$ideo_define_canNL_bin[clean$ideo_define_clean == "First Canadian, second Newfoundlander and/or Labradorian"] <- 1
+DataClean$ideo_define_canNL_bin[clean$ideo_define_clean != "First Canadian, second Newfoundlander and/or Labradorian" &
+                                  !is.na(clean$ideo_define_clean)] <- 0
+table(DataClean$ideo_define_canNL_bin, useNA = "always")
+
+# 5) NOVA SCOTIA — First Canadian, second Nova Scotian
+DataClean$ideo_define_canNS_bin <- NA
+DataClean$ideo_define_canNS_bin[clean$ideo_define_clean == "First Canadian, second Nova Scotian"] <- 1
+DataClean$ideo_define_canNS_bin[clean$ideo_define_clean != "First Canadian, second Nova Scotian" &
+                                  !is.na(clean$ideo_define_clean)] <- 0
+table(DataClean$ideo_define_canNS_bin, useNA = "always")
+
+# 6) ONTARIO — First Canadian, second Ontarian
+DataClean$ideo_define_canON_bin <- NA
+DataClean$ideo_define_canON_bin[clean$ideo_define_clean == "First Canadian, second Ontarian"] <- 1
+DataClean$ideo_define_canON_bin[clean$ideo_define_clean != "First Canadian, second Ontarian" &
+                                  !is.na(clean$ideo_define_clean)] <- 0
+table(DataClean$ideo_define_canON_bin, useNA = "always")
+
+# 7) PRINCE EDWARD ISLAND — First Canadian, second Prince Edward Islander
+DataClean$ideo_define_canPE_bin <- NA
+DataClean$ideo_define_canPE_bin[clean$ideo_define_clean == "First Canadian, second Prince Edward Islander"] <- 1
+DataClean$ideo_define_canPE_bin[clean$ideo_define_clean != "First Canadian, second Prince Edward Islander" &
+                                  !is.na(clean$ideo_define_clean)] <- 0
+table(DataClean$ideo_define_canPE_bin, useNA = "always")
+
+# 8) QUEBEC — First Canadian, second Quebecer
+DataClean$ideo_define_canQC_bin <- NA
+DataClean$ideo_define_canQC_bin[clean$ideo_define_clean == "First Canadian, second Quebecer"] <- 1
+DataClean$ideo_define_canQC_bin[clean$ideo_define_clean != "First Canadian, second Quebecer" &
+                                  !is.na(clean$ideo_define_clean)] <- 0
+table(DataClean$ideo_define_canQC_bin, useNA = "always")
 
 #############################################################################################################
 #DataClean <- read.csv("data/aca_wrangled_W26.csv")
@@ -764,15 +903,17 @@ DataClean$budget_spend_prio_health_bin <- ifelse(
   DataClean$budget_spend_prio_health_norm %in% c(0.75, 1), 1, 0
 )
 
+table(DataClean$budget_spend_prio_health_bin)
+
 #Imagine the government has the means to increase spending in some areas, but not all. Among the following policy areas, which are most important to you? You can allocate 100 points. Give more points to the areas you consider to be most important and less to those you consider to be less important. The government should: - increase home care for seniors
 ##seniors
-attributes(clean$budget_spend_prio._7)
-class(clean$budget_spend_prio._7)
-table(clean$budget_spend_prio._7, useNA = "always")
+attributes(clean$budget_spend_prio_7)
+class(clean$budget_spend_prio_7)
+table(clean$budget_spend_prio_7, useNA = "always")
 
 clean <- clean %>%
   mutate(
-    budget_spend_prio_seniors_num = as.numeric(budget_spend_prio._7),
+    budget_spend_prio_seniors_num = as.numeric(budget_spend_prio_7),
     budget_spend_prio_seniors_raw = budget_spend_prio_seniors_num / 100,
     budget_spend_prio_seniors_norm = case_when(
       is.na(budget_spend_prio_seniors_raw) ~ NA_real_,
@@ -793,17 +934,19 @@ table(DataClean$budget_spend_prio_seniors_norm, useNA = "always")
 DataClean$budget_spend_prio_seniors_bin <- ifelse(
   DataClean$budget_spend_prio_seniors_norm %in% c(0.75, 1), 1, 0
 )
+table(DataClean$budget_spend_prio_seniors_bin)
+
 
 #Imagine the government has the means to increase spending in some areas, but not all. Among the following policy areas, which are most important to you? You can allocate 100 points. Give more points to the areas you consider to be most important and less to those you consider to be less important. The government should: - increase the availability of subsidized childcare
 #childcare
 
-attributes(clean$budget_spend_prio._8)
-class(clean$budget_spend_prio._8)
-table(clean$budget_spend_prio._8, useNA = "always")
+attributes(clean$budget_spend_prio_8)
+class(clean$budget_spend_prio_8)
+table(clean$budget_spend_prio_8, useNA = "always")
 
 clean <- clean %>%
   mutate(
-    budget_spend_prio_childcare_num = as.numeric(budget_spend_prio._8),
+    budget_spend_prio_childcare_num = as.numeric(budget_spend_prio_8),
     budget_spend_prio_childcare_raw = budget_spend_prio_childcare_num / 100,
     budget_spend_prio_childcare_norm = case_when(
       is.na(budget_spend_prio_childcare_raw) ~ NA_real_,
@@ -824,17 +967,20 @@ table(DataClean$budget_spend_prio_childcare_norm, useNA = "always")
 DataClean$budget_spend_prio_childcare_bin <- ifelse(
   DataClean$budget_spend_prio_childcare_norm %in% c(0.75, 1), 1, 0
 )
+table(DataClean$budget_spend_prio_childcare_bin)
+
+table(DataClean$budget_spend_prio_childcare_norm)
 
 #Imagine the government has the means to increase spending in some areas, but not all. Among the following policy areas, which are most important to you? You can allocate 100 points. Give more points to the areas you consider to be most important and less to those you consider to be less important. The government should: - improve the cost of living
 ##cost of living
 
-attributes(clean$budget_spend_prio._9)
-class(clean$budget_spend_prio._9)
-table(clean$budget_spend_prio._9, useNA = "always")
+attributes(clean$budget_spend_prio_9)
+class(clean$budget_spend_prio_9)
+table(clean$budget_spend_prio_9, useNA = "always")
 
 clean <- clean %>%
   mutate(
-    budget_spend_prio_costLiving_num = as.numeric(budget_spend_prio._9),
+    budget_spend_prio_costLiving_num = as.numeric(budget_spend_prio_9),
     budget_spend_prio_costLiving_raw = budget_spend_prio_costLiving_num / 100,
     budget_spend_prio_costLiving_norm = case_when(
       is.na(budget_spend_prio_costLiving_raw) ~ NA_real_,
@@ -856,36 +1002,40 @@ DataClean$budget_spend_prio_costLiving_bin <- ifelse(
   DataClean$budget_spend_prio_costLiving_norm %in% c(0.75, 1), 1, 0
 )
 
+table(DataClean$budget_spend_prio_costLiving_bin)
+
 #Imagine the government has the means to increase spending in some areas, but not all. Among the following policy areas, which are most important to you? You can allocate 100 points. Give more points to the areas you consider to be most important and less to those you consider to be less important. The government should: - invest in the fight against climate change
 ##climate change
 
-attributes(clean$budget_spend_prio._10)
-class(clean$budget_spend_prio._10)
-table(clean$budget_spend_prio._10, useNA = "always")
+attributes(clean$budget_spend_prio_10)
+class(clean$budget_spend_prio_10)
+table(clean$budget_spend_prio_10, useNA = "always")
 
 clean <- clean %>%
   mutate(
-    budget_spend_prio_climateChange_num = as.numeric(budget_spend_prio._10),
-    budget_spend_prio_climateChange_raw = budget_spend_prio_climateChange_num / 100,
-    budget_spend_prio_climateChange_norm = case_when(
-      is.na(budget_spend_prio_climateChange_raw) ~ NA_real_,
-      budget_spend_prio_climateChange_raw <= 0.125 ~ 0.00,
-      budget_spend_prio_climateChange_raw <= 0.375 ~ 0.25,
-      budget_spend_prio_climateChange_raw <= 0.625 ~ 0.50,
-      budget_spend_prio_climateChange_raw <= 0.875 ~ 0.75,
+    budget_spend_prio_clim_num = as.numeric(budget_spend_prio_10),
+    budget_spend_prio_clim_raw = budget_spend_prio_clim_num / 100,
+    budget_spend_prio_clim_norm = case_when(
+      is.na(budget_spend_prio_clim_raw) ~ NA_real_,
+      budget_spend_prio_clim_raw <= 0.125 ~ 0.00,
+      budget_spend_prio_clim_raw <= 0.375 ~ 0.25,
+      budget_spend_prio_clim_raw <= 0.625 ~ 0.50,
+      budget_spend_prio_clim_raw <= 0.875 ~ 0.75,
       TRUE ~ 1.00
     )
   )
 
-DataClean$budget_spend_prio_climateChange_norm <- clean$budget_spend_prio_climateChange_norm
+DataClean$budget_spend_prio_clim_norm <- clean$budget_spend_prio_clim_norm
 
 
-table(DataClean$budget_spend_prio_climateChange_norm, useNA = "always")
+table(DataClean$budget_spend_prio_clim_norm, useNA = "always")
 
 # Création de la variable binaire : 1 = priorité forte à la dette (0.75 ou 1), 0 = le reste
-DataClean$budget_spend_prio_climateChange_bin <- ifelse(
-  DataClean$budget_spend_prio_climateChange_norm %in% c(0.75, 1), 1, 0
+DataClean$budget_spend_prio_clim_bin <- ifelse(
+  DataClean$budget_spend_prio_clim_norm %in% c(0.75, 1), 1, 0
 )
+
+table(DataClean$budget_spend_prio_clim_bin)
 
 #To what extent do you agree with the following statement: The government should increase spending on childcare.
 table(clean$tradeoff_invest_cc0)
