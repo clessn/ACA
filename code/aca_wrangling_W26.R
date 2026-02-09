@@ -946,30 +946,30 @@ table(clean$budget_spend_prio_8, useNA = "always")
 
 clean <- clean %>%
   mutate(
-    budget_spend_prio_childcare_num = as.numeric(budget_spend_prio_8),
-    budget_spend_prio_childcare_raw = budget_spend_prio_childcare_num / 100,
-    budget_spend_prio_childcare_norm = case_when(
-      is.na(budget_spend_prio_childcare_raw) ~ NA_real_,
-      budget_spend_prio_childcare_raw <= 0.125 ~ 0.00,
-      budget_spend_prio_childcare_raw <= 0.375 ~ 0.25,
-      budget_spend_prio_childcare_raw <= 0.625 ~ 0.50,
-      budget_spend_prio_childcare_raw <= 0.875 ~ 0.75,
+    budget_spend_prio_cc_num = as.numeric(budget_spend_prio_8),
+    budget_spend_prio_cc_raw = budget_spend_prio_cc_num / 100,
+    budget_spend_prio_cc_norm = case_when(
+      is.na(budget_spend_prio_cc_raw) ~ NA_real_,
+      budget_spend_prio_cc_raw <= 0.125 ~ 0.00,
+      budget_spend_prio_cc_raw <= 0.375 ~ 0.25,
+      budget_spend_prio_cc_raw <= 0.625 ~ 0.50,
+      budget_spend_prio_cc_raw <= 0.875 ~ 0.75,
       TRUE ~ 1.00
     )
   )
 
-DataClean$budget_spend_prio_childcare_norm <- clean$budget_spend_prio_childcare_norm
+DataClean$budget_spend_prio_cc_norm <- clean$budget_spend_prio_cc_norm
 
 
-table(DataClean$budget_spend_prio_childcare_norm, useNA = "always")
+table(DataClean$budget_spend_prio_cc_norm, useNA = "always")
 
 # Création de la variable binaire : 1 = priorité forte à la dette (0.75 ou 1), 0 = le reste
-DataClean$budget_spend_prio_childcare_bin <- ifelse(
-  DataClean$budget_spend_prio_childcare_norm %in% c(0.75, 1), 1, 0
+DataClean$budget_spend_prio_cc_bin <- ifelse(
+  DataClean$budget_spend_prio_cc_norm %in% c(0.75, 1), 1, 0
 )
-table(DataClean$budget_spend_prio_childcare_bin)
+table(DataClean$budget_spend_prio_cc_bin)
 
-table(DataClean$budget_spend_prio_childcare_norm)
+table(DataClean$budget_spend_prio_cc_norm)
 
 #Imagine the government has the means to increase spending in some areas, but not all. Among the following policy areas, which are most important to you? You can allocate 100 points. Give more points to the areas you consider to be most important and less to those you consider to be less important. The government should: - improve the cost of living
 ##cost of living
@@ -980,29 +980,29 @@ table(clean$budget_spend_prio_9, useNA = "always")
 
 clean <- clean %>%
   mutate(
-    budget_spend_prio_costLiving_num = as.numeric(budget_spend_prio_9),
-    budget_spend_prio_costLiving_raw = budget_spend_prio_costLiving_num / 100,
-    budget_spend_prio_costLiving_norm = case_when(
-      is.na(budget_spend_prio_costLiving_raw) ~ NA_real_,
-      budget_spend_prio_costLiving_raw <= 0.125 ~ 0.00,
-      budget_spend_prio_costLiving_raw <= 0.375 ~ 0.25,
-      budget_spend_prio_costLiving_raw <= 0.625 ~ 0.50,
-      budget_spend_prio_costLiving_raw <= 0.875 ~ 0.75,
+    budget_spend_prio_ecn_num = as.numeric(budget_spend_prio_9),
+    budget_spend_prio_ecn_raw = budget_spend_prio_ecn_num / 100,
+    budget_spend_prio_ecn_norm = case_when(
+      is.na(budget_spend_prio_ecn_raw) ~ NA_real_,
+      budget_spend_prio_ecn_raw <= 0.125 ~ 0.00,
+      budget_spend_prio_ecn_raw <= 0.375 ~ 0.25,
+      budget_spend_prio_ecn_raw <= 0.625 ~ 0.50,
+      budget_spend_prio_ecn_raw <= 0.875 ~ 0.75,
       TRUE ~ 1.00
     )
   )
 
-DataClean$budget_spend_prio_costLiving_norm <- clean$budget_spend_prio_costLiving_norm
+DataClean$budget_spend_prio_ecn_norm <- clean$budget_spend_prio_ecn_norm
 
 
 table(DataClean$budget_spend_prio_costLiving_norm, useNA = "always")
 
 # Création de la variable binaire : 1 = priorité forte à la dette (0.75 ou 1), 0 = le reste
-DataClean$budget_spend_prio_costLiving_bin <- ifelse(
-  DataClean$budget_spend_prio_costLiving_norm %in% c(0.75, 1), 1, 0
+DataClean$budget_spend_prio_ecn_bin <- ifelse(
+  DataClean$budget_spend_prio_ecn_norm %in% c(0.75, 1), 1, 0
 )
 
-table(DataClean$budget_spend_prio_costLiving_bin)
+table(DataClean$budget_spend_prio_ecn_bin)
 
 #Imagine the government has the means to increase spending in some areas, but not all. Among the following policy areas, which are most important to you? You can allocate 100 points. Give more points to the areas you consider to be most important and less to those you consider to be less important. The government should: - invest in the fight against climate change
 ##climate change
