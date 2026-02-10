@@ -779,98 +779,98 @@ table(DataClean$ideo_define_canQC_bin, useNA = "always")
 #Now we would like to ask you about public finance questions. Please remember to read closely and pay attention. You will be asked questions to check your memory and comprehension. Please arrange the following policy issues by order of importance - Health
 table(clean$budget_issue_imp_1)
 
-DataClean$budget_health_priority_num <- NA_real_
-DataClean$budget_health_priority_num[clean$budget_issue_imp_1 == 1] <- 1
-DataClean$budget_health_priority_num[clean$budget_issue_imp_1 == 2] <- 0.75
-DataClean$budget_health_priority_num[clean$budget_issue_imp_1 == 3] <- 0.50
-DataClean$budget_health_priority_num[clean$budget_issue_imp_1 == 4] <- 0.25
-DataClean$budget_health_priority_num[clean$budget_issue_imp_1 == 5] <- 0
-table(DataClean$budget_health_priority_num)
+DataClean$budget_imp_health_num <- NA_real_
+DataClean$budget_imp_health_num[clean$budget_issue_imp_1 == 1] <- 1
+DataClean$budget_imp_health_num[clean$budget_issue_imp_1 == 2] <- 0.75
+DataClean$budget_imp_health_num[clean$budget_issue_imp_1 == 3] <- 0.50
+DataClean$budget_imp_health_num[clean$budget_issue_imp_1 == 4] <- 0.25
+DataClean$budget_imp_health_num[clean$budget_issue_imp_1 == 5] <- 0
+table(DataClean$budget_imp_health_num)
 
 # Création de la variable binaire : 1 = priorité forte à la santé (0.75 ou 1), 0 = le reste
-DataClean$budget_health_priority_bin <- ifelse(
-  DataClean$budget_health_priority_num %in% c(0.75, 1), 1, 0
+DataClean$budget_imp_health_bin <- ifelse(
+  DataClean$budget_imp_health_num %in% c(0.75, 1), 1, 0
 )
 
 # Vérification
-table(DataClean$budget_health_priority_bin, useNA = "always")
+table(DataClean$budget_imp_health_bin, useNA = "always")
 
 #Now we would like to ask you about public finance questions. Please remember to read closely and pay attention. You will be asked questions to check your memory and comprehension. Please arrange the following policy issues by order of importance - Education
 table(clean$budget_issue_imp_2)
 
-DataClean$budget_education_priority_num <- NA_real_
-DataClean$budget_education_priority_num[clean$budget_issue_imp_2 == 1] <- 1
-DataClean$budget_education_priority_num[clean$budget_issue_imp_2 == 2] <- 0.75
-DataClean$budget_education_priority_num[clean$budget_issue_imp_2 == 3] <- 0.50
-DataClean$budget_education_priority_num[clean$budget_issue_imp_2 == 4] <- 0.25
-DataClean$budget_education_priority_num[clean$budget_issue_imp_2 == 5] <- 0
-table(DataClean$budget_education_priority_num)
+DataClean$budget_imp_edu_num <- NA_real_
+DataClean$budget_imp_edu_num[clean$budget_issue_imp_2 == 1] <- 1
+DataClean$budget_imp_edu_num[clean$budget_issue_imp_2 == 2] <- 0.75
+DataClean$budget_imp_edu_num[clean$budget_issue_imp_2 == 3] <- 0.50
+DataClean$budget_imp_edu_num[clean$budget_issue_imp_2 == 4] <- 0.25
+DataClean$budget_imp_edu_num[clean$budget_issue_imp_2 == 5] <- 0
+table(DataClean$budget_imp_edu_num)
 
 # Création de la variable binaire : 1 = priorité forte à l'éducation (0.75 ou 1), 0 = le reste
-DataClean$budget_education_priority_bin <- ifelse(
-  DataClean$budget_education_priority_num %in% c(0.75, 1), 1, 0
+DataClean$budget_imp_edu_bin <- ifelse(
+  DataClean$budget_imp_edu_num %in% c(0.75, 1), 1, 0
 )
 
 # Vérification
-table(DataClean$budget_education_priority_bin, useNA = "always")
+table(DataClean$budget_imp_edu_bin, useNA = "always")
 
 #Now we would like to ask you about public finance questions. Please remember to read closely and pay attention. You will be asked questions to check your memory and comprehension. Please arrange the following policy issues by order of importance - Pensions
 table(clean$budget_issue_imp_3)
 
-DataClean$budget_pensions_priority_num <- NA_real_
-DataClean$budget_pensions_priority_num[clean$budget_issue_imp_3 == 1] <- 1
-DataClean$budget_pensions_priority_num[clean$budget_issue_imp_3 == 2] <- 0.75
-DataClean$budget_pensions_priority_num[clean$budget_issue_imp_3 == 3] <- 0.50
-DataClean$budget_pensions_priority_num[clean$budget_issue_imp_3 == 4] <- 0.25
-DataClean$budget_pensions_priority_num[clean$budget_issue_imp_3 == 5] <- 0
-table(DataClean$budget_pensions_priority_num)
+DataClean$budget_imp_pensions_num <- NA_real_
+DataClean$budget_imp_pensions_num[clean$budget_issue_imp_3 == 1] <- 1
+DataClean$budget_imp_pensions_num[clean$budget_issue_imp_3 == 2] <- 0.75
+DataClean$budget_imp_pensions_num[clean$budget_issue_imp_3 == 3] <- 0.50
+DataClean$budget_imp_pensions_num[clean$budget_issue_imp_3 == 4] <- 0.25
+DataClean$budget_imp_pensions_num[clean$budget_issue_imp_3 == 5] <- 0
+table(DataClean$budget_imp_pensions_num)
 
 # Création de la variable binaire : 1 = priorité forte aux pensions (0.75 ou 1), 0 = le reste
-DataClean$budget_pensions_priority_bin <- ifelse(
-  DataClean$budget_pensions_priority_num %in% c(0.75, 1), 1, 0
+DataClean$budget_imp_pensions_bin <- ifelse(
+  DataClean$budget_imp_pensions_num %in% c(0.75, 1), 1, 0
 )
 
 # Vérification
-table(DataClean$budget_pensions_priority_bin, useNA = "always")
+table(DataClean$budget_imp_pensions_bin, useNA = "always")
 
 #Now we would like to ask you about public finance questions. Please remember to read closely and pay attention. You will be asked questions to check your memory and comprehension. Please arrange the following policy issues by order of importance - Taxes
 table(clean$budget_issue_imp_4)
 
-DataClean$budget_taxes_priority_num <- NA_real_
-DataClean$budget_taxes_priority_num[clean$budget_issue_imp_4 == 1] <- 1
-DataClean$budget_taxes_priority_num[clean$budget_issue_imp_4 == 2] <- 0.75
-DataClean$budget_taxes_priority_num[clean$budget_issue_imp_4 == 3] <- 0.50
-DataClean$budget_taxes_priority_num[clean$budget_issue_imp_4 == 4] <- 0.25
-DataClean$budget_taxes_priority_num[clean$budget_issue_imp_4 == 5] <- 0
-table(DataClean$budget_taxes_priority_num)
+DataClean$budget_imp_taxes_num <- NA_real_
+DataClean$budget_imp_taxes_num[clean$budget_issue_imp_4 == 1] <- 1
+DataClean$budget_imp_taxes_num[clean$budget_issue_imp_4 == 2] <- 0.75
+DataClean$budget_imp_taxes_num[clean$budget_issue_imp_4 == 3] <- 0.50
+DataClean$budget_imp_taxes_num[clean$budget_issue_imp_4 == 4] <- 0.25
+DataClean$budget_imp_taxes_num[clean$budget_issue_imp_4 == 5] <- 0
+table(DataClean$budget_imp_taxes_num)
 
 # Création de la variable binaire : 1 = priorité forte aux taxes (0.75 ou 1), 0 = le reste
-DataClean$budget_taxes_priority_bin <- ifelse(
-  DataClean$budget_taxes_priority_num %in% c(0.75, 1), 1, 0
+DataClean$budget_imp_taxes_bin <- ifelse(
+  DataClean$budget_imp_taxes_num %in% c(0.75, 1), 1, 0
 )
 
 # Vérification
-table(DataClean$budget_taxes_priority_bin, useNA = "always")
+table(DataClean$budget_imp_taxes_bin, useNA = "always")
 
 
 #Now we would like to ask you about public finance questions. Please remember to read closely and pay attention. You will be asked questions to check your memory and comprehension. Please arrange the following policy issues by order of importance - Public debt
 table(clean$budget_issue_imp_5)
 
-DataClean$budget_debt_priority_num <- NA_real_
-DataClean$budget_debt_priority_num[clean$budget_issue_imp_5 == 1] <- 1
-DataClean$budget_debt_priority_num[clean$budget_issue_imp_5 == 2] <- 0.75
-DataClean$budget_debt_priority_num[clean$budget_issue_imp_5 == 3] <- 0.50
-DataClean$budget_debt_priority_num[clean$budget_issue_imp_5 == 4] <- 0.25
-DataClean$budget_debt_priority_num[clean$budget_issue_imp_5 == 5] <- 0
-table(DataClean$budget_debt_priority_num)
+DataClean$budget_imp_debt_num <- NA_real_
+DataClean$budget_imp_debt_num[clean$budget_issue_imp_5 == 1] <- 1
+DataClean$budget_imp_debt_num[clean$budget_issue_imp_5 == 2] <- 0.75
+DataClean$budget_imp_debt_num[clean$budget_issue_imp_5 == 3] <- 0.50
+DataClean$budget_imp_debt_num[clean$budget_issue_imp_5 == 4] <- 0.25
+DataClean$budget_imp_debt_num[clean$budget_issue_imp_5 == 5] <- 0
+table(DataClean$budget_imp_debt_num)
 
 # Création de la variable binaire : 1 = priorité forte à la dette (0.75 ou 1), 0 = le reste
-DataClean$budget_debt_priority_bin <- ifelse(
-  DataClean$budget_debt_priority_num %in% c(0.75, 1), 1, 0
+DataClean$budget_imp_debt_bin <- ifelse(
+  DataClean$budget_imp_debt_num %in% c(0.75, 1), 1, 0
 )
 
 # Vérification
-table(DataClean$budget_debt_priority_bin, useNA = "always")
+table(DataClean$budget_imp_debt_bin, useNA = "always")
 
 #Imagine the government has the means to increase spending in some areas, but not all. Among the following policy areas, which are most important to you? You can allocate 100 points. Give more points to the areas you consider to be most important and less to those you consider to be less important. The government should: - increase access to healthcare
 ##healthcare
@@ -1038,469 +1038,470 @@ DataClean$budget_spend_prio_clim_bin <- ifelse(
 table(DataClean$budget_spend_prio_clim_bin)
 
 #To what extent do you agree with the following statement: The government should increase spending on childcare.
-table(clean$tradeoff_invest_cc0)
-
-DataClean$tradeoff_childcare_num <- NA_real_
-DataClean$tradeoff_childcare_num[clean$tradeoff_invest_cc0 == "Strongly agree"] <- 1
-DataClean$tradeoff_childcare_num[clean$tradeoff_invest_cc0 == "Somewhat agree"] <- 0.66
-DataClean$tradeoff_childcare_num[clean$tradeoff_invest_cc0 == "Somewhat disagree"] <- 0.33
-DataClean$tradeoff_childcare_num[clean$tradeoff_invest_cc0 == "Strongly disagree"] <- 0
-table(DataClean$tradeoff_childcare_num)
-
-# Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-DataClean$tradeoff_childcare_num_bin <- ifelse(
-  DataClean$tradeoff_childcare_num %in% c(0.66, 1), 1, 0
-)
-
-#To what extent do you agree with the following statement: The government should increase spending on childcare, even if that implies higher taxes.
-table(clean$tradeoff_invest_cc1)      
-
-DataClean$tradeoff_childcare_higher_taxes_num <- NA_real_
-DataClean$tradeoff_childcare_higher_taxes_num[clean$tradeoff_invest_cc1 == "Strongly agree"] <- 1
-DataClean$tradeoff_childcare_higher_taxes_num[clean$tradeoff_invest_cc1 == "Somewhat agree"] <- 0.66
-DataClean$tradeoff_childcare_higher_taxes_num[clean$tradeoff_invest_cc1 == "Somewhat disagree"] <- 0.33
-DataClean$tradeoff_childcare_higher_taxes_num[clean$tradeoff_invest_cc1 == "Strongly disagree"] <- 0
-table(DataClean$tradeoff_childcare_higher_taxes_num)
-
-# Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-DataClean$tradeoff_childcare_higher_taxes_bin <- ifelse(
-  DataClean$tradeoff_childcare_higher_taxes_num %in% c(0.66, 1), 1, 0
-)
-
-#To what extent do you agree with the following statement: The government should increase spending on childcare, even if that implies cutting back in other areas.
-table(clean$tradeoff_childcare_by_cutting_num)      
-
-DataClean$tradeoff_childcare_by_cutting_num <- NA_real_
-DataClean$tradeoff_childcare_by_cutting_num[clean$tradeoff_invest_cc2 == "Strongly agree"] <- 1
-DataClean$tradeoff_childcare_by_cutting_num[clean$tradeoff_invest_cc2 == "Somewhat agree"] <- 0.66
-DataClean$tradeoff_childcare_by_cutting_num[clean$tradeoff_invest_cc2 == "Somewhat disagree"] <- 0.33
-DataClean$tradeoff_childcare_by_cutting_num[clean$tradeoff_invest_cc2 == "Strongly disagree"] <- 0
-table(DataClean$tradeoff_childcare_by_cutting_num)
-
-# Création de la variable binaire : 1 = priorité forte à la dette (0.75 ou 1), 0 = le reste
-DataClean$tradeoff_childcare_by_cutting_bin <- ifelse(
-  DataClean$tradeoff_childcare_by_cutting_num %in% c(0.66, 1), 1, 0
-)
-
-#To what extent do you agree with the following statement: The government should increase spending on childcare, even if that implies a higher public debt.
-table(clean$tradeoff_childcare_debt_num)      
-
-DataClean$tradeoff_childcare_debt_num <- NA_real_
-DataClean$tradeoff_childcare_debt_num[clean$tradeoff_invest_cc3 == "Strongly agree"] <- 1
-DataClean$tradeoff_childcare_debt_num[clean$tradeoff_invest_cc3 == "Somewhat agree"] <- 0.66
-DataClean$tradeoff_childcare_debt_num[clean$tradeoff_invest_cc3 == "Somewhat disagree"] <- 0.33
-DataClean$tradeoff_childcare_debt_num[clean$tradeoff_invest_cc3 == "Strongly disagree"] <- 0
-table(DataClean$tradeoff_childcare_debt_num)
-
-# Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-DataClean$tradeoff_childcare_debt_bin <- ifelse(
-  DataClean$tradeoff_childcare_debt_num %in% c(0.66, 1), 1, 0
-)
-
-#To what extent do you agree with the following statement:  Taxes are already high. The government should not collect more money from citizens through taxes.
-table(clean$tradeoff_taxconst_0)
-
-DataClean$tradeoff_no_taxes_num <- NA_real_
-DataClean$tradeoff_no_taxes_num[clean$tradeoff_taxconst_0 == "Strongly agree"] <- 1
-DataClean$tradeoff_no_taxes_num[clean$tradeoff_taxconst_0 == "Somewhat agree"] <- 0.66
-DataClean$tradeoff_no_taxes_num[clean$tradeoff_taxconst_0 == "Somewhat disagree"] <- 0.33
-DataClean$tradeoff_no_taxes_num[clean$tradeoff_taxconst_0 == "Strongly disagree"] <- 0
-table(DataClean$tradeoff_no_taxes_num)
-
-# Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-DataClean$tradeoff_no_taxes_bin <- ifelse(
-  DataClean$tradeoff_no_taxes_num %in% c(0.66, 1), 1, 0
-)
-
-#To what extent do you agree with the following statement:  Taxes are already high. The government should not collect more money from citizens unless it is targeted at all citizens, through an increase in sales taxes. (Note: a tax added to the price of goods or services at the time of purchase).
-table(clean$tradeoff_taxconst_1)
-
-DataClean$tradeoff_taxes_sales_num <- NA_real_
-DataClean$tradeoff_taxes_sales_num[clean$tradeoff_taxconst_1 == "Strongly agree"] <- 1
-DataClean$tradeoff_taxes_sales_num[clean$tradeoff_taxconst_1 == "Somewhat agree"] <- 0.66
-DataClean$tradeoff_taxes_sales_num[clean$tradeoff_taxconst_1 == "Somewhat disagree"] <- 0.33
-DataClean$tradeoff_taxes_sales_num[clean$tradeoff_taxconst_1 == "Strongly disagree"] <- 0
-table(DataClean$tradeoff_taxes_sales_num)
-
-# Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-DataClean$tradeoff_taxes_sales_bin <- ifelse(
-  DataClean$tradeoff_taxes_sales_num %in% c(0.66, 1), 1, 0
-)
-
-#To what extent do you agree with the following statement: Taxes are already high. The government should not collect more money from citizens unless it is targeted at high income citizens, like a tax on high incomes.
-table(clean$tradeoff_taxconst_2)
-
-DataClean$tradeoff_taxes_high_income_num <- NA_real_
-DataClean$tradeoff_taxes_high_income_num[clean$tradeoff_taxconst_2 == "Strongly agree"] <- 1
-DataClean$tradeoff_taxes_high_income_num[clean$tradeoff_taxconst_2 == "Somewhat agree"] <- 0.66
-DataClean$tradeoff_taxes_high_income_num[clean$tradeoff_taxconst_2 == "Somewhat disagree"] <- 0.33
-DataClean$tradeoff_taxes_high_income_num[clean$tradeoff_taxconst_2 == "Strongly disagree"] <- 0
-table(DataClean$tradeoff_taxes_high_income_num)
-
-# Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-DataClean$tradeoff_taxes_high_income_bin <- ifelse(
-  DataClean$tradeoff_taxes_high_income_num %in% c(0.66, 1), 1, 0
-)
-
-#To what extent do you agree with the following statement:  Taxes are already high. The government should not collect more money from citizens unless it is targeted at wealthy citizens, like a capital gains tax. (Note: a tax you pay when you make money from selling something valuable for more than you paid for it, like property or stocks.)
-table(clean$tradeoff_taxconst_3)
-
-DataClean$tradeoff_taxes_wealthy_num <- NA_real_
-DataClean$tradeoff_taxes_wealthy_num[clean$tradeoff_taxconst_3 == "Strongly agree"] <- 1
-DataClean$tradeoff_taxes_wealthy_num[clean$tradeoff_taxconst_3 == "Somewhat agree"] <- 0.66
-DataClean$tradeoff_taxes_wealthy_num[clean$tradeoff_taxconst_3 == "Somewhat disagree"] <- 0.33
-DataClean$tradeoff_taxes_wealthy_num[clean$tradeoff_taxconst_3 == "Strongly disagree"] <- 0
-table(DataClean$tradeoff_taxes_wealthy_num)
-
-# Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-DataClean$tradeoff_taxes_wealthy_bin <- ifelse(
-  DataClean$tradeoff_taxes_wealthy_num %in% c(0.66, 1), 1, 0
-)
-
-#In the question you just answered, which taxation policy was mentioned as a possible exception to the statement that the government should not collect more money from citizens?
-table(clean$tradeoff_taxconst_m)
-
-DataClean$tradeoff_taxconst_char <- NA
-DataClean$tradeoff_taxconst_char[clean$tradeoff_taxconst_m == "A capital gains tax."]   <- "A capital gains tax."
-DataClean$tradeoff_taxconst_char[clean$tradeoff_taxconst_m == "An increase in sales taxes."]  <- "An increase in sales taxes."
-DataClean$tradeoff_taxconst_char[clean$tradeoff_taxconst_m == "A tax on high incomes."]  <- "A tax on high incomes."
-DataClean$tradeoff_taxconst_char[clean$tradeoff_taxconst_m == "No exception was mentioned."]   <- "No exception was mentioned."
-DataClean$tradeoff_taxconst_char[clean$tradeoff_taxconst_m == "I don’t remember."]   <- "I don’t remember."
-
-table(DataClean$tradeoff_taxconst_char)
-
-#binaires
-DataClean$attention_tradeoff_capital_bin <- ifelse(DataClean$tradeoff_taxconst_char == "A capital gains tax.", 1, 0)
-DataClean$attention_tradeoff_sales_bin <- ifelse(DataClean$tradeoff_taxconst_char == "An increase in sales taxes.", 1, 0)
-DataClean$attention_tradeoff_income_bin <- ifelse(DataClean$tradeoff_taxconst_char == "A tax on high incomes.", 1, 0)
-DataClean$attention_tradeoff_no_exception_bin <- ifelse(DataClean$tradeoff_taxconst_char == "No exception was mentioned.", 1, 0)
-DataClean$attention_tradeoff_dontremember_bin <- ifelse(DataClean$tradeoff_taxconst_char == "I don’t remember.", 1, 0)
-table(DataClean$attention_tradeoff_capital_bin)
-
-#Please imagine that the government wants to improve certain social benefits. However, it can only do so by cutting back on other social benefits. To what extent do you find the following cutbacks acceptable in comparison to the improvement they allow? The government subsidizes child care for all families at a cost of lowering other family benefits (e.g., child tax credits or parental leave payments).
-table(clean$tradeoff_spend_cc_1)
-
-DataClean$tradeoff_childcare_benefits_num <- NA_real_
-DataClean$tradeoff_childcare_benefits_num[clean$tradeoff_spend_cc_1 == "Strongly agree"] <- 1
-DataClean$tradeoff_childcare_benefits_num[clean$tradeoff_spend_cc_1 == "Somewhat agree"] <- 0.66
-DataClean$tradeoff_childcare_benefits_num[clean$tradeoff_spend_cc_1 == "Somewhat disagree"] <- 0.33
-DataClean$tradeoff_childcare_benefits_num[clean$tradeoff_spend_cc_1 == "Strongly disagree"] <- 0
-table(DataClean$tradeoff_childcare_benefits_num)
-
-# Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-DataClean$tradeoff_childcare_benefits_bin <- ifelse(
-  DataClean$tradeoff_childcare_benefits_num %in% c(0.66, 1), 1, 0
-)
-
-#Please imagine that the government wants to improve certain social benefits. However, it can only do so by cutting back on other social benefits. To what extent do you find the following cutbacks acceptable in comparison to the improvement they allow? The government subsidizes childcare for low-income families at a cost of increasing the price of childcare for middle and upper-class families.
-table(clean$tradeoff_spend_cc_2)
-
-DataClean$tradeoff_childcare_lowincome_num <- NA_real_
-DataClean$tradeoff_childcare_lowincome_num[clean$tradeoff_spend_cc_2 == "Strongly agree"] <- 1
-DataClean$tradeoff_childcare_lowincome_num[clean$tradeoff_spend_cc_2 == "Somewhat agree"] <- 0.66
-DataClean$tradeoff_childcare_lowincome_num[clean$tradeoff_spend_cc_2 == "Somewhat disagree"] <- 0.33
-DataClean$tradeoff_childcare_lowincome_num[clean$tradeoff_spend_cc_2 == "Strongly disagree"] <- 0
-table(DataClean$tradeoff_childcare_lowincome_num)
-
-# Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-DataClean$tradeoff_childcare_lowincome_bin <- ifelse(
-  DataClean$tradeoff_childcare_lowincome_num %in% c(0.66, 1), 1, 0
-)
-
-#In the question  you just answered, what was mentioned as the trade-off for increasing childcare subsidies?
-table(clean$tradeoff_spend_cc_m)
-DataClean$tradeoff_childcare_char <- NA
-DataClean$tradeoff_childcare_char[clean$tradeoff_spend_cc_m == "A reduction in other family benefits (e.g., child tax credits or parental leave payments)."]   <- "A reduction in other family benefits (e.g., child tax credits or parental leave payments)."
-DataClean$tradeoff_childcare_char[clean$tradeoff_spend_cc_m == "An increase in the price of childcare for middle- and upper-class families."]  <- "An increase in the price of childcare for middle- and upper-class families."
-DataClean$tradeoff_childcare_char[clean$tradeoff_spend_cc_m == "I don’t remember."]  <- "I don’t remember."
-DataClean$tradeoff_childcare_char[clean$tradeoff_spend_cc_m == "No trade-off was mentioned."]   <- "No trade-off was mentioned."
-
-table(DataClean$tradeoff_childcare_char)
-
-#binaires
-DataClean$attention_tradeoff_childcare_benefits_bin <- ifelse(DataClean$tradeoff_childcare_char == "A reduction in other family benefits (e.g., child tax credits or parental leave payments).", 1, 0)
-DataClean$attention_tradeoff_childcare_income_bin <- ifelse(DataClean$tradeoff_childcare_char == "An increase in the price of childcare for middle- and upper-class families.", 1, 0)
-DataClean$attention_tradeoff_childcare_dontremember_bin <- ifelse(DataClean$tradeoff_childcare_char == "I don’t remember.", 1, 0)
-DataClean$attention_tradeoff_childcare_no_mention_bin <- ifelse(DataClean$tradeoff_childcare_char == "No trade-off was mentioned.", 1, 0)
-table(DataClean$attention_tradeoff_childcare_benefits_bin)
-
-#Please imagine that the government wants to improve certain social benefits. However, it can only do so by cutting back on other social benefits. To what extent do you find the following cutbacks acceptable in comparison to the improvement they allow? The government increases home care for all seniors at a cost of lowering maximum old age pension benefits.
-table(clean$tradeoff_spend_hc_1)
-
-DataClean$tradeoff_senior_benefits_num <- NA_real_
-DataClean$tradeoff_senior_benefits_num[clean$tradeoff_spend_hc_1 == "Strongly agree"] <- 1
-DataClean$tradeoff_senior_benefits_num[clean$tradeoff_spend_hc_1 == "Somewhat agree"] <- 0.66
-DataClean$tradeoff_senior_benefits_num[clean$tradeoff_spend_hc_1 == "Somewhat disagree"] <- 0.33
-DataClean$tradeoff_senior_benefits_num[clean$tradeoff_spend_hc_1 == "Strongly disagree"] <- 0
-table(DataClean$tradeoff_senior_benefits_num)
-
-# Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-DataClean$tradeoff_senior_benefits_bin <- ifelse(
-  DataClean$tradeoff_senior_benefits_num %in% c(0.66, 1), 1, 0
-)
-
-#Please imagine that the government wants to improve certain social benefits. However, it can only do so by cutting back on other social benefits. To what extent do you find the following cutbacks acceptable in comparison to the improvement they allow? The government increases home care for low-income seniors at a cost of increasing the price of home care for middle and upper-class seniors.
-table(clean$tradeoff_spend_hc_2)
-
-DataClean$tradeoff_senior_income_num <- NA_real_
-DataClean$tradeoff_senior_income_num[clean$tradeoff_spend_hc_2 == "Strongly agree"] <- 1
-DataClean$tradeoff_senior_income_num[clean$tradeoff_spend_hc_2 == "Somewhat agree"] <- 0.66
-DataClean$tradeoff_senior_income_num[clean$tradeoff_spend_hc_2 == "Somewhat disagree"] <- 0.33
-DataClean$tradeoff_senior_income_num[clean$tradeoff_spend_hc_2 == "Strongly disagree"] <- 0
-table(DataClean$tradeoff_senior_income_num)
-
-# Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-DataClean$tradeoff_senior_income_bin <- ifelse(
-  DataClean$tradeoff_senior_income_num %in% c(0.66, 1), 1, 0
-)
-
-#To what extent do you agree with the following statement? In Canada, people get rewarded for their intelligence and skill.
-table(clean$redis_fei_can1)
-
-DataClean$redis_intelligence_num <- NA_real_
-DataClean$redis_intelligence_num[clean$redis_fei_can1 == "Most of the time"] <- 1
-DataClean$redis_intelligence_num[clean$redis_fei_can1 == "Sometimes"] <- 0.66
-DataClean$redis_intelligence_num[clean$redis_fei_can1 == "Rarely"] <- 0.33
-DataClean$redis_intelligence_num[clean$redis_fei_can1 == "Never"] <- 0
-table(DataClean$redis_intelligence_num)
-
-# Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-DataClean$redis_intelligence_bin <- ifelse(
-  DataClean$redis_intelligence_num %in% c(0.66, 1), 1, 0
-)
-
-#To what extent do you agree with the following statement? In Canada, people have equal opportunity to get ahead.
-table(clean$redis_fei_can2.)
-
-DataClean$redis_opportunity_num <- NA_real_
-DataClean$redis_opportunity_num[clean$redis_fei_can2. == "Most of the time"] <- 1
-DataClean$redis_opportunity_num[clean$redis_fei_can2. == "Sometimes"] <- 0.66
-DataClean$redis_opportunity_num[clean$redis_fei_can2. == "Rarely"] <- 0.33
-DataClean$redis_opportunity_num[clean$redis_fei_can2. == "Never"] <- 0
-table(DataClean$redis_opportunity_num)
-
-# Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-DataClean$redis_opportunity_bin <- ifelse(
-  DataClean$redis_opportunity_num %in% c(0.66, 1), 1, 0
-)
-
-#In your opinion, what share of rich people are rich for reasons that have nothing to do with how hard they work?
-table(clean$redis_pnvo_rich)
-
-DataClean$redis_reasons_rich_num <- NA_real_
-DataClean$redis_reasons_rich_num[clean$redis_pnvo_rich == "Most of the time"] <- 1
-DataClean$redis_reasons_rich_num[clean$redis_pnvo_rich == "Sometimes"] <- 0.66
-DataClean$redis_reasons_rich_num[clean$redis_pnvo_rich == "Rarely"] <- 0.33
-DataClean$redis_reasons_rich_num[clean$redis_pnvo_rich == "Never"] <- 0
-table(DataClean$redis_reasons_rich_num)
-
-# Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-DataClean$redis_reasons_rich_bin <- ifelse(
-  DataClean$redis_reasons_rich_num %in% c(0.66, 1), 1, 0
-)
-
-#In your opinion, what share of poor people are poor for reasons that have nothing to do with how hard they work?
-table(clean$redis_pnvo_poor)
-
-DataClean$redis_reasons_poor_num <- NA_real_
-DataClean$redis_reasons_poor_num[clean$redis_pnvo_poor == "Most of the time"] <- 1
-DataClean$redis_reasons_poor_num[clean$redis_pnvo_poor == "Sometimes"] <- 0.66
-DataClean$redis_reasons_poor_num[clean$redis_pnvo_poor == "Rarely"] <- 0.33
-DataClean$redis_reasons_poor_num[clean$redis_pnvo_poor == "Never"] <- 0
-table(DataClean$redis_reasons_poor_num)
-
-# Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-DataClean$redis_reasons_poor_bin <- ifelse(
-  DataClean$redis_reasons_poor_num %in% c(0.66, 1), 1, 0
-)
-
-#To what extent do you agree with the following statement?  In Canada, income differences are legitimate reflections of differences in people’s  effort.
-table(clean$redis_fid_can)
-
-DataClean$redis_effort_num <- NA_real_
-DataClean$redis_effort_num[clean$redis_fid_can == "Most of the time"] <- 1
-DataClean$redis_effort_num[clean$redis_fid_can == "Sometimes"] <- 0.66
-DataClean$redis_effort_num[clean$redis_fid_can == "Rarely"] <- 0.33
-DataClean$redis_effort_num[clean$redis_fid_can == "Never"] <- 0
-table(DataClean$redis_effort_num)
-
-
-# Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-DataClean$redis_effort_bin <- ifelse(
-  DataClean$redis_effort_num %in% c(0.66, 1), 1, 0
-)
-
-#To what extent do you agree with the following statement?  People on social benefits do not really have a choice.
-table(clean$redis_prev_freerider)
-
-DataClean$redis_social_benefits_num <- NA_real_
-DataClean$redis_social_benefits_num[clean$redis_prev_freerider == "Most of the time"] <- 1
-DataClean$redis_social_benefits_num[clean$redis_prev_freerider == "Sometimes"] <- 0.66
-DataClean$redis_social_benefits_num[clean$redis_prev_freerider == "Rarely"] <- 0.33
-DataClean$redis_social_benefits_num[clean$redis_prev_freerider == "Never"] <- 0
-table(DataClean$redis_social_benefits_num)
-
-# Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-DataClean$redis_social_benefits_bin <- ifelse(
-  DataClean$redis_social_benefits_num %in% c(0.66, 1), 1, 0
-)
-
-#How often does welfare go to people who do not really deserve it?
-table(clean$redis_iden_freerider)
-
-DataClean$redis_welfare_num <- NA_real_
-DataClean$redis_welfare_num[clean$redis_iden_freerider == "Most of the time"] <- 1
-DataClean$redis_welfare_num[clean$redis_iden_freerider == "Sometimes"] <- 0.66
-DataClean$redis_welfare_num[clean$redis_iden_freerider == "Rarely"] <- 0.33
-DataClean$redis_welfare_num[clean$redis_iden_freerider == "Never"] <- 0
-table(DataClean$redis_welfare_num)
-
-# Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-DataClean$redis_welfare_bin <- ifelse(
-  DataClean$redis_welfare_num %in% c(0.66, 1), 1, 0
-)
-
-#To what extent can others be trusted to not abuse and cheat the system?
-table(clean$redis_human_nature.)
-
-DataClean$redis_no_cheat_system_num <- NA_real_
-DataClean$redis_no_cheat_system_num[clean$redis_human_nature. == "Most of the time"] <- 1
-DataClean$redis_no_cheat_system_num[clean$redis_human_nature. == "Sometimes"] <- 0.66
-DataClean$redis_no_cheat_system_num[clean$redis_human_nature. == "Rarely"] <- 0.33
-DataClean$redis_no_cheat_system_num[clean$redis_human_nature. == "Never"] <- 0
-table(DataClean$redis_no_cheat_system_num)
-
-# Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-DataClean$redis_no_cheat_system_bin <- ifelse(
-  DataClean$redis_no_cheat_system_num %in% c(0.66, 1), 1, 0
-)
-
-##Generally speaking would you say that most people can be trusted, or, that you need to be very careful when dealing with people? - On a scale of 0 to 10 where 0 means no trust and 10 means complete trust.
-table(data$trust_social_1)
-data$trust_social_bin <- ifelse(data$trust_social_1 >= 6, 1, 
-                                ifelse(data$trust_social_1 <= 5, 0, NA))
-
-DataClean$trust_social_bin <- data$trust_social_bin[match(rownames(DataClean), rownames(data))]
-
-table(DataClean$trust_social_bin, useNA = "ifany")
-
-
-##Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - Political parties
-table(data$trust_institution_1)
-data$trust_pol_parties_bin <- ifelse(data$trust_institution_1 >= 6, 1,
-                                     ifelse(data$trust_institution_1 <= 5, 0, NA))
-
-DataClean$trust_pol_parties_bin <- data$trust_pol_parties_bin[match(rownames(DataClean), rownames(data))]
-
-table(DataClean$trust_pol_parties_bin, useNA = "ifany")
-
-
-##Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - The federal government
-table(data$trust_institution_2)
-
-data$trust_fed_gov_bin <- ifelse(data$trust_institution_1 >= 6, 1,
-                                 ifelse(data$trust_institution_1 <= 5, 0, NA))
-
-DataClean$trust_fed_gov_bin <- data$trust_fed_gov_bin[match(rownames(DataClean), rownames(data))]
-
-table(DataClean$trust_fed_gov_bin, useNA = "ifany")
-##Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - The provincial government
-table(data$trust_institution_3)
-
-data$trust_prov_gov_bin <- ifelse(data$trust_institution_1 >= 6, 1,
-                                  ifelse(data$trust_institution_1 <= 5, 0, NA))
-
-DataClean$trust_prov_gov_bin <- data$trust_prov_gov_bin[match(rownames(DataClean), rownames(data))]
-
-table(DataClean$trust_prov_gov_bin, useNA = "ifany")
-##Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - The mass media
-table(data$trust_institution_4)
-
-data$trust_media_bin <- ifelse(data$trust_institution_1 >= 6, 1,
-                               ifelse(data$trust_institution_1 <= 5, 0, NA))
-
-DataClean$trust_media_bin <- data$trust_media_bin[match(rownames(DataClean), rownames(data))]
-
-table(DataClean$trust_media_bin, useNA = "ifany")
-
-##Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - Your provincial government
-table(data$trust_institution_5)
-
-data$trust_your_prov_gov_bin <- ifelse(data$trust_institution_1 >= 6, 1,
-                                       ifelse(data$trust_institution_1 <= 5, 0, NA))
-
-DataClean$trust_your_prov_gov_bin <- data$trust_your_prov_gov_bin[match(rownames(DataClean), rownames(data))]
-
-table(DataClean$trust_your_prov_gov_bin, useNA = "ifany")
-##Generally speaking would you say that most people can be trusted, or, that you need to be very careful when dealing with people? - On a scale of 0 to 10 where 0 means no trust and 10 means complete trust.
-table(data$trust_social_terr_1)
-##Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - Political parties
-table(data$trust_institut_terr_1)
-##Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - The federal government
-table(data$trust_institut_terr_2)
-##Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - The provincial government
-table(data$trust_institut_terr_3)
-##Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - The mass media
-table(data$trust_institut_terr_4)
-##Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - Your territorial government
-table(data$trust_institut_terr_5)
-
-
-
-
-#To what extent do you agree with the following statement: The government should increase spending on green economy.
-table(clean$tradeoff_invest_ge0.)
-
-DataClean$tradeoff_invest_green_num <- NA_real_
-DataClean$tradeoff_invest_green_num[clean$tradeoff_invest_ge0. == "Strongly agree"] <- 1
-DataClean$tradeoff_invest_green_num[clean$tradeoff_invest_ge0. == "Somewhat agree"] <- 0.66
-DataClean$tradeoff_invest_green_num[clean$tradeoff_invest_ge0. == "Somewhat disagree"] <- 0.33
-DataClean$tradeoff_invest_green_num[clean$tradeoff_invest_ge0. == "Strongly disagree"] <- 0
-table(DataClean$tradeoff_invest_green_num)
-
-#To what extent do you agree with the following statement: The government should increase spending on the green economy, even if that implies higher taxes.
-table(clean$tradeoff_invest_ge1)
-
-DataClean$tradeoff_taxes_green_num <- NA_real_
-DataClean$tradeoff_taxes_green_num[clean$tradeoff_invest_ge1 == "Strongly agree"] <- 1
-DataClean$tradeoff_taxes_green_num[clean$tradeoff_invest_ge1 == "Somewhat agree"] <- 0.66
-DataClean$tradeoff_taxes_green_num[clean$tradeoff_invest_ge1 == "Somewhat disagree"] <- 0.33
-DataClean$tradeoff_taxes_green_num[clean$tradeoff_invest_ge1 == "Strongly disagree"] <- 0
-table(DataClean$tradeoff_taxes_green_num)
-
-#To what extent do you agree with the following statement:  The government should increase spending on the green economy, even if that implies cutting back in other areas.
-table(clean$tradeoff_invest_ge2)
-
-DataClean$tradeoff_cutting_for_green_num <- NA_real_
-DataClean$tradeoff_cutting_for_green_num[clean$tradeoff_invest_ge2 == "Strongly agree"] <- 1
-DataClean$tradeoff_cutting_for_green_num[clean$tradeoff_invest_ge2 == "Somewhat agree"] <- 0.66
-DataClean$tradeoff_cutting_for_green_num[clean$tradeoff_invest_ge2 == "Somewhat disagree"] <- 0.33
-DataClean$tradeoff_cutting_for_green_num[clean$tradeoff_invest_ge2 == "Strongly disagree"] <- 0
-table(DataClean$tradeoff_cutting_for_green_num)
-
-#To what extent do you agree with the following statement:  The government should increase spending on the green economy, even if that implies a higher public debt.
-table(clean$tradeoff_invest_ge3)
-
-DataClean$tradeoff_debt_green_num <- NA_real_
-DataClean$tradeoff_debt_green_num[clean$tradeoff_invest_ge3 == "Strongly agree"] <- 1
-DataClean$tradeoff_debt_green_num[clean$tradeoff_invest_ge3 == "Somewhat agree"] <- 0.66
-DataClean$tradeoff_debt_green_num[clean$tradeoff_invest_ge3 == "Somewhat disagree"] <- 0.33
-DataClean$tradeoff_debt_green_num[clean$tradeoff_invest_ge3 == "Strongly disagree"] <- 0
-table(DataClean$tradeoff_debt_green_num)
-
-
-##province
-#table(clean$province)
+#table(clean$tradeoff_invest_cc0)
 #
-#DataClean$province_char <- NA
-#DataClean$province_char[clean$province == "Alberta"]   <- 1
-#DataClean$province_char[clean$province == "British Columbia"]  <- 2
-#DataClean$province_char[clean$province == "Colombie-Britannique"]  <- 3
-#DataClean$province_char[clean$province == "Nova Scotia"]   <- 4
-#DataClean$province_char[clean$province == "Ontario"]   <- 5
-#DataClean$province_char[clean$province == "Quebec"]   <- 6
-#DataClean$province_char[clean$province == "Québec"]   <- 7
-#DataClean$province_char[clean$province == "Yukon"]   <- 8
+#DataClean$tradeoff_childcare_num <- NA_real_
+#DataClean$tradeoff_childcare_num[clean$tradeoff_invest_cc0 == "Strongly agree"] <- 1
+#DataClean$tradeoff_childcare_num[clean$tradeoff_invest_cc0 == "Somewhat agree"] <- 0.66
+#DataClean$tradeoff_childcare_num[clean$tradeoff_invest_cc0 == "Somewhat disagree"] <- 0.33
+#DataClean$tradeoff_childcare_num[clean$tradeoff_invest_cc0 == "Strongly disagree"] <- 0
+#table(DataClean$tradeoff_childcare_num)
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
+#DataClean$tradeoff_childcare_num_bin <- ifelse(
+#  DataClean$tradeoff_childcare_num %in% c(0.66, 1), 1, 0
+#)
+#
+#To what extent do you agree with the following statement: The government should increase spending on childcare, even if that implies higher taxes.
+#table(clean$tradeoff_invest_cc1)      
+#
+#DataClean$tradeoff_childcare_higher_taxes_num <- NA_real_
+#DataClean$tradeoff_childcare_higher_taxes_num[clean$tradeoff_invest_cc1 == "Strongly agree"] <- 1
+#DataClean$tradeoff_childcare_higher_taxes_num[clean$tradeoff_invest_cc1 == "Somewhat agree"] <- 0.66
+#DataClean$tradeoff_childcare_higher_taxes_num[clean$tradeoff_invest_cc1 == "Somewhat disagree"] <- 0.33
+#DataClean$tradeoff_childcare_higher_taxes_num[clean$tradeoff_invest_cc1 == "Strongly disagree"] <- 0
+#table(DataClean$tradeoff_childcare_higher_taxes_num)
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
+#DataClean$tradeoff_childcare_higher_taxes_bin <- ifelse(
+#  DataClean$tradeoff_childcare_higher_taxes_num %in% c(0.66, 1), 1, 0
+#)
+#
+##To what extent do you agree with the following statement: The government should increase spending on childcare, even if that implies cutting back in other areas.
+#table(clean$tradeoff_childcare_by_cutting_num)      
+#
+#DataClean$tradeoff_childcare_by_cutting_num <- NA_real_
+#DataClean$tradeoff_childcare_by_cutting_num[clean$tradeoff_invest_cc2 == "Strongly agree"] <- 1
+#DataClean$tradeoff_childcare_by_cutting_num[clean$tradeoff_invest_cc2 == "Somewhat agree"] <- 0.66
+#DataClean$tradeoff_childcare_by_cutting_num[clean$tradeoff_invest_cc2 == "Somewhat disagree"] <- 0.33
+#DataClean$tradeoff_childcare_by_cutting_num[clean$tradeoff_invest_cc2 == "Strongly disagree"] <- 0
+#table(DataClean$tradeoff_childcare_by_cutting_num)
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.75 ou 1), 0 = le reste
+#DataClean$tradeoff_childcare_by_cutting_bin <- ifelse(
+#  DataClean$tradeoff_childcare_by_cutting_num %in% c(0.66, 1), 1, 0
+#)
+#
+##To what extent do you agree with the following statement: The government should increase spending on childcare, even if that implies a higher public debt.
+#table(clean$tradeoff_childcare_debt_num)      
+#
+#DataClean$tradeoff_childcare_debt_num <- NA_real_
+#DataClean$tradeoff_childcare_debt_num[clean$tradeoff_invest_cc3 == "Strongly agree"] <- 1
+#DataClean$tradeoff_childcare_debt_num[clean$tradeoff_invest_cc3 == "Somewhat agree"] <- 0.66
+#DataClean$tradeoff_childcare_debt_num[clean$tradeoff_invest_cc3 == "Somewhat disagree"] <- 0.33
+#DataClean$tradeoff_childcare_debt_num[clean$tradeoff_invest_cc3 == "Strongly disagree"] <- 0
+#table(DataClean$tradeoff_childcare_debt_num)
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
+#DataClean$tradeoff_childcare_debt_bin <- ifelse(
+#  DataClean$tradeoff_childcare_debt_num %in% c(0.66, 1), 1, 0
+#)
+#
+##To what extent do you agree with the following statement:  Taxes are already high. The government should not collect more money from citizens through taxes.
+#table(clean$tradeoff_taxconst_0)
+#
+#DataClean$tradeoff_no_taxes_num <- NA_real_
+#DataClean$tradeoff_no_taxes_num[clean$tradeoff_taxconst_0 == "Strongly agree"] <- 1
+#DataClean$tradeoff_no_taxes_num[clean$tradeoff_taxconst_0 == "Somewhat agree"] <- 0.66
+#DataClean$tradeoff_no_taxes_num[clean$tradeoff_taxconst_0 == "Somewhat disagree"] <- 0.33
+#DataClean$tradeoff_no_taxes_num[clean$tradeoff_taxconst_0 == "Strongly disagree"] <- 0
+#table(DataClean$tradeoff_no_taxes_num)
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
+#DataClean$tradeoff_no_taxes_bin <- ifelse(
+#  DataClean$tradeoff_no_taxes_num %in% c(0.66, 1), 1, 0
+#)
+#
+##To what extent do you agree with the following statement:  Taxes are already high. The government should not collect more money from citizens unless it is targeted at all citizens, through an increase in sales taxes. (Note: a tax added to the price of goods or services at the time of purchase).
+#table(clean$tradeoff_taxconst_1)
+#
+#DataClean$tradeoff_taxes_sales_num <- NA_real_
+#DataClean$tradeoff_taxes_sales_num[clean$tradeoff_taxconst_1 == "Strongly agree"] <- 1
+#DataClean$tradeoff_taxes_sales_num[clean$tradeoff_taxconst_1 == "Somewhat agree"] <- 0.66
+#DataClean$tradeoff_taxes_sales_num[clean$tradeoff_taxconst_1 == "Somewhat disagree"] <- 0.33
+#DataClean$tradeoff_taxes_sales_num[clean$tradeoff_taxconst_1 == "Strongly disagree"] <- 0
+#table(DataClean$tradeoff_taxes_sales_num)
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
+#DataClean$tradeoff_taxes_sales_bin <- ifelse(
+#  DataClean$tradeoff_taxes_sales_num %in% c(0.66, 1), 1, 0
+#)
+#
+##To what extent do you agree with the following statement: Taxes are already high. The government should not collect more money from citizens unless it is targeted at high income citizens, like a tax on high incomes.
+#table(clean$tradeoff_taxconst_2)
+#
+
+#DataClean$tradeoff_taxes_high_income_num <- NA_real_
+#DataClean$tradeoff_taxes_high_income_num[clean$tradeoff_taxconst_2 == "Strongly agree"] <- 1
+#DataClean$tradeoff_taxes_high_income_num[clean$tradeoff_taxconst_2 == "Somewhat agree"] <- 0.66
+#DataClean$tradeoff_taxes_high_income_num[clean$tradeoff_taxconst_2 == "Somewhat disagree"] <- 0.33
+#DataClean$tradeoff_taxes_high_income_num[clean$tradeoff_taxconst_2 == "Strongly disagree"] <- 0
+#table(DataClean$tradeoff_taxes_high_income_num)
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
+#DataClean$tradeoff_taxes_high_income_bin <- ifelse(
+#  DataClean$tradeoff_taxes_high_income_num %in% c(0.66, 1), 1, 0
+#)
+#
+##To what extent do you agree with the following statement:  Taxes are already high. The government should not collect more money from citizens unless it is targeted at wealthy citizens, like a capital gains tax. (Note: a tax you pay when you make money from selling something valuable for more than you paid for it, like property or stocks.)
+#table(clean$tradeoff_taxconst_3)
+#
+#DataClean$tradeoff_taxes_wealthy_num <- NA_real_
+#DataClean$tradeoff_taxes_wealthy_num[clean$tradeoff_taxconst_3 == "Strongly agree"] <- 1
+#DataClean$tradeoff_taxes_wealthy_num[clean$tradeoff_taxconst_3 == "Somewhat agree"] <- 0.66
+#DataClean$tradeoff_taxes_wealthy_num[clean$tradeoff_taxconst_3 == "Somewhat disagree"] <- 0.33
+#DataClean$tradeoff_taxes_wealthy_num[clean$tradeoff_taxconst_3 == "Strongly disagree"] <- 0
+#table(DataClean$tradeoff_taxes_wealthy_num)
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
+#DataClean$tradeoff_taxes_wealthy_bin <- ifelse(
+#  DataClean$tradeoff_taxes_wealthy_num %in% c(0.66, 1), 1, 0
+#)
+#
+##In the question you just answered, which taxation policy was mentioned as a possible exception to the statement that the government should not collect more money from citizens?
+#table(clean$tradeoff_taxconst_m)
+#
+#DataClean$tradeoff_taxconst_char <- NA
+#DataClean$tradeoff_taxconst_char[clean$tradeoff_taxconst_m == "A capital gains tax."]   <- "A capital gains tax."
+#DataClean$tradeoff_taxconst_char[clean$tradeoff_taxconst_m == "An increase in sales taxes."]  <- "An increase in sales taxes."
+#DataClean$tradeoff_taxconst_char[clean$tradeoff_taxconst_m == "A tax on high incomes."]  <- "A tax on high incomes."
+#DataClean$tradeoff_taxconst_char[clean$tradeoff_taxconst_m == "No exception was mentioned."]   <- "No exception was mentioned."
+#DataClean$tradeoff_taxconst_char[clean$tradeoff_taxconst_m == "I don’t remember."]   <- "I don’t remember."
+#
+#table(DataClean$tradeoff_taxconst_char)
+#
+##binaires
+#DataClean$attention_tradeoff_capital_bin <- ifelse(DataClean$tradeoff_taxconst_char == "A capital gains tax.", 1, 0)
+#DataClean$attention_tradeoff_sales_bin <- ifelse(DataClean$tradeoff_taxconst_char == "An increase in sales taxes.", 1, 0)
+#DataClean$attention_tradeoff_income_bin <- ifelse(DataClean$tradeoff_taxconst_char == "A tax on high incomes.", 1, 0)
+#DataClean$attention_tradeoff_no_exception_bin <- ifelse(DataClean$tradeoff_taxconst_char == "No exception was mentioned.", 1, 0)
+#DataClean$attention_tradeoff_dontremember_bin <- ifelse(DataClean$tradeoff_taxconst_char == "I don’t remember.", 1, 0)
+#table(DataClean$attention_tradeoff_capital_bin)
+#
+#Please imagine that the government wants to improve certain social benefits. However, it can only do so by cutting back on other social benefits. To what extent do you find the following cutbacks acceptable in comparison to the improvement they allow? The government subsidizes child care for all families at a cost of lowering other family benefits (e.g., child tax credits or parental leave payments).
+#table(clean$tradeoff_spend_cc_1)
+#
+#DataClean$tradeoff_childcare_benefits_num <- NA_real_
+#DataClean$tradeoff_childcare_benefits_num[clean$tradeoff_spend_cc_1 == "Strongly agree"] <- 1
+#DataClean$tradeoff_childcare_benefits_num[clean$tradeoff_spend_cc_1 == "Somewhat agree"] <- 0.66
+#DataClean$tradeoff_childcare_benefits_num[clean$tradeoff_spend_cc_1 == "Somewhat disagree"] <- 0.33
+#DataClean$tradeoff_childcare_benefits_num[clean$tradeoff_spend_cc_1 == "Strongly disagree"] <- 0
+#table(DataClean$tradeoff_childcare_benefits_num)
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
+#DataClean$tradeoff_childcare_benefits_bin <- ifelse(
+#  DataClean$tradeoff_childcare_benefits_num %in% c(0.66, 1), 1, 0
+#)
+#
+##Please imagine that the government wants to improve certain social benefits. However, it can only do so by cutting back on other social benefits. To what extent do you find the following cutbacks acceptable in comparison to the improvement they allow? The government subsidizes childcare for low-income families at a cost of increasing the price of childcare for middle and upper-class families.
+#table(clean$tradeoff_spend_cc_2)
+#
+#DataClean$tradeoff_childcare_lowincome_num <- NA_real_
+#DataClean$tradeoff_childcare_lowincome_num[clean$tradeoff_spend_cc_2 == "Strongly agree"] <- 1
+#DataClean$tradeoff_childcare_lowincome_num[clean$tradeoff_spend_cc_2 == "Somewhat agree"] <- 0.66
+#DataClean$tradeoff_childcare_lowincome_num[clean$tradeoff_spend_cc_2 == "Somewhat disagree"] <- 0.33
+#DataClean$tradeoff_childcare_lowincome_num[clean$tradeoff_spend_cc_2 == "Strongly disagree"] <- 0
+#table(DataClean$tradeoff_childcare_lowincome_num)
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
+#DataClean$tradeoff_childcare_lowincome_bin <- ifelse(
+#  DataClean$tradeoff_childcare_lowincome_num %in% c(0.66, 1), 1, 0
+#)
+#
+##In the question  you just answered, what was mentioned as the trade-off for increasing childcare subsidies?
+#table(clean$tradeoff_spend_cc_m)
+#DataClean$tradeoff_childcare_char <- NA
+#DataClean$tradeoff_childcare_char[clean$tradeoff_spend_cc_m == "A reduction in other family benefits (e.g., child tax credits or parental leave payments)."]   <- "A reduction in other family benefits (e.g., child tax credits or parental leave payments)."
+#DataClean$tradeoff_childcare_char[clean$tradeoff_spend_cc_m == "An increase in the price of childcare for middle- and upper-class families."]  <- "An increase in the price of childcare for middle- and upper-class families."
+#DataClean$tradeoff_childcare_char[clean$tradeoff_spend_cc_m == "I don’t remember."]  <- "I don’t remember."
+#DataClean$tradeoff_childcare_char[clean$tradeoff_spend_cc_m == "No trade-off was mentioned."]   <- "No trade-off was mentioned."
+#
+#table(DataClean$tradeoff_childcare_char)
+#
+##binaires
+#DataClean$attention_tradeoff_childcare_benefits_bin <- ifelse(DataClean$tradeoff_childcare_char == "A reduction in other family benefits (e.g., child tax credits or parental leave payments).", 1, 0)
+#DataClean$attention_tradeoff_childcare_income_bin <- ifelse(DataClean$tradeoff_childcare_char == "An increase in the price of childcare for middle- and upper-class families.", 1, 0)
+#DataClean$attention_tradeoff_childcare_dontremember_bin <- ifelse(DataClean$tradeoff_childcare_char == "I don’t remember.", 1, 0)
+#DataClean$attention_tradeoff_childcare_no_mention_bin <- ifelse(DataClean$tradeoff_childcare_char == "No trade-off was mentioned.", 1, 0)
+#table(DataClean$attention_tradeoff_childcare_benefits_bin)
+#
+##Please imagine that the government wants to improve certain social benefits. However, it can only do so by cutting back on other social benefits. To what extent do you find the following cutbacks acceptable in comparison to the improvement they allow? The government increases home care for all seniors at a cost of lowering maximum old age pension benefits.
+#table(clean$tradeoff_spend_hc_1)
+#
+#DataClean$tradeoff_senior_benefits_num <- NA_real_
+#DataClean$tradeoff_senior_benefits_num[clean$tradeoff_spend_hc_1 == "Strongly agree"] <- 1
+#DataClean$tradeoff_senior_benefits_num[clean$tradeoff_spend_hc_1 == "Somewhat agree"] <- 0.66
+#DataClean$tradeoff_senior_benefits_num[clean$tradeoff_spend_hc_1 == "Somewhat disagree"] <- 0.33
+#DataClean$tradeoff_senior_benefits_num[clean$tradeoff_spend_hc_1 == "Strongly disagree"] <- 0
+#table(DataClean$tradeoff_senior_benefits_num)
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
+#DataClean$tradeoff_senior_benefits_bin <- ifelse(
+#  DataClean$tradeoff_senior_benefits_num %in% c(0.66, 1), 1, 0
+#)
+#
+##Please imagine that the government wants to improve certain social benefits. However, it can only do so by cutting back on other social benefits. To what extent do you find the following cutbacks acceptable in comparison to the improvement they allow? The government increases home care for low-income seniors at a cost of increasing the price of home care for middle and upper-class seniors.
+#table(clean$tradeoff_spend_hc_2)
+#
+#DataClean$tradeoff_senior_income_num <- NA_real_
+#DataClean$tradeoff_senior_income_num[clean$tradeoff_spend_hc_2 == "Strongly agree"] <- 1
+#DataClean$tradeoff_senior_income_num[clean$tradeoff_spend_hc_2 == "Somewhat agree"] <- 0.66
+#DataClean$tradeoff_senior_income_num[clean$tradeoff_spend_hc_2 == "Somewhat disagree"] <- 0.33
+#DataClean$tradeoff_senior_income_num[clean$tradeoff_spend_hc_2 == "Strongly disagree"] <- 0
+#table(DataClean$tradeoff_senior_income_num)
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
+#DataClean$tradeoff_senior_income_bin <- ifelse(
+#  DataClean$tradeoff_senior_income_num %in% c(0.66, 1), 1, 0
+#)
+#
+##To what extent do you agree with the following statement? In Canada, people get rewarded for their intelligence and skill.
+#table(clean$redis_fei_can1)
+#
+#DataClean$redis_intelligence_num <- NA_real_
+#DataClean$redis_intelligence_num[clean$redis_fei_can1 == "Most of the time"] <- 1
+#DataClean$redis_intelligence_num[clean$redis_fei_can1 == "Sometimes"] <- 0.66
+#DataClean$redis_intelligence_num[clean$redis_fei_can1 == "Rarely"] <- 0.33
+#DataClean$redis_intelligence_num[clean$redis_fei_can1 == "Never"] <- 0
+#table(DataClean$redis_intelligence_num)
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
+#DataClean$redis_intelligence_bin <- ifelse(
+#  DataClean$redis_intelligence_num %in% c(0.66, 1), 1, 0
+#)
+#
+##To what extent do you agree with the following statement? In Canada, people have equal opportunity to get ahead.
+#table(clean$redis_fei_can2.)
+#
+#DataClean$redis_opportunity_num <- NA_real_
+#DataClean$redis_opportunity_num[clean$redis_fei_can2. == "Most of the time"] <- 1
+#DataClean$redis_opportunity_num[clean$redis_fei_can2. == "Sometimes"] <- 0.66
+#DataClean$redis_opportunity_num[clean$redis_fei_can2. == "Rarely"] <- 0.33
+#DataClean$redis_opportunity_num[clean$redis_fei_can2. == "Never"] <- 0
+#table(DataClean$redis_opportunity_num)
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
+#DataClean$redis_opportunity_bin <- ifelse(
+#  DataClean$redis_opportunity_num %in% c(0.66, 1), 1, 0
+#)
+#
+##In your opinion, what share of rich people are rich for reasons that have nothing to do with how hard they work?
+#table(clean$redis_pnvo_rich)
+#
+#DataClean$redis_reasons_rich_num <- NA_real_
+#DataClean$redis_reasons_rich_num[clean$redis_pnvo_rich == "Most of the time"] <- 1
+#DataClean$redis_reasons_rich_num[clean$redis_pnvo_rich == "Sometimes"] <- 0.66
+#DataClean$redis_reasons_rich_num[clean$redis_pnvo_rich == "Rarely"] <- 0.33
+#DataClean$redis_reasons_rich_num[clean$redis_pnvo_rich == "Never"] <- 0
+#table(DataClean$redis_reasons_rich_num)
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
+#DataClean$redis_reasons_rich_bin <- ifelse(
+#  DataClean$redis_reasons_rich_num %in% c(0.66, 1), 1, 0
+#)
+#
+##In your opinion, what share of poor people are poor for reasons that have nothing to do with how hard they work?
+#table(clean$redis_pnvo_poor)
+#
+#DataClean$redis_reasons_poor_num <- NA_real_
+#DataClean$redis_reasons_poor_num[clean$redis_pnvo_poor == "Most of the time"] <- 1
+#DataClean$redis_reasons_poor_num[clean$redis_pnvo_poor == "Sometimes"] <- 0.66
+#DataClean$redis_reasons_poor_num[clean$redis_pnvo_poor == "Rarely"] <- 0.33
+#DataClean$redis_reasons_poor_num[clean$redis_pnvo_poor == "Never"] <- 0
+#table(DataClean$redis_reasons_poor_num)
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
+#DataClean$redis_reasons_poor_bin <- ifelse(
+#  DataClean$redis_reasons_poor_num %in% c(0.66, 1), 1, 0
+#)
+#
+##To what extent do you agree with the following statement?  In Canada, income differences are legitimate reflections of differences in people’s  effort.
+#table(clean$redis_fid_can)
+#
+#DataClean$redis_effort_num <- NA_real_
+#DataClean$redis_effort_num[clean$redis_fid_can == "Most of the time"] <- 1
+#DataClean$redis_effort_num[clean$redis_fid_can == "Sometimes"] <- 0.66
+#DataClean$redis_effort_num[clean$redis_fid_can == "Rarely"] <- 0.33
+#DataClean$redis_effort_num[clean$redis_fid_can == "Never"] <- 0
+#table(DataClean$redis_effort_num)
+#
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
+#DataClean$redis_effort_bin <- ifelse(
+#  DataClean$redis_effort_num %in% c(0.66, 1), 1, 0
+#)
+#
+##To what extent do you agree with the following statement?  People on social benefits do not really have a choice.
+#table(clean$redis_prev_freerider)
+#
+#DataClean$redis_social_benefits_num <- NA_real_
+#DataClean$redis_social_benefits_num[clean$redis_prev_freerider == "Most of the time"] <- 1
+#DataClean$redis_social_benefits_num[clean$redis_prev_freerider == "Sometimes"] <- 0.66
+#DataClean$redis_social_benefits_num[clean$redis_prev_freerider == "Rarely"] <- 0.33
+#DataClean$redis_social_benefits_num[clean$redis_prev_freerider == "Never"] <- 0
+#table(DataClean$redis_social_benefits_num)
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
+#DataClean$redis_social_benefits_bin <- ifelse(
+#  DataClean$redis_social_benefits_num %in% c(0.66, 1), 1, 0
+#)
+#
+##How often does welfare go to people who do not really deserve it?
+#table(clean$redis_iden_freerider)
+#
+#DataClean$redis_welfare_num <- NA_real_
+#DataClean$redis_welfare_num[clean$redis_iden_freerider == "Most of the time"] <- 1
+#DataClean$redis_welfare_num[clean$redis_iden_freerider == "Sometimes"] <- 0.66
+#DataClean$redis_welfare_num[clean$redis_iden_freerider == "Rarely"] <- 0.33
+#DataClean$redis_welfare_num[clean$redis_iden_freerider == "Never"] <- 0
+#table(DataClean$redis_welfare_num)
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
+#DataClean$redis_welfare_bin <- ifelse(
+#  DataClean$redis_welfare_num %in% c(0.66, 1), 1, 0
+#)
+#
+##To what extent can others be trusted to not abuse and cheat the system?
+#table(clean$redis_human_nature.)
+#
+#DataClean$redis_no_cheat_system_num <- NA_real_
+#DataClean$redis_no_cheat_system_num[clean$redis_human_nature. == "Most of the time"] <- 1
+#DataClean$redis_no_cheat_system_num[clean$redis_human_nature. == "Sometimes"] <- 0.66
+#DataClean$redis_no_cheat_system_num[clean$redis_human_nature. == "Rarely"] <- 0.33
+#DataClean$redis_no_cheat_system_num[clean$redis_human_nature. == "Never"] <- 0
+#table(DataClean$redis_no_cheat_system_num)
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
+#DataClean$redis_no_cheat_system_bin <- ifelse(
+#  DataClean$redis_no_cheat_system_num %in% c(0.66, 1), 1, 0
+#)
+#
+###Generally speaking would you say that most people can be trusted, or, that you need to be very careful when dealing with people? - On a scale of 0 to 10 where 0 means no trust and 10 means complete trust.
+#table(data$trust_social_1)
+#data$trust_social_bin <- ifelse(data$trust_social_1 >= 6, 1, 
+#                                ifelse(data$trust_social_1 <= 5, 0, NA))
+#
+#DataClean$trust_social_bin <- data$trust_social_bin[match(rownames(DataClean), rownames(data))]
+#
+#table(DataClean$trust_social_bin, useNA = "ifany")
+#
+#
+###Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - Political parties
+#table(data$trust_institution_1)
+#data$trust_pol_parties_bin <- ifelse(data$trust_institution_1 >= 6, 1,
+#                                     ifelse(data$trust_institution_1 <= 5, 0, NA))
+#
+#DataClean$trust_pol_parties_bin <- data$trust_pol_parties_bin[match(rownames(DataClean), rownames(data))]
+#
+#table(DataClean$trust_pol_parties_bin, useNA = "ifany")
+#
+#
+###Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - The federal government
+#table(data$trust_institution_2)
+#
+#data$trust_fed_gov_bin <- ifelse(data$trust_institution_1 >= 6, 1,
+#                                 ifelse(data$trust_institution_1 <= 5, 0, NA))
+#
+#DataClean$trust_fed_gov_bin <- data$trust_fed_gov_bin[match(rownames(DataClean), rownames(data))]
+#
+#table(DataClean$trust_fed_gov_bin, useNA = "ifany")
+###Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - The provincial government
+#table(data$trust_institution_3)
+#
+#data$trust_prov_gov_bin <- ifelse(data$trust_institution_1 >= 6, 1,
+#                                  ifelse(data$trust_institution_1 <= 5, 0, NA))
+#
+#DataClean$trust_prov_gov_bin <- data$trust_prov_gov_bin[match(rownames(DataClean), rownames(data))]
+#
+#table(DataClean$trust_prov_gov_bin, useNA = "ifany")
+###Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - The mass media
+#table(data$trust_institution_4)
+#
+#data$trust_media_bin <- ifelse(data$trust_institution_1 >= 6, 1,
+#                               ifelse(data$trust_institution_1 <= 5, 0, NA))
+#
+#DataClean$trust_media_bin <- data$trust_media_bin[match(rownames(DataClean), rownames(data))]
+#
+#table(DataClean$trust_media_bin, useNA = "ifany")
+#
+###Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - Your provincial government
+#table(data$trust_institution_5)
+#
+#data$trust_your_prov_gov_bin <- ifelse(data$trust_institution_1 >= 6, 1,
+#                                       ifelse(data$trust_institution_1 <= 5, 0, NA))
+#
+#DataClean$trust_your_prov_gov_bin <- data$trust_your_prov_gov_bin[match(rownames(DataClean), rownames(data))]
+#
+#table(DataClean$trust_your_prov_gov_bin, useNA = "ifany")
+###Generally speaking would you say that most people can be trusted, or, that you need to be very careful when dealing with people? - On a scale of 0 to 10 where 0 means no trust and 10 means complete trust.
+#table(data$trust_social_terr_1)
+###Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - Political parties
+#table(data$trust_institut_terr_1)
+###Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - The federal government
+#table(data$trust_institut_terr_2)
+###Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - The provincial government
+#table(data$trust_institut_terr_3)
+###Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - The mass media
+#table(data$trust_institut_terr_4)
+###Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - Your territorial government
+#table(data$trust_institut_terr_5)
+#
+#
+#
+#
+##To what extent do you agree with the following statement: The government should increase spending on green economy.
+#table(clean$tradeoff_invest_ge0.)
+#
+#DataClean$tradeoff_invest_green_num <- NA_real_
+#DataClean$tradeoff_invest_green_num[clean$tradeoff_invest_ge0. == "Strongly agree"] <- 1
+#DataClean$tradeoff_invest_green_num[clean$tradeoff_invest_ge0. == "Somewhat agree"] <- 0.66
+#DataClean$tradeoff_invest_green_num[clean$tradeoff_invest_ge0. == "Somewhat disagree"] <- 0.33
+#DataClean$tradeoff_invest_green_num[clean$tradeoff_invest_ge0. == "Strongly disagree"] <- 0
+#table(DataClean$tradeoff_invest_green_num)
+#
+##To what extent do you agree with the following statement: The government should increase spending on the green economy, even if that implies higher taxes.
+#table(clean$tradeoff_invest_ge1)
+#
+#DataClean$tradeoff_taxes_green_num <- NA_real_
+#DataClean$tradeoff_taxes_green_num[clean$tradeoff_invest_ge1 == "Strongly agree"] <- 1
+#DataClean$tradeoff_taxes_green_num[clean$tradeoff_invest_ge1 == "Somewhat agree"] <- 0.66
+#DataClean$tradeoff_taxes_green_num[clean$tradeoff_invest_ge1 == "Somewhat disagree"] <- 0.33
+#DataClean$tradeoff_taxes_green_num[clean$tradeoff_invest_ge1 == "Strongly disagree"] <- 0
+#table(DataClean$tradeoff_taxes_green_num)
+#
+##To what extent do you agree with the following statement:  The government should increase spending on the green economy, even if that implies cutting back in other areas.
+#table(clean$tradeoff_invest_ge2)
+#
+#DataClean$tradeoff_cutting_for_green_num <- NA_real_
+#DataClean$tradeoff_cutting_for_green_num[clean$tradeoff_invest_ge2 == "Strongly agree"] <- 1
+#DataClean$tradeoff_cutting_for_green_num[clean$tradeoff_invest_ge2 == "Somewhat agree"] <- 0.66
+#DataClean$tradeoff_cutting_for_green_num[clean$tradeoff_invest_ge2 == "Somewhat disagree"] <- 0.33
+#DataClean$tradeoff_cutting_for_green_num[clean$tradeoff_invest_ge2 == "Strongly disagree"] <- 0
+#table(DataClean$tradeoff_cutting_for_green_num)
+#
+##To what extent do you agree with the following statement:  The government should increase spending on the green economy, even if that implies a higher public debt.
+#table(clean$tradeoff_invest_ge3)
+#
+#DataClean$tradeoff_debt_green_num <- NA_real_
+#DataClean$tradeoff_debt_green_num[clean$tradeoff_invest_ge3 == "Strongly agree"] <- 1
+#DataClean$tradeoff_debt_green_num[clean$tradeoff_invest_ge3 == "Somewhat agree"] <- 0.66
+#DataClean$tradeoff_debt_green_num[clean$tradeoff_invest_ge3 == "Somewhat disagree"] <- 0.33
+#DataClean$tradeoff_debt_green_num[clean$tradeoff_invest_ge3 == "Strongly disagree"] <- 0
+#table(DataClean$tradeoff_debt_green_num)
+#
+#
+###province
+##table(clean$province)
+##
+##DataClean$province_char <- NA
+##DataClean$province_char[clean$province == "Alberta"]   <- 1
+##DataClean$province_char[clean$province == "British Columbia"]  <- 2
+##DataClean$province_char[clean$province == "Colombie-Britannique"]  <- 3
+##DataClean$province_char[clean$province == "Nova Scotia"]   <- 4
+##DataClean$province_char[clean$province == "Ontario"]   <- 5
+##DataClean$province_char[clean$province == "Quebec"]   <- 6
+##DataClean$province_char[clean$province == "Québec"]   <- 7
+##DataClean$province_char[clean$province == "Yukon"]   <- 8
 #
 #table(DataClean$province_char)
 #
@@ -1514,6 +1515,36 @@ table(DataClean$tradeoff_debt_green_num)
 #DataClean$quebec_FR_bin <- ifelse(DataClean$province_char == 7, 1, 0)
 #DataClean$yukon_bin <- ifelse(DataClean$province_char == 8, 1, 0)
 #table(DataClean$quebec_FR_bin)
+#-----------------------------------------------------------------------------------------
+##budget prio
 
+
+##----------------------------------------------------------------------------------------
+##Tradeoff
+
+
+"budget_tradeoff_cc1_17" tradeoff_cc1_tax
+"budget_tradeoff_cc1_18" tradeoff_cc1_cut
+"budget_tradeoff_cc1_19" tradeoff_cc1_debt
+"budget_tradeoff_cc1_20" tradeoff_cc1_no_spend
+
+"budget_tradeoff_ge_6" tradeoff_ge_tax
+"budget_tradeoff_ge_7"  tradeoff_ge_cut
+"budget_tradeoff_ge_8"  tradeoff_ge_debt
+"budget_tradeoff_ge_9" tradeoff_ge_no_spend
+
+"budget_tradeoff_tax_6" tradeoff_tax_less_services
+"budget_tradeoff_tax_7" tradeoff_tax_sales_tax
+"budget_tradeoff_tax_8" tradeoff_tax_inc_tax
+"budget_tradeoff_tax_9" tradeoff_tax_wealth_tax
+
+"budget_tradeoff_hc_21" tradeoff_hc_all
+"budget_tradeoff_hc_22" tradeoff_hc_spend
+"budget_tradeoff_hc_23" tradeoff_hc_pensions
+
+"budget_tradeoff_cc2_21" tradeoff_cc2_all
+"budget_tradeoff_cc2_22" tradeoff_cc1_low_inc
+"budget_tradeoff_cc2_23" tradeoff_cc1_educ_all
+"budget_tradeoff_cc2_24" tradeoff_cc1_educ_low_inc
 
 write.csv(DataClean, "data/clean_df_full.csv")
