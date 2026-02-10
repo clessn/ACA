@@ -787,9 +787,9 @@ DataClean$budget_imp_health_num[clean$budget_issue_imp_1 == 4] <- 0.25
 DataClean$budget_imp_health_num[clean$budget_issue_imp_1 == 5] <- 0
 table(DataClean$budget_imp_health_num)
 
-# Création de la variable binaire : 1 = priorité forte à la santé (0.75 ou 1), 0 = le reste
+# Création de la variable binaire : 1 = priorité forte à la santé (1), 0 = le reste
 DataClean$budget_imp_health_bin <- ifelse(
-  DataClean$budget_imp_health_num %in% c(0.75, 1), 1, 0
+  DataClean$budget_imp_health_num %in% c(1), 1, 0
 )
 
 # Vérification
@@ -806,9 +806,9 @@ DataClean$budget_imp_edu_num[clean$budget_issue_imp_2 == 4] <- 0.25
 DataClean$budget_imp_edu_num[clean$budget_issue_imp_2 == 5] <- 0
 table(DataClean$budget_imp_edu_num)
 
-# Création de la variable binaire : 1 = priorité forte à l'éducation (0.75 ou 1), 0 = le reste
+# Création de la variable binaire : 1 = priorité forte à l'éducation (1), 0 = le reste
 DataClean$budget_imp_edu_bin <- ifelse(
-  DataClean$budget_imp_edu_num %in% c(0.75, 1), 1, 0
+  DataClean$budget_imp_edu_num %in% c(1), 1, 0
 )
 
 # Vérification
@@ -825,9 +825,9 @@ DataClean$budget_imp_pensions_num[clean$budget_issue_imp_3 == 4] <- 0.25
 DataClean$budget_imp_pensions_num[clean$budget_issue_imp_3 == 5] <- 0
 table(DataClean$budget_imp_pensions_num)
 
-# Création de la variable binaire : 1 = priorité forte aux pensions (0.75 ou 1), 0 = le reste
+# Création de la variable binaire : 1 = priorité forte aux pensions (1), 0 = le reste
 DataClean$budget_imp_pensions_bin <- ifelse(
-  DataClean$budget_imp_pensions_num %in% c(0.75, 1), 1, 0
+  DataClean$budget_imp_pensions_num %in% c(1), 1, 0
 )
 
 # Vérification
@@ -844,9 +844,9 @@ DataClean$budget_imp_taxes_num[clean$budget_issue_imp_4 == 4] <- 0.25
 DataClean$budget_imp_taxes_num[clean$budget_issue_imp_4 == 5] <- 0
 table(DataClean$budget_imp_taxes_num)
 
-# Création de la variable binaire : 1 = priorité forte aux taxes (0.75 ou 1), 0 = le reste
+# Création de la variable binaire : 1 = priorité forte aux taxes (1), 0 = le reste
 DataClean$budget_imp_taxes_bin <- ifelse(
-  DataClean$budget_imp_taxes_num %in% c(0.75, 1), 1, 0
+  DataClean$budget_imp_taxes_num %in% c(1), 1, 0
 )
 
 # Vérification
@@ -864,180 +864,659 @@ DataClean$budget_imp_debt_num[clean$budget_issue_imp_5 == 4] <- 0.25
 DataClean$budget_imp_debt_num[clean$budget_issue_imp_5 == 5] <- 0
 table(DataClean$budget_imp_debt_num)
 
-# Création de la variable binaire : 1 = priorité forte à la dette (0.75 ou 1), 0 = le reste
+# Création de la variable binaire : 1 = priorité forte à la dette (1), 0 = le reste
 DataClean$budget_imp_debt_bin <- ifelse(
-  DataClean$budget_imp_debt_num %in% c(0.75, 1), 1, 0
+  DataClean$budget_imp_debt_num %in% c(1), 1, 0
 )
 
 # Vérification
 table(DataClean$budget_imp_debt_bin, useNA = "always")
 
 #Imagine the government has the means to increase spending in some areas, but not all. Among the following policy areas, which are most important to you? You can allocate 100 points. Give more points to the areas you consider to be most important and less to those you consider to be less important. The government should: - increase access to healthcare
-##healthcare
+###healthcare
+#
+#attributes(clean$budget_spend_prio_6)
+#class(clean$budget_spend_prio_6)
+#table(clean$budget_spend_prio_6, useNA = "always")
+#
+#clean <- clean %>%
+#  mutate(
+#    budget_spend_prio_health_num = as.numeric(budget_spend_prio_6),
+#    budget_spend_prio_health_raw = budget_spend_prio_health_num / 100,
+#    budget_spend_prio_health_norm = case_when(
+#      is.na(budget_spend_prio_health_raw) ~ NA_real_,
+#      budget_spend_prio_health_raw <= 0.125 ~ 0.00,
+#      budget_spend_prio_health_raw <= 0.375 ~ 0.25,
+#      budget_spend_prio_health_raw <= 0.625 ~ 0.50,
+#      budget_spend_prio_health_raw <= 0.875 ~ 0.75,
+#      TRUE ~ 1.00
+#    )
+#  )
+#
+#DataClean$budget_spend_prio_health_norm <- clean$budget_spend_prio_health_norm
+#
+#
+#table(DataClean$budget_spend_prio_health_norm, useNA = "always")
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.75 ou 1), 0 = le reste
+#DataClean$budget_spend_prio_health_bin <- ifelse(
+#  DataClean$budget_spend_prio_health_norm %in% c(0.75, 1), 1, 0
+#)
+#
+#table(DataClean$budget_spend_prio_health_bin)
+#
+##Imagine the government has the means to increase spending in some areas, but not all. Among the following policy areas, which are most important to you? You can allocate 100 points. Give more points to the areas you consider to be most important and less to those you consider to be less important. The government should: - increase home care for seniors
+###seniors
+#attributes(clean$budget_spend_prio_7)
+#class(clean$budget_spend_prio_7)
+#table(clean$budget_spend_prio_7, useNA = "always")
+#
+#clean <- clean %>%
+#  mutate(
+#    budget_spend_prio_seniors_num = as.numeric(budget_spend_prio_7),
+#    budget_spend_prio_seniors_raw = budget_spend_prio_seniors_num / 100,
+#    budget_spend_prio_seniors_norm = case_when(
+#      is.na(budget_spend_prio_seniors_raw) ~ NA_real_,
+#      budget_spend_prio_seniors_raw <= 0.125 ~ 0.00,
+#      budget_spend_prio_seniors_raw <= 0.375 ~ 0.25,
+#      budget_spend_prio_seniors_raw <= 0.625 ~ 0.50,
+#      budget_spend_prio_seniors_raw <= 0.875 ~ 0.75,
+#      TRUE ~ 1.00
+#    )
+#  )
+#
+#DataClean$budget_spend_prio_seniors_norm <- clean$budget_spend_prio_seniors_norm
+#
+#
+#table(DataClean$budget_spend_prio_seniors_norm, useNA = "always")
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.75 ou 1), 0 = le reste
+#DataClean$budget_spend_prio_seniors_bin <- ifelse(
+#  DataClean$budget_spend_prio_seniors_norm %in% c(0.75, 1), 1, 0
+#)
+#table(DataClean$budget_spend_prio_seniors_bin)
+#
+#
+##Imagine the government has the means to increase spending in some areas, but not all. Among the following policy areas, which are most important to you? You can allocate 100 points. Give more points to the areas you consider to be most important and less to those you consider to be less important. The government should: - increase the availability of subsidized childcare
+##childcare
+#
+#attributes(clean$budget_spend_prio_8)
+#class(clean$budget_spend_prio_8)
+#table(clean$budget_spend_prio_8, useNA = "always")
+#
+#clean <- clean %>%
+#  mutate(
+#    budget_spend_prio_cc_num = as.numeric(budget_spend_prio_8),
+#    budget_spend_prio_cc_raw = budget_spend_prio_cc_num / 100,
+#    budget_spend_prio_cc_norm = case_when(
+#      is.na(budget_spend_prio_cc_raw) ~ NA_real_,
+#      budget_spend_prio_cc_raw <= 0.125 ~ 0.00,
+#      budget_spend_prio_cc_raw <= 0.375 ~ 0.25,
+#      budget_spend_prio_cc_raw <= 0.625 ~ 0.50,
+#      budget_spend_prio_cc_raw <= 0.875 ~ 0.75,
+#      TRUE ~ 1.00
+#    )
+#  )
+#
+#DataClean$budget_spend_prio_cc_norm <- clean$budget_spend_prio_cc_norm
+#
+#
+#table(DataClean$budget_spend_prio_cc_norm, useNA = "always")
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.75 ou 1), 0 = le reste
+#DataClean$budget_spend_prio_cc_bin <- ifelse(
+#  DataClean$budget_spend_prio_cc_norm %in% c(0.75, 1), 1, 0
+#)
+#table(DataClean$budget_spend_prio_cc_bin)
+#
+#table(DataClean$budget_spend_prio_cc_norm)
+#
+##Imagine the government has the means to increase spending in some areas, but not all. Among the following policy areas, which are most important to you? You can allocate 100 points. Give more points to the areas you consider to be most important and less to those you consider to be less important. The government should: - improve the cost of living
+###cost of living
+#
+#attributes(clean$budget_spend_prio_9)
+#class(clean$budget_spend_prio_9)
+#table(clean$budget_spend_prio_9, useNA = "always")
+#
+#clean <- clean %>%
+#  mutate(
+#    budget_spend_prio_ecn_num = as.numeric(budget_spend_prio_9),
+#    budget_spend_prio_ecn_raw = budget_spend_prio_ecn_num / 100,
+#    budget_spend_prio_ecn_norm = case_when(
+#      is.na(budget_spend_prio_ecn_raw) ~ NA_real_,
+#      budget_spend_prio_ecn_raw <= 0.125 ~ 0.00,
+#      budget_spend_prio_ecn_raw <= 0.375 ~ 0.25,
+#      budget_spend_prio_ecn_raw <= 0.625 ~ 0.50,
+#      budget_spend_prio_ecn_raw <= 0.875 ~ 0.75,
+#      TRUE ~ 1.00
+#    )
+#  )
+#
+#DataClean$budget_spend_prio_ecn_norm <- clean$budget_spend_prio_ecn_norm
+#
+#
+#table(DataClean$budget_spend_prio_costLiving_norm, useNA = "always")
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.75 ou 1), 0 = le reste
+#DataClean$budget_spend_prio_ecn_bin <- ifelse(
+#  DataClean$budget_spend_prio_ecn_norm %in% c(0.75, 1), 1, 0
+#)
+#
+#table(DataClean$budget_spend_prio_ecn_bin)
+#
+##Imagine the government has the means to increase spending in some areas, but not all. Among the following policy areas, which are most important to you? You can allocate 100 points. Give more points to the areas you consider to be most important and less to those you consider to be less important. The government should: - invest in the fight against climate change
+###climate change
+#
+#attributes(clean$budget_spend_prio_10)
+#class(clean$budget_spend_prio_10)
+#table(clean$budget_spend_prio_10, useNA = "always")
+#
+#clean <- clean %>%
+#  mutate(
+#    budget_spend_prio_clim_num = as.numeric(budget_spend_prio_10),
+#    budget_spend_prio_clim_raw = budget_spend_prio_clim_num / 100,
+#    budget_spend_prio_clim_norm = case_when(
+#      is.na(budget_spend_prio_clim_raw) ~ NA_real_,
+#      budget_spend_prio_clim_raw <= 0.125 ~ 0.00,
+#      budget_spend_prio_clim_raw <= 0.375 ~ 0.25,
+#      budget_spend_prio_clim_raw <= 0.625 ~ 0.50,
+#      budget_spend_prio_clim_raw <= 0.875 ~ 0.75,
+#      TRUE ~ 1.00
+#    )
+#  )
+#
+#DataClean$budget_spend_prio_clim_norm <- clean$budget_spend_prio_clim_norm
+#
+#
+#table(DataClean$budget_spend_prio_clim_norm, useNA = "always")
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.75 ou 1), 0 = le reste
+#DataClean$budget_spend_prio_clim_bin <- ifelse(
+#  DataClean$budget_spend_prio_clim_norm %in% c(0.75, 1), 1, 0
+#)
+#
+#table(DataClean$budget_spend_prio_clim_bin)
+#
+#
+#
+#
+##To what extent do you agree with the following statement: The government should increase spending on green economy.
+#table(clean$tradeoff_invest_ge0.)
+#
+#DataClean$tradeoff_invest_green_num <- NA_real_
+#DataClean$tradeoff_invest_green_num[clean$tradeoff_invest_ge0. == "Strongly agree"] <- 1
+#DataClean$tradeoff_invest_green_num[clean$tradeoff_invest_ge0. == "Somewhat agree"] <- 0.66
+#DataClean$tradeoff_invest_green_num[clean$tradeoff_invest_ge0. == "Somewhat disagree"] <- 0.33
+#DataClean$tradeoff_invest_green_num[clean$tradeoff_invest_ge0. == "Strongly disagree"] <- 0
+#table(DataClean$tradeoff_invest_green_num)
+#
+##To what extent do you agree with the following statement: The government should increase spending on the green economy, even if that implies higher taxes.
+#table(clean$tradeoff_invest_ge1)
+#
+#DataClean$tradeoff_taxes_green_num <- NA_real_
+#DataClean$tradeoff_taxes_green_num[clean$tradeoff_invest_ge1 == "Strongly agree"] <- 1
+#DataClean$tradeoff_taxes_green_num[clean$tradeoff_invest_ge1 == "Somewhat agree"] <- 0.66
+#DataClean$tradeoff_taxes_green_num[clean$tradeoff_invest_ge1 == "Somewhat disagree"] <- 0.33
+#DataClean$tradeoff_taxes_green_num[clean$tradeoff_invest_ge1 == "Strongly disagree"] <- 0
+#table(DataClean$tradeoff_taxes_green_num)
+#
+##To what extent do you agree with the following statement:  The government should increase spending on the green economy, even if that implies cutting back in other areas.
+#table(clean$tradeoff_invest_ge2)
+#
+#DataClean$tradeoff_cutting_for_green_num <- NA_real_
+#DataClean$tradeoff_cutting_for_green_num[clean$tradeoff_invest_ge2 == "Strongly agree"] <- 1
+#DataClean$tradeoff_cutting_for_green_num[clean$tradeoff_invest_ge2 == "Somewhat agree"] <- 0.66
+#DataClean$tradeoff_cutting_for_green_num[clean$tradeoff_invest_ge2 == "Somewhat disagree"] <- 0.33
+#DataClean$tradeoff_cutting_for_green_num[clean$tradeoff_invest_ge2 == "Strongly disagree"] <- 0
+#table(DataClean$tradeoff_cutting_for_green_num)
+#
+##To what extent do you agree with the following statement:  The government should increase spending on the green economy, even if that implies a higher public debt.
+#table(clean$tradeoff_invest_ge3)
+#
+#DataClean$tradeoff_debt_green_num <- NA_real_
+#DataClean$tradeoff_debt_green_num[clean$tradeoff_invest_ge3 == "Strongly agree"] <- 1
+#DataClean$tradeoff_debt_green_num[clean$tradeoff_invest_ge3 == "Somewhat agree"] <- 0.66
+#DataClean$tradeoff_debt_green_num[clean$tradeoff_invest_ge3 == "Somewhat disagree"] <- 0.33
+#DataClean$tradeoff_debt_green_num[clean$tradeoff_invest_ge3 == "Strongly disagree"] <- 0
+#table(DataClean$tradeoff_debt_green_num)
+#
+#
+###province
+##table(clean$province)
+##
+##DataClean$province_char <- NA
+##DataClean$province_char[clean$province == "Alberta"]   <- 1
+##DataClean$province_char[clean$province == "British Columbia"]  <- 2
+##DataClean$province_char[clean$province == "Colombie-Britannique"]  <- 3
+##DataClean$province_char[clean$province == "Nova Scotia"]   <- 4
+##DataClean$province_char[clean$province == "Ontario"]   <- 5
+##DataClean$province_char[clean$province == "Quebec"]   <- 6
+##DataClean$province_char[clean$province == "Québec"]   <- 7
+##DataClean$province_char[clean$province == "Yukon"]   <- 8
+#
+#table(DataClean$province_char)
+#
+##binaires
+#DataClean$alberta_bin <- ifelse(DataClean$province_char == 1, 1, 0)
+#DataClean$BC_EN_bin <- ifelse(DataClean$province_char == 2, 1, 0)
+#DataClean$BC_FR_bin <- ifelse(DataClean$province_char == 3, 1, 0)
+#DataClean$nova_scotia_bin <- ifelse(DataClean$province_char == 4, 1, 0)
+#DataClean$ontario_bin <- ifelse(DataClean$province_char == 5, 1, 0)
+#DataClean$quebec_EN_bin <- ifelse(DataClean$province_char == 6, 1, 0)
+#DataClean$quebec_FR_bin <- ifelse(DataClean$province_char == 7, 1, 0)
+#DataClean$yukon_bin <- ifelse(DataClean$province_char == 8, 1, 0)
+#table(DataClean$quebec_FR_bin)
+#-----------------------------------------------------------------------------------------
+##budget prio
 
-attributes(clean$budget_spend_prio_6)
-class(clean$budget_spend_prio_6)
-table(clean$budget_spend_prio_6, useNA = "always")
+# ============================================================
+# ÉTAPE 1: RENOMMER ET CRÉER LES VARIABLES BINAIRES
+# ============================================================
 
-clean <- clean %>%
-  mutate(
-    budget_spend_prio_health_num = as.numeric(budget_spend_prio_6),
-    budget_spend_prio_health_raw = budget_spend_prio_health_num / 100,
-    budget_spend_prio_health_norm = case_when(
-      is.na(budget_spend_prio_health_raw) ~ NA_real_,
-      budget_spend_prio_health_raw <= 0.125 ~ 0.00,
-      budget_spend_prio_health_raw <= 0.375 ~ 0.25,
-      budget_spend_prio_health_raw <= 0.625 ~ 0.50,
-      budget_spend_prio_health_raw <= 0.875 ~ 0.75,
-      TRUE ~ 1.00
-    )
+# 1. Renommer les variables
+DataClean <- clean %>%
+  rename(
+    budget_prio_health = budget_spend_prio_6,
+    budget_prio_seniors = budget_spend_prio_7,
+    budget_prio_cc = budget_spend_prio_8,
+    budget_prio_ecn = budget_spend_prio_9,
+    budget_prio_clim = budget_spend_prio_10
   )
 
-DataClean$budget_spend_prio_health_norm <- clean$budget_spend_prio_health_norm
-
-
-table(DataClean$budget_spend_prio_health_norm, useNA = "always")
-
-# Création de la variable binaire : 1 = priorité forte à la dette (0.75 ou 1), 0 = le reste
-DataClean$budget_spend_prio_health_bin <- ifelse(
-  DataClean$budget_spend_prio_health_norm %in% c(0.75, 1), 1, 0
-)
-
-table(DataClean$budget_spend_prio_health_bin)
-
-#Imagine the government has the means to increase spending in some areas, but not all. Among the following policy areas, which are most important to you? You can allocate 100 points. Give more points to the areas you consider to be most important and less to those you consider to be less important. The government should: - increase home care for seniors
-##seniors
-attributes(clean$budget_spend_prio_7)
-class(clean$budget_spend_prio_7)
-table(clean$budget_spend_prio_7, useNA = "always")
-
-clean <- clean %>%
+# 2. Créer les variables binaires (1 = priorité #1, 0 = pas priorité #1)
+DataClean <- DataClean %>%
+  rowwise() %>%
   mutate(
-    budget_spend_prio_seniors_num = as.numeric(budget_spend_prio_7),
-    budget_spend_prio_seniors_raw = budget_spend_prio_seniors_num / 100,
-    budget_spend_prio_seniors_norm = case_when(
-      is.na(budget_spend_prio_seniors_raw) ~ NA_real_,
-      budget_spend_prio_seniors_raw <= 0.125 ~ 0.00,
-      budget_spend_prio_seniors_raw <= 0.375 ~ 0.25,
-      budget_spend_prio_seniors_raw <= 0.625 ~ 0.50,
-      budget_spend_prio_seniors_raw <= 0.875 ~ 0.75,
-      TRUE ~ 1.00
-    )
+    max_budget = max(c(budget_prio_health, budget_prio_seniors, budget_prio_cc, 
+                       budget_prio_ecn, budget_prio_clim), na.rm = TRUE),
+    
+    # Compter combien de priorités partagent le maximum
+    n_at_max = sum(c(budget_prio_health, budget_prio_seniors, budget_prio_cc, 
+                     budget_prio_ecn, budget_prio_clim) == max_budget, na.rm = TRUE),
+    
+    # Binaire = 1 seulement si c'est le SEUL maximum
+    budget_prio_health_bin = as.integer(budget_prio_health == max_budget & n_at_max == 1),
+    budget_prio_seniors_bin = as.integer(budget_prio_seniors == max_budget & n_at_max == 1),
+    budget_prio_cc_bin = as.integer(budget_prio_cc == max_budget & n_at_max == 1),
+    budget_prio_ecn_bin = as.integer(budget_prio_ecn == max_budget & n_at_max == 1),
+    budget_prio_clim_bin = as.integer(budget_prio_clim == max_budget & n_at_max == 1)
+  ) %>%
+  ungroup() %>%
+  # Nettoyer les colonnes d'aide
+  select(-max_budget, -n_at_max)
+
+# ============================================================
+# ÉTAPE 2: VÉRIFICATION
+# ============================================================
+
+cat("=== VÉRIFICATION DES VARIABLES BINAIRES ===\n\n")
+
+# Compter les 1 et les 0 pour chaque variable binaire
+bin_vars <- c("budget_prio_health_bin", "budget_prio_seniors_bin", 
+              "budget_prio_cc_bin", "budget_prio_ecn_bin", "budget_prio_clim_bin")
+
+for (var in bin_vars) {
+  cat(var, ":\n")
+  print(table(DataClean[[var]], useNA = "ifany"))
+  cat("\n")
+}
+
+# Résumé global
+cat("=== RÉSUMÉ GLOBAL ===\n")
+summary_bin <- DataClean %>%
+  select(all_of(bin_vars)) %>%
+  summarise(across(everything(), 
+                   list(
+                     zeros = ~sum(. == 0, na.rm = TRUE),
+                     ones = ~sum(. == 1, na.rm = TRUE),
+                     NAs = ~sum(is.na(.))
+                   )))
+
+print(summary_bin)
+
+# Vérifier que chaque répondant a maximum 1 priorité
+cat("\n=== VÉRIFICATION: Nombre de '1' par répondant ===\n")
+DataClean <- DataClean %>%
+  mutate(total_bins = budget_prio_health_bin + budget_prio_seniors_bin + 
+           budget_prio_cc_bin + budget_prio_ecn_bin + budget_prio_clim_bin)
+
+cat("Distribution du nombre de priorités #1 par répondant:\n")
+print(table(DataClean$total_bins, useNA = "ifany"))
+#1753 répondants ont une seule priorité claire (ils ont mis plus de points sur UN seul secteur) 
+#662 répondants ont une égalité (ils ont mis le même nombre de points maximum sur 2+ secteurs) → pas de priorité claire, donc tous leurs "_bin" sont à 0
+
+##----------------------------------------------------------------------------------------
+##Tradeoff
+
+# ============================================================
+# FONCTION 
+# ============================================================
+
+create_policy_vars <- function(df, policy_cols) {
+  df <- df %>%
+    rowwise() %>%
+    mutate(
+      max_val = suppressWarnings(max(c_across(all_of(policy_cols)), na.rm = TRUE)),
+      max_val = ifelse(is.infinite(max_val), NA, max_val),
+      n_at_max = sum(c_across(all_of(policy_cols)) == max_val, na.rm = TRUE),
+      mean_allocation = mean(c_across(all_of(policy_cols)), na.rm = TRUE)
+    ) %>%
+    ungroup()
+  
+  for (col in policy_cols) {
+    bin_name <- paste0(col, "_bin")
+    int_name <- paste0(col, "_intensity")
+    
+    df <- df %>%
+      mutate(
+        !!bin_name := ifelse(is.na(max_val), NA, as.integer(!!sym(col) == max_val & n_at_max == 1)),
+        !!int_name := !!sym(col) - mean_allocation
+      )
+  }
+  
+  df <- df %>% select(-max_val, -n_at_max, -mean_allocation)
+  return(df)
+}
+
+# ============================================================
+# NETTOYAGE DES DONNÉES
+# ============================================================
+
+DataClean <- clean %>%
+  rename(
+    tradeoff_cc1_tax = budget_tradeoff_cc1_17,
+    tradeoff_cc1_cut = budget_tradeoff_cc1_18,
+    tradeoff_cc1_debt = budget_tradeoff_cc1_19,
+    tradeoff_cc1_no_spend = budget_tradeoff_cc1_20,
+    
+    tradeoff_ge_tax = budget_tradeoff_ge_6,
+    tradeoff_ge_cut = budget_tradeoff_ge_7,
+    tradeoff_ge_debt = budget_tradeoff_ge_8,
+    tradeoff_ge_no_spend = budget_tradeoff_ge_9,
+    
+    tradeoff_tax_less_services = budget_tradeoff_tax_6,
+    tradeoff_tax_sales_tax = budget_tradeoff_tax_7,
+    tradeoff_tax_inc_tax = budget_tradeoff_tax_8,
+    tradeoff_tax_wealth_tax = budget_tradeoff_tax_9,
+    
+    tradeoff_hc_all = budget_tradeoff_hc_21,
+    tradeoff_hc_spend = budget_tradeoff_hc_22,
+    tradeoff_hc_pensions = budget_tradeoff_hc_23,
+    
+    tradeoff_cc2_all = budget_tradeoff_cc2_21,
+    tradeoff_cc2_low_inc = budget_tradeoff_cc2_22,
+    tradeoff_cc2_educ_all = budget_tradeoff_cc2_23,
+    tradeoff_cc2_educ_low_inc = budget_tradeoff_cc2_24
+  ) %>%
+  mutate(
+    tradeoff_cc1_tax = as.numeric(tradeoff_cc1_tax),
+    tradeoff_cc1_cut = as.numeric(tradeoff_cc1_cut),
+    tradeoff_cc1_debt = as.numeric(tradeoff_cc1_debt),
+    tradeoff_cc1_no_spend = as.numeric(tradeoff_cc1_no_spend),
+    
+    tradeoff_ge_tax = as.numeric(tradeoff_ge_tax),
+    tradeoff_ge_cut = as.numeric(tradeoff_ge_cut),
+    tradeoff_ge_debt = as.numeric(tradeoff_ge_debt),
+    tradeoff_ge_no_spend = as.numeric(tradeoff_ge_no_spend),
+    
+    tradeoff_tax_less_services = as.numeric(tradeoff_tax_less_services),
+    tradeoff_tax_sales_tax = as.numeric(tradeoff_tax_sales_tax),
+    tradeoff_tax_inc_tax = as.numeric(tradeoff_tax_inc_tax),
+    tradeoff_tax_wealth_tax = as.numeric(tradeoff_tax_wealth_tax),
+    
+    tradeoff_hc_all = as.numeric(tradeoff_hc_all),
+    tradeoff_hc_spend = as.numeric(tradeoff_hc_spend),
+    tradeoff_hc_pensions = as.numeric(tradeoff_hc_pensions),
+    
+    tradeoff_cc2_all = as.numeric(tradeoff_cc2_all),
+    tradeoff_cc2_low_inc = as.numeric(tradeoff_cc2_low_inc),
+    tradeoff_cc2_educ_all = as.numeric(tradeoff_cc2_educ_all),
+    tradeoff_cc2_educ_low_inc = as.numeric(tradeoff_cc2_educ_low_inc)
   )
 
-DataClean$budget_spend_prio_seniors_norm <- clean$budget_spend_prio_seniors_norm
+# Créer variables binaires et intensité
+DataClean <- create_policy_vars(DataClean, c("tradeoff_cc1_tax", "tradeoff_cc1_cut", "tradeoff_cc1_debt", "tradeoff_cc1_no_spend"))
+DataClean <- create_policy_vars(DataClean, c("tradeoff_ge_tax", "tradeoff_ge_cut", "tradeoff_ge_debt", "tradeoff_ge_no_spend"))
+DataClean <- create_policy_vars(DataClean, c("tradeoff_tax_less_services", "tradeoff_tax_sales_tax", "tradeoff_tax_inc_tax", "tradeoff_tax_wealth_tax"))
+DataClean <- create_policy_vars(DataClean, c("tradeoff_hc_all", "tradeoff_hc_spend", "tradeoff_hc_pensions"))
+DataClean <- create_policy_vars(DataClean, c("tradeoff_cc2_all", "tradeoff_cc2_low_inc", "tradeoff_cc2_educ_all", "tradeoff_cc2_educ_low_inc"))
 
+# ============================================================
+# CRÉER VARIABLES BINAIRES BASÉES SUR INTENSITÉ >= 50
+# ============================================================
 
-table(DataClean$budget_spend_prio_seniors_norm, useNA = "always")
-
-# Création de la variable binaire : 1 = priorité forte à la dette (0.75 ou 1), 0 = le reste
-DataClean$budget_spend_prio_seniors_bin <- ifelse(
-  DataClean$budget_spend_prio_seniors_norm %in% c(0.75, 1), 1, 0
-)
-table(DataClean$budget_spend_prio_seniors_bin)
-
-
-#Imagine the government has the means to increase spending in some areas, but not all. Among the following policy areas, which are most important to you? You can allocate 100 points. Give more points to the areas you consider to be most important and less to those you consider to be less important. The government should: - increase the availability of subsidized childcare
-#childcare
-
-attributes(clean$budget_spend_prio_8)
-class(clean$budget_spend_prio_8)
-table(clean$budget_spend_prio_8, useNA = "always")
-
-clean <- clean %>%
+DataClean <- DataClean %>%
   mutate(
-    budget_spend_prio_cc_num = as.numeric(budget_spend_prio_8),
-    budget_spend_prio_cc_raw = budget_spend_prio_cc_num / 100,
-    budget_spend_prio_cc_norm = case_when(
-      is.na(budget_spend_prio_cc_raw) ~ NA_real_,
-      budget_spend_prio_cc_raw <= 0.125 ~ 0.00,
-      budget_spend_prio_cc_raw <= 0.375 ~ 0.25,
-      budget_spend_prio_cc_raw <= 0.625 ~ 0.50,
-      budget_spend_prio_cc_raw <= 0.875 ~ 0.75,
-      TRUE ~ 1.00
-    )
+    # cc1
+    tradeoff_cc1_tax_strong = as.integer(tradeoff_cc1_tax_intensity >= 50),
+    tradeoff_cc1_cut_strong = as.integer(tradeoff_cc1_cut_intensity >= 50),
+    tradeoff_cc1_debt_strong = as.integer(tradeoff_cc1_debt_intensity >= 50),
+    tradeoff_cc1_no_spend_strong = as.integer(tradeoff_cc1_no_spend_intensity >= 50),
+    
+    # ge
+    tradeoff_ge_tax_strong = as.integer(tradeoff_ge_tax_intensity >= 50),
+    tradeoff_ge_cut_strong = as.integer(tradeoff_ge_cut_intensity >= 50),
+    tradeoff_ge_debt_strong = as.integer(tradeoff_ge_debt_intensity >= 50),
+    tradeoff_ge_no_spend_strong = as.integer(tradeoff_ge_no_spend_intensity >= 50),
+    
+    # tax
+    tradeoff_tax_less_services_strong = as.integer(tradeoff_tax_less_services_intensity >= 50),
+    tradeoff_tax_sales_tax_strong = as.integer(tradeoff_tax_sales_tax_intensity >= 50),
+    tradeoff_tax_inc_tax_strong = as.integer(tradeoff_tax_inc_tax_intensity >= 50),
+    tradeoff_tax_wealth_tax_strong = as.integer(tradeoff_tax_wealth_tax_intensity >= 50),
+    
+    # hc
+    tradeoff_hc_all_strong = as.integer(tradeoff_hc_all_intensity >= 50),
+    tradeoff_hc_spend_strong = as.integer(tradeoff_hc_spend_intensity >= 50),
+    tradeoff_hc_pensions_strong = as.integer(tradeoff_hc_pensions_intensity >= 50),
+    
+    # cc2
+    tradeoff_cc2_all_strong = as.integer(tradeoff_cc2_all_intensity >= 50),
+    tradeoff_cc2_low_inc_strong = as.integer(tradeoff_cc2_low_inc_intensity >= 50),
+    tradeoff_cc2_educ_all_strong = as.integer(tradeoff_cc2_educ_all_intensity >= 50),
+    tradeoff_cc2_educ_low_inc_strong = as.integer(tradeoff_cc2_educ_low_inc_intensity >= 50)
   )
 
-DataClean$budget_spend_prio_cc_norm <- clean$budget_spend_prio_cc_norm
+# ============================================================
+# VÉRIFICATION
+# ============================================================
 
+cat("✅ Nettoyage terminé!\n\n")
 
-table(DataClean$budget_spend_prio_cc_norm, useNA = "always")
+cat("=== VÉRIFICATION DES PRÉFÉRENCES FORTES (>= 50 points) ===\n\n")
 
-# Création de la variable binaire : 1 = priorité forte à la dette (0.75 ou 1), 0 = le reste
-DataClean$budget_spend_prio_cc_bin <- ifelse(
-  DataClean$budget_spend_prio_cc_norm %in% c(0.75, 1), 1, 0
-)
-table(DataClean$budget_spend_prio_cc_bin)
+cat("cc1:\n")
+cat("Tax strong:", sum(DataClean$tradeoff_cc1_tax_strong, na.rm = TRUE), "\n")
+cat("Cut strong:", sum(DataClean$tradeoff_cc1_cut_strong, na.rm = TRUE), "\n")
+cat("Debt strong:", sum(DataClean$tradeoff_cc1_debt_strong, na.rm = TRUE), "\n")
+cat("No spend strong:", sum(DataClean$tradeoff_cc1_no_spend_strong, na.rm = TRUE), "\n\n")
 
-table(DataClean$budget_spend_prio_cc_norm)
+cat("ge:\n")
+cat("Tax strong:", sum(DataClean$tradeoff_ge_tax_strong, na.rm = TRUE), "\n")
+cat("Cut strong:", sum(DataClean$tradeoff_ge_cut_strong, na.rm = TRUE), "\n")
+cat("Debt strong:", sum(DataClean$tradeoff_ge_debt_strong, na.rm = TRUE), "\n")
+cat("No spend strong:", sum(DataClean$tradeoff_ge_no_spend_strong, na.rm = TRUE), "\n\n")
 
-#Imagine the government has the means to increase spending in some areas, but not all. Among the following policy areas, which are most important to you? You can allocate 100 points. Give more points to the areas you consider to be most important and less to those you consider to be less important. The government should: - improve the cost of living
-##cost of living
+cat("tax:\n")
+cat("Less services strong:", sum(DataClean$tradeoff_tax_less_services_strong, na.rm = TRUE), "\n")
+cat("Sales tax strong:", sum(DataClean$tradeoff_tax_sales_tax_strong, na.rm = TRUE), "\n")
+cat("Inc tax strong:", sum(DataClean$tradeoff_tax_inc_tax_strong, na.rm = TRUE), "\n")
+cat("Wealth tax strong:", sum(DataClean$tradeoff_tax_wealth_tax_strong, na.rm = TRUE), "\n\n")
 
-attributes(clean$budget_spend_prio_9)
-class(clean$budget_spend_prio_9)
-table(clean$budget_spend_prio_9, useNA = "always")
+cat("hc:\n")
+cat("All strong:", sum(DataClean$tradeoff_hc_all_strong, na.rm = TRUE), "\n")
+cat("Spend strong:", sum(DataClean$tradeoff_hc_spend_strong, na.rm = TRUE), "\n")
+cat("Pensions strong:", sum(DataClean$tradeoff_hc_pensions_strong, na.rm = TRUE), "\n\n")
 
-clean <- clean %>%
-  mutate(
-    budget_spend_prio_ecn_num = as.numeric(budget_spend_prio_9),
-    budget_spend_prio_ecn_raw = budget_spend_prio_ecn_num / 100,
-    budget_spend_prio_ecn_norm = case_when(
-      is.na(budget_spend_prio_ecn_raw) ~ NA_real_,
-      budget_spend_prio_ecn_raw <= 0.125 ~ 0.00,
-      budget_spend_prio_ecn_raw <= 0.375 ~ 0.25,
-      budget_spend_prio_ecn_raw <= 0.625 ~ 0.50,
-      budget_spend_prio_ecn_raw <= 0.875 ~ 0.75,
-      TRUE ~ 1.00
-    )
-  )
+cat("cc2:\n")
+cat("All strong:", sum(DataClean$tradeoff_cc2_all_strong, na.rm = TRUE), "\n")
+cat("Low inc strong:", sum(DataClean$tradeoff_cc2_low_inc_strong, na.rm = TRUE), "\n")
+cat("Educ all strong:", sum(DataClean$tradeoff_cc2_educ_all_strong, na.rm = TRUE), "\n")
+cat("Educ low inc strong:", sum(DataClean$tradeoff_cc2_educ_low_inc_strong, na.rm = TRUE), "\n")
 
-DataClean$budget_spend_prio_ecn_norm <- clean$budget_spend_prio_ecn_norm
+# ============================================================
+# VÉRIFICATIONS COMPLÈTES
+# ============================================================
 
+cat("\n========================================\n")
+cat("VÉRIFICATIONS DES 3 TYPES DE VARIABLES\n")
+cat("========================================\n\n")
 
-table(DataClean$budget_spend_prio_costLiving_norm, useNA = "always")
+# ============================================================
+# QUESTION CC1
+# ============================================================
 
-# Création de la variable binaire : 1 = priorité forte à la dette (0.75 ou 1), 0 = le reste
-DataClean$budget_spend_prio_ecn_bin <- ifelse(
-  DataClean$budget_spend_prio_ecn_norm %in% c(0.75, 1), 1, 0
-)
+cat("=====================================\n")
+cat("QUESTION CC1 (Childcare 1)\n")
+cat("=====================================\n\n")
 
-table(DataClean$budget_spend_prio_ecn_bin)
+cat("--- BINAIRES (_bin) - Priorité #1 claire ---\n")
+cat("tradeoff_cc1_tax_bin:\n")
+print(table(DataClean$tradeoff_cc1_tax_bin, useNA = "ifany"))
+cat("\ntradeoff_cc1_cut_bin:\n")
+print(table(DataClean$tradeoff_cc1_cut_bin, useNA = "ifany"))
+cat("\ntradeoff_cc1_debt_bin:\n")
+print(table(DataClean$tradeoff_cc1_debt_bin, useNA = "ifany"))
+cat("\ntradeoff_cc1_no_spend_bin:\n")
+print(table(DataClean$tradeoff_cc1_no_spend_bin, useNA = "ifany"))
 
-#Imagine the government has the means to increase spending in some areas, but not all. Among the following policy areas, which are most important to you? You can allocate 100 points. Give more points to the areas you consider to be most important and less to those you consider to be less important. The government should: - invest in the fight against climate change
-##climate change
+cat("\n--- INTENSITÉ (_intensity) - Écart par rapport à la moyenne ---\n")
+print(summary(DataClean[, c("tradeoff_cc1_tax_intensity", "tradeoff_cc1_cut_intensity", 
+                            "tradeoff_cc1_debt_intensity", "tradeoff_cc1_no_spend_intensity")]))
 
-attributes(clean$budget_spend_prio_10)
-class(clean$budget_spend_prio_10)
-table(clean$budget_spend_prio_10, useNA = "always")
+cat("\n--- PRÉFÉRENCES FORTES (_strong) - Intensité >= 50 points ---\n")
+cat("Tax strong:", sum(DataClean$tradeoff_cc1_tax_strong, na.rm = TRUE), "personnes\n")
+cat("Cut strong:", sum(DataClean$tradeoff_cc1_cut_strong, na.rm = TRUE), "personnes\n")
+cat("Debt strong:", sum(DataClean$tradeoff_cc1_debt_strong, na.rm = TRUE), "personnes\n")
+cat("No spend strong:", sum(DataClean$tradeoff_cc1_no_spend_strong, na.rm = TRUE), "personnes\n")
 
-clean <- clean %>%
-  mutate(
-    budget_spend_prio_clim_num = as.numeric(budget_spend_prio_10),
-    budget_spend_prio_clim_raw = budget_spend_prio_clim_num / 100,
-    budget_spend_prio_clim_norm = case_when(
-      is.na(budget_spend_prio_clim_raw) ~ NA_real_,
-      budget_spend_prio_clim_raw <= 0.125 ~ 0.00,
-      budget_spend_prio_clim_raw <= 0.375 ~ 0.25,
-      budget_spend_prio_clim_raw <= 0.625 ~ 0.50,
-      budget_spend_prio_clim_raw <= 0.875 ~ 0.75,
-      TRUE ~ 1.00
-    )
-  )
+# ============================================================
+# QUESTION GE
+# ============================================================
 
-DataClean$budget_spend_prio_clim_norm <- clean$budget_spend_prio_clim_norm
+cat("\n=====================================\n")
+cat("QUESTION GE (Green Economy)\n")
+cat("=====================================\n\n")
 
+cat("--- BINAIRES (_bin) ---\n")
+cat("tradeoff_ge_tax_bin:\n")
+print(table(DataClean$tradeoff_ge_tax_bin, useNA = "ifany"))
+cat("\ntradeoff_ge_cut_bin:\n")
+print(table(DataClean$tradeoff_ge_cut_bin, useNA = "ifany"))
+cat("\ntradeoff_ge_debt_bin:\n")
+print(table(DataClean$tradeoff_ge_debt_bin, useNA = "ifany"))
+cat("\ntradeoff_ge_no_spend_bin:\n")
+print(table(DataClean$tradeoff_ge_no_spend_bin, useNA = "ifany"))
 
-table(DataClean$budget_spend_prio_clim_norm, useNA = "always")
+cat("\n--- INTENSITÉ (_intensity) ---\n")
+print(summary(DataClean[, c("tradeoff_ge_tax_intensity", "tradeoff_ge_cut_intensity", 
+                            "tradeoff_ge_debt_intensity", "tradeoff_ge_no_spend_intensity")]))
 
-# Création de la variable binaire : 1 = priorité forte à la dette (0.75 ou 1), 0 = le reste
-DataClean$budget_spend_prio_clim_bin <- ifelse(
-  DataClean$budget_spend_prio_clim_norm %in% c(0.75, 1), 1, 0
-)
+cat("\n--- PRÉFÉRENCES FORTES (_strong) ---\n")
+cat("Tax strong:", sum(DataClean$tradeoff_ge_tax_strong, na.rm = TRUE), "personnes\n")
+cat("Cut strong:", sum(DataClean$tradeoff_ge_cut_strong, na.rm = TRUE), "personnes\n")
+cat("Debt strong:", sum(DataClean$tradeoff_ge_debt_strong, na.rm = TRUE), "personnes\n")
+cat("No spend strong:", sum(DataClean$tradeoff_ge_no_spend_strong, na.rm = TRUE), "personnes\n")
 
-table(DataClean$budget_spend_prio_clim_bin)
+# ============================================================
+# QUESTION TAX
+# ============================================================
 
-#To what extent do you agree with the following statement: The government should increase spending on childcare.
+cat("\n=====================================\n")
+cat("QUESTION TAX\n")
+cat("=====================================\n\n")
+
+cat("--- BINAIRES (_bin) ---\n")
+cat("tradeoff_tax_less_services_bin:\n")
+print(table(DataClean$tradeoff_tax_less_services_bin, useNA = "ifany"))
+cat("\ntradeoff_tax_sales_tax_bin:\n")
+print(table(DataClean$tradeoff_tax_sales_tax_bin, useNA = "ifany"))
+cat("\ntradeoff_tax_inc_tax_bin:\n")
+print(table(DataClean$tradeoff_tax_inc_tax_bin, useNA = "ifany"))
+cat("\ntradeoff_tax_wealth_tax_bin:\n")
+print(table(DataClean$tradeoff_tax_wealth_tax_bin, useNA = "ifany"))
+
+cat("\n--- INTENSITÉ (_intensity) ---\n")
+print(summary(DataClean[, c("tradeoff_tax_less_services_intensity", "tradeoff_tax_sales_tax_intensity", 
+                            "tradeoff_tax_inc_tax_intensity", "tradeoff_tax_wealth_tax_intensity")]))
+
+cat("\n--- PRÉFÉRENCES FORTES (_strong) ---\n")
+cat("Less services strong:", sum(DataClean$tradeoff_tax_less_services_strong, na.rm = TRUE), "personnes\n")
+cat("Sales tax strong:", sum(DataClean$tradeoff_tax_sales_tax_strong, na.rm = TRUE), "personnes\n")
+cat("Inc tax strong:", sum(DataClean$tradeoff_tax_inc_tax_strong, na.rm = TRUE), "personnes\n")
+cat("Wealth tax strong:", sum(DataClean$tradeoff_tax_wealth_tax_strong, na.rm = TRUE), "personnes\n")
+
+# ============================================================
+# QUESTION HC
+# ============================================================
+
+cat("\n=====================================\n")
+cat("QUESTION HC (Healthcare)\n")
+cat("=====================================\n\n")
+
+cat("--- BINAIRES (_bin) ---\n")
+cat("tradeoff_hc_all_bin:\n")
+print(table(DataClean$tradeoff_hc_all_bin, useNA = "ifany"))
+cat("\ntradeoff_hc_spend_bin:\n")
+print(table(DataClean$tradeoff_hc_spend_bin, useNA = "ifany"))
+cat("\ntradeoff_hc_pensions_bin:\n")
+print(table(DataClean$tradeoff_hc_pensions_bin, useNA = "ifany"))
+
+cat("\n--- INTENSITÉ (_intensity) ---\n")
+print(summary(DataClean[, c("tradeoff_hc_all_intensity", "tradeoff_hc_spend_intensity", 
+                            "tradeoff_hc_pensions_intensity")]))
+
+cat("\n--- PRÉFÉRENCES FORTES (_strong) ---\n")
+cat("All strong:", sum(DataClean$tradeoff_hc_all_strong, na.rm = TRUE), "personnes\n")
+cat("Spend strong:", sum(DataClean$tradeoff_hc_spend_strong, na.rm = TRUE), "personnes\n")
+cat("Pensions strong:", sum(DataClean$tradeoff_hc_pensions_strong, na.rm = TRUE), "personnes\n")
+
+# ============================================================
+# QUESTION CC2
+# ============================================================
+
+cat("\n=====================================\n")
+cat("QUESTION CC2 (Childcare 2)\n")
+cat("=====================================\n\n")
+
+cat("--- BINAIRES (_bin) ---\n")
+cat("tradeoff_cc2_all_bin:\n")
+print(table(DataClean$tradeoff_cc2_all_bin, useNA = "ifany"))
+cat("\ntradeoff_cc2_low_inc_bin:\n")
+print(table(DataClean$tradeoff_cc2_low_inc_bin, useNA = "ifany"))
+cat("\ntradeoff_cc2_educ_all_bin:\n")
+print(table(DataClean$tradeoff_cc2_educ_all_bin, useNA = "ifany"))
+cat("\ntradeoff_cc2_educ_low_inc_bin:\n")
+print(table(DataClean$tradeoff_cc2_educ_low_inc_bin, useNA = "ifany"))
+
+cat("\n--- INTENSITÉ (_intensity) ---\n")
+print(summary(DataClean[, c("tradeoff_cc2_all_intensity", "tradeoff_cc2_low_inc_intensity", 
+                            "tradeoff_cc2_educ_all_intensity", "tradeoff_cc2_educ_low_inc_intensity")]))
+
+cat("\n--- PRÉFÉRENCES FORTES (_strong) ---\n")
+cat("All strong:", sum(DataClean$tradeoff_cc2_all_strong, na.rm = TRUE), "personnes\n")
+cat("Low inc strong:", sum(DataClean$tradeoff_cc2_low_inc_strong, na.rm = TRUE), "personnes\n")
+cat("Educ all strong:", sum(DataClean$tradeoff_cc2_educ_all_strong, na.rm = TRUE), "personnes\n")
+cat("Educ low inc strong:", sum(DataClean$tradeoff_cc2_educ_low_inc_strong, na.rm = TRUE), "personnes\n")
+
+# ============================================================
+# RÉSUMÉ GLOBAL
+# ============================================================
+
+cat("\n\n========================================\n")
+cat("RÉSUMÉ GLOBAL\n")
+cat("========================================\n\n")
+
+cat("Total de variables créées par question:\n")
+cat("- CC1: ", length(grep("^tradeoff_cc1_.*_(bin|intensity|strong)$", names(DataClean))), " variables\n")
+cat("- GE: ", length(grep("^tradeoff_ge_.*_(bin|intensity|strong)$", names(DataClean))), " variables\n")
+cat("- TAX: ", length(grep("^tradeoff_tax_.*_(bin|intensity|strong)$", names(DataClean))), " variables\n")
+cat("- HC: ", length(grep("^tradeoff_hc_.*_(bin|intensity|strong)$", names(DataClean))), " variables\n")
+cat("- CC2: ", length(grep("^tradeoff_cc2_.*_(bin|intensity|strong)$", names(DataClean))), " variables\n")
+
+cat("\n✅ VÉRIFICATIONS TERMINÉES!\n")
+
+##To what extent do you agree with the following statement: The government should increase spending on childcare.
 #table(clean$tradeoff_invest_cc0)
 #
 #DataClean$tradeoff_childcare_num <- NA_real_
@@ -1254,297 +1733,244 @@ table(DataClean$budget_spend_prio_clim_bin)
 #DataClean$tradeoff_senior_income_bin <- ifelse(
 #  DataClean$tradeoff_senior_income_num %in% c(0.66, 1), 1, 0
 #)
-#
-##To what extent do you agree with the following statement? In Canada, people get rewarded for their intelligence and skill.
-#table(clean$redis_fei_can1)
-#
-#DataClean$redis_intelligence_num <- NA_real_
-#DataClean$redis_intelligence_num[clean$redis_fei_can1 == "Most of the time"] <- 1
-#DataClean$redis_intelligence_num[clean$redis_fei_can1 == "Sometimes"] <- 0.66
-#DataClean$redis_intelligence_num[clean$redis_fei_can1 == "Rarely"] <- 0.33
-#DataClean$redis_intelligence_num[clean$redis_fei_can1 == "Never"] <- 0
-#table(DataClean$redis_intelligence_num)
-#
-## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-#DataClean$redis_intelligence_bin <- ifelse(
-#  DataClean$redis_intelligence_num %in% c(0.66, 1), 1, 0
-#)
-#
-##To what extent do you agree with the following statement? In Canada, people have equal opportunity to get ahead.
-#table(clean$redis_fei_can2.)
-#
-#DataClean$redis_opportunity_num <- NA_real_
-#DataClean$redis_opportunity_num[clean$redis_fei_can2. == "Most of the time"] <- 1
-#DataClean$redis_opportunity_num[clean$redis_fei_can2. == "Sometimes"] <- 0.66
-#DataClean$redis_opportunity_num[clean$redis_fei_can2. == "Rarely"] <- 0.33
-#DataClean$redis_opportunity_num[clean$redis_fei_can2. == "Never"] <- 0
-#table(DataClean$redis_opportunity_num)
-#
-## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-#DataClean$redis_opportunity_bin <- ifelse(
-#  DataClean$redis_opportunity_num %in% c(0.66, 1), 1, 0
-#)
-#
-##In your opinion, what share of rich people are rich for reasons that have nothing to do with how hard they work?
-#table(clean$redis_pnvo_rich)
-#
-#DataClean$redis_reasons_rich_num <- NA_real_
-#DataClean$redis_reasons_rich_num[clean$redis_pnvo_rich == "Most of the time"] <- 1
-#DataClean$redis_reasons_rich_num[clean$redis_pnvo_rich == "Sometimes"] <- 0.66
-#DataClean$redis_reasons_rich_num[clean$redis_pnvo_rich == "Rarely"] <- 0.33
-#DataClean$redis_reasons_rich_num[clean$redis_pnvo_rich == "Never"] <- 0
-#table(DataClean$redis_reasons_rich_num)
-#
-## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-#DataClean$redis_reasons_rich_bin <- ifelse(
-#  DataClean$redis_reasons_rich_num %in% c(0.66, 1), 1, 0
-#)
-#
-##In your opinion, what share of poor people are poor for reasons that have nothing to do with how hard they work?
-#table(clean$redis_pnvo_poor)
-#
-#DataClean$redis_reasons_poor_num <- NA_real_
-#DataClean$redis_reasons_poor_num[clean$redis_pnvo_poor == "Most of the time"] <- 1
-#DataClean$redis_reasons_poor_num[clean$redis_pnvo_poor == "Sometimes"] <- 0.66
-#DataClean$redis_reasons_poor_num[clean$redis_pnvo_poor == "Rarely"] <- 0.33
-#DataClean$redis_reasons_poor_num[clean$redis_pnvo_poor == "Never"] <- 0
-#table(DataClean$redis_reasons_poor_num)
-#
-## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-#DataClean$redis_reasons_poor_bin <- ifelse(
-#  DataClean$redis_reasons_poor_num %in% c(0.66, 1), 1, 0
-#)
-#
-##To what extent do you agree with the following statement?  In Canada, income differences are legitimate reflections of differences in people’s  effort.
-#table(clean$redis_fid_can)
-#
-#DataClean$redis_effort_num <- NA_real_
-#DataClean$redis_effort_num[clean$redis_fid_can == "Most of the time"] <- 1
-#DataClean$redis_effort_num[clean$redis_fid_can == "Sometimes"] <- 0.66
-#DataClean$redis_effort_num[clean$redis_fid_can == "Rarely"] <- 0.33
-#DataClean$redis_effort_num[clean$redis_fid_can == "Never"] <- 0
-#table(DataClean$redis_effort_num)
-#
-#
-## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-#DataClean$redis_effort_bin <- ifelse(
-#  DataClean$redis_effort_num %in% c(0.66, 1), 1, 0
-#)
-#
-##To what extent do you agree with the following statement?  People on social benefits do not really have a choice.
-#table(clean$redis_prev_freerider)
-#
-#DataClean$redis_social_benefits_num <- NA_real_
-#DataClean$redis_social_benefits_num[clean$redis_prev_freerider == "Most of the time"] <- 1
-#DataClean$redis_social_benefits_num[clean$redis_prev_freerider == "Sometimes"] <- 0.66
-#DataClean$redis_social_benefits_num[clean$redis_prev_freerider == "Rarely"] <- 0.33
-#DataClean$redis_social_benefits_num[clean$redis_prev_freerider == "Never"] <- 0
-#table(DataClean$redis_social_benefits_num)
-#
-## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-#DataClean$redis_social_benefits_bin <- ifelse(
-#  DataClean$redis_social_benefits_num %in% c(0.66, 1), 1, 0
-#)
-#
-##How often does welfare go to people who do not really deserve it?
-#table(clean$redis_iden_freerider)
-#
-#DataClean$redis_welfare_num <- NA_real_
-#DataClean$redis_welfare_num[clean$redis_iden_freerider == "Most of the time"] <- 1
-#DataClean$redis_welfare_num[clean$redis_iden_freerider == "Sometimes"] <- 0.66
-#DataClean$redis_welfare_num[clean$redis_iden_freerider == "Rarely"] <- 0.33
-#DataClean$redis_welfare_num[clean$redis_iden_freerider == "Never"] <- 0
-#table(DataClean$redis_welfare_num)
-#
-## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-#DataClean$redis_welfare_bin <- ifelse(
-#  DataClean$redis_welfare_num %in% c(0.66, 1), 1, 0
-#)
-#
-##To what extent can others be trusted to not abuse and cheat the system?
-#table(clean$redis_human_nature.)
-#
-#DataClean$redis_no_cheat_system_num <- NA_real_
-#DataClean$redis_no_cheat_system_num[clean$redis_human_nature. == "Most of the time"] <- 1
-#DataClean$redis_no_cheat_system_num[clean$redis_human_nature. == "Sometimes"] <- 0.66
-#DataClean$redis_no_cheat_system_num[clean$redis_human_nature. == "Rarely"] <- 0.33
-#DataClean$redis_no_cheat_system_num[clean$redis_human_nature. == "Never"] <- 0
-#table(DataClean$redis_no_cheat_system_num)
-#
-## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-#DataClean$redis_no_cheat_system_bin <- ifelse(
-#  DataClean$redis_no_cheat_system_num %in% c(0.66, 1), 1, 0
-#)
-#
-###Generally speaking would you say that most people can be trusted, or, that you need to be very careful when dealing with people? - On a scale of 0 to 10 where 0 means no trust and 10 means complete trust.
-#table(data$trust_social_1)
-#data$trust_social_bin <- ifelse(data$trust_social_1 >= 6, 1, 
-#                                ifelse(data$trust_social_1 <= 5, 0, NA))
-#
-#DataClean$trust_social_bin <- data$trust_social_bin[match(rownames(DataClean), rownames(data))]
-#
-#table(DataClean$trust_social_bin, useNA = "ifany")
-#
-#
-###Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - Political parties
-#table(data$trust_institution_1)
-#data$trust_pol_parties_bin <- ifelse(data$trust_institution_1 >= 6, 1,
-#                                     ifelse(data$trust_institution_1 <= 5, 0, NA))
-#
-#DataClean$trust_pol_parties_bin <- data$trust_pol_parties_bin[match(rownames(DataClean), rownames(data))]
-#
-#table(DataClean$trust_pol_parties_bin, useNA = "ifany")
-#
-#
-###Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - The federal government
-#table(data$trust_institution_2)
-#
-#data$trust_fed_gov_bin <- ifelse(data$trust_institution_1 >= 6, 1,
-#                                 ifelse(data$trust_institution_1 <= 5, 0, NA))
-#
-#DataClean$trust_fed_gov_bin <- data$trust_fed_gov_bin[match(rownames(DataClean), rownames(data))]
-#
-#table(DataClean$trust_fed_gov_bin, useNA = "ifany")
-###Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - The provincial government
-#table(data$trust_institution_3)
-#
-#data$trust_prov_gov_bin <- ifelse(data$trust_institution_1 >= 6, 1,
-#                                  ifelse(data$trust_institution_1 <= 5, 0, NA))
-#
-#DataClean$trust_prov_gov_bin <- data$trust_prov_gov_bin[match(rownames(DataClean), rownames(data))]
-#
-#table(DataClean$trust_prov_gov_bin, useNA = "ifany")
-###Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - The mass media
-#table(data$trust_institution_4)
-#
-#data$trust_media_bin <- ifelse(data$trust_institution_1 >= 6, 1,
-#                               ifelse(data$trust_institution_1 <= 5, 0, NA))
-#
-#DataClean$trust_media_bin <- data$trust_media_bin[match(rownames(DataClean), rownames(data))]
-#
-#table(DataClean$trust_media_bin, useNA = "ifany")
-#
-###Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - Your provincial government
-#table(data$trust_institution_5)
-#
-#data$trust_your_prov_gov_bin <- ifelse(data$trust_institution_1 >= 6, 1,
-#                                       ifelse(data$trust_institution_1 <= 5, 0, NA))
-#
-#DataClean$trust_your_prov_gov_bin <- data$trust_your_prov_gov_bin[match(rownames(DataClean), rownames(data))]
-#
-#table(DataClean$trust_your_prov_gov_bin, useNA = "ifany")
-###Generally speaking would you say that most people can be trusted, or, that you need to be very careful when dealing with people? - On a scale of 0 to 10 where 0 means no trust and 10 means complete trust.
-#table(data$trust_social_terr_1)
-###Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - Political parties
-#table(data$trust_institut_terr_1)
-###Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - The federal government
-#table(data$trust_institut_terr_2)
-###Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - The provincial government
-#table(data$trust_institut_terr_3)
-###Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - The mass media
-#table(data$trust_institut_terr_4)
-###Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - Your territorial government
-#table(data$trust_institut_terr_5)
-#
-#
-#
-#
-##To what extent do you agree with the following statement: The government should increase spending on green economy.
-#table(clean$tradeoff_invest_ge0.)
-#
-#DataClean$tradeoff_invest_green_num <- NA_real_
-#DataClean$tradeoff_invest_green_num[clean$tradeoff_invest_ge0. == "Strongly agree"] <- 1
-#DataClean$tradeoff_invest_green_num[clean$tradeoff_invest_ge0. == "Somewhat agree"] <- 0.66
-#DataClean$tradeoff_invest_green_num[clean$tradeoff_invest_ge0. == "Somewhat disagree"] <- 0.33
-#DataClean$tradeoff_invest_green_num[clean$tradeoff_invest_ge0. == "Strongly disagree"] <- 0
-#table(DataClean$tradeoff_invest_green_num)
-#
-##To what extent do you agree with the following statement: The government should increase spending on the green economy, even if that implies higher taxes.
-#table(clean$tradeoff_invest_ge1)
-#
-#DataClean$tradeoff_taxes_green_num <- NA_real_
-#DataClean$tradeoff_taxes_green_num[clean$tradeoff_invest_ge1 == "Strongly agree"] <- 1
-#DataClean$tradeoff_taxes_green_num[clean$tradeoff_invest_ge1 == "Somewhat agree"] <- 0.66
-#DataClean$tradeoff_taxes_green_num[clean$tradeoff_invest_ge1 == "Somewhat disagree"] <- 0.33
-#DataClean$tradeoff_taxes_green_num[clean$tradeoff_invest_ge1 == "Strongly disagree"] <- 0
-#table(DataClean$tradeoff_taxes_green_num)
-#
-##To what extent do you agree with the following statement:  The government should increase spending on the green economy, even if that implies cutting back in other areas.
-#table(clean$tradeoff_invest_ge2)
-#
-#DataClean$tradeoff_cutting_for_green_num <- NA_real_
-#DataClean$tradeoff_cutting_for_green_num[clean$tradeoff_invest_ge2 == "Strongly agree"] <- 1
-#DataClean$tradeoff_cutting_for_green_num[clean$tradeoff_invest_ge2 == "Somewhat agree"] <- 0.66
-#DataClean$tradeoff_cutting_for_green_num[clean$tradeoff_invest_ge2 == "Somewhat disagree"] <- 0.33
-#DataClean$tradeoff_cutting_for_green_num[clean$tradeoff_invest_ge2 == "Strongly disagree"] <- 0
-#table(DataClean$tradeoff_cutting_for_green_num)
-#
-##To what extent do you agree with the following statement:  The government should increase spending on the green economy, even if that implies a higher public debt.
-#table(clean$tradeoff_invest_ge3)
-#
-#DataClean$tradeoff_debt_green_num <- NA_real_
-#DataClean$tradeoff_debt_green_num[clean$tradeoff_invest_ge3 == "Strongly agree"] <- 1
-#DataClean$tradeoff_debt_green_num[clean$tradeoff_invest_ge3 == "Somewhat agree"] <- 0.66
-#DataClean$tradeoff_debt_green_num[clean$tradeoff_invest_ge3 == "Somewhat disagree"] <- 0.33
-#DataClean$tradeoff_debt_green_num[clean$tradeoff_invest_ge3 == "Strongly disagree"] <- 0
-#table(DataClean$tradeoff_debt_green_num)
-#
-#
-###province
-##table(clean$province)
-##
-##DataClean$province_char <- NA
-##DataClean$province_char[clean$province == "Alberta"]   <- 1
-##DataClean$province_char[clean$province == "British Columbia"]  <- 2
-##DataClean$province_char[clean$province == "Colombie-Britannique"]  <- 3
-##DataClean$province_char[clean$province == "Nova Scotia"]   <- 4
-##DataClean$province_char[clean$province == "Ontario"]   <- 5
-##DataClean$province_char[clean$province == "Quebec"]   <- 6
-##DataClean$province_char[clean$province == "Québec"]   <- 7
-##DataClean$province_char[clean$province == "Yukon"]   <- 8
-#
-#table(DataClean$province_char)
-#
-##binaires
-#DataClean$alberta_bin <- ifelse(DataClean$province_char == 1, 1, 0)
-#DataClean$BC_EN_bin <- ifelse(DataClean$province_char == 2, 1, 0)
-#DataClean$BC_FR_bin <- ifelse(DataClean$province_char == 3, 1, 0)
-#DataClean$nova_scotia_bin <- ifelse(DataClean$province_char == 4, 1, 0)
-#DataClean$ontario_bin <- ifelse(DataClean$province_char == 5, 1, 0)
-#DataClean$quebec_EN_bin <- ifelse(DataClean$province_char == 6, 1, 0)
-#DataClean$quebec_FR_bin <- ifelse(DataClean$province_char == 7, 1, 0)
-#DataClean$yukon_bin <- ifelse(DataClean$province_char == 8, 1, 0)
-#table(DataClean$quebec_FR_bin)
-#-----------------------------------------------------------------------------------------
-##budget prio
+#---------------------------------------------------------------------------
+##redis
+# ============================================================
+# NETTOYAGE DES VARIABLES DE REDISTRIBUTION
+# ============================================================
+
+# redis_fei_can1: most = 1, never = 0 
+table(clean$redis_fei_can1)
+
+DataClean$redis_intelligence_num <- NA_real_
+DataClean$redis_intelligence_num[clean$redis_fei_can1 == "Most of the time"] <- 1
+DataClean$redis_intelligence_num[clean$redis_fei_can1 == "Sometimes"] <- 0.66
+DataClean$redis_intelligence_num[clean$redis_fei_can1 == "Rarely"] <- 0.33
+DataClean$redis_intelligence_num[clean$redis_fei_can1 == "Never"] <- 0
+table(DataClean$redis_intelligence_num)
+
+DataClean$redis_intelligence_bin <- ifelse(
+  DataClean$redis_intelligence_num %in% c(0.66, 1), 1, 0
+)
+
+# redis_fei_can2.: most = 1, never = 0 
+table(clean$redis_fei_can2.)
+
+DataClean$redis_opportunity_num <- NA_real_
+DataClean$redis_opportunity_num[clean$redis_fei_can2. == "Most of the time"] <- 1
+DataClean$redis_opportunity_num[clean$redis_fei_can2. == "Sometimes"] <- 0.66
+DataClean$redis_opportunity_num[clean$redis_fei_can2. == "Rarely"] <- 0.33
+DataClean$redis_opportunity_num[clean$redis_fei_can2. == "Never"] <- 0
+table(DataClean$redis_opportunity_num)
+
+DataClean$redis_opportunity_bin <- ifelse(
+  DataClean$redis_opportunity_num %in% c(0.66, 1), 1, 0
+)
+
+# redis_pnvo_rich: most = 0, never = 1 ⚠ INVERSÉ
+table(clean$redis_pnvo_rich)
+
+DataClean$redis_reasons_rich_num <- NA_real_
+DataClean$redis_reasons_rich_num[clean$redis_pnvo_rich == "Most of the time"] <- 0  # CHANGÉ de 1 à 0
+DataClean$redis_reasons_rich_num[clean$redis_pnvo_rich == "Sometimes"] <- 0.33      # CHANGÉ de 0.66 à 0.33
+DataClean$redis_reasons_rich_num[clean$redis_pnvo_rich == "Rarely"] <- 0.66         # CHANGÉ de 0.33 à 0.66
+DataClean$redis_reasons_rich_num[clean$redis_pnvo_rich == "Never"] <- 1             # CHANGÉ de 0 à 1
+table(DataClean$redis_reasons_rich_num)
+
+DataClean$redis_reasons_rich_bin <- ifelse(
+  DataClean$redis_reasons_rich_num %in% c(0.66, 1), 1, 0
+)
+
+# redis_pnvo_poor.: most = 0, never = 1 ⚠ INVERSÉ
+table(clean$redis_pnvo_poor.)
+
+DataClean$redis_reasons_poor_num <- NA_real_
+DataClean$redis_reasons_poor_num[clean$redis_pnvo_poor. == "Most of the time"] <- 0  # CHANGÉ de 1 à 0
+DataClean$redis_reasons_poor_num[clean$redis_pnvo_poor. == "Sometimes"] <- 0.33      # CHANGÉ de 0.66 à 0.33
+DataClean$redis_reasons_poor_num[clean$redis_pnvo_poor. == "Rarely"] <- 0.66         # CHANGÉ de 0.33 à 0.66
+DataClean$redis_reasons_poor_num[clean$redis_pnvo_poor. == "Never"] <- 1             # CHANGÉ de 0 à 1
+table(DataClean$redis_reasons_poor_num)
+
+DataClean$redis_reasons_poor_bin <- ifelse(
+  DataClean$redis_reasons_poor_num %in% c(0.66, 1), 1, 0
+)
+
+# redis_fid_can: most = 1, never = 0 
+table(clean$redis_fid_can)
+
+DataClean$redis_effort_num <- NA_real_
+DataClean$redis_effort_num[clean$redis_fid_can == "Most of the time"] <- 1
+DataClean$redis_effort_num[clean$redis_fid_can == "Sometimes"] <- 0.66
+DataClean$redis_effort_num[clean$redis_fid_can == "Rarely"] <- 0.33
+DataClean$redis_effort_num[clean$redis_fid_can == "Never"] <- 0
+table(DataClean$redis_effort_num)
+
+DataClean$redis_effort_bin <- ifelse(
+  DataClean$redis_effort_num %in% c(0.66, 1), 1, 0
+)
+
+# redis_prev_freerider: most = 1, never = 0 
+table(clean$redis_prev_freerider)
+
+DataClean$redis_social_benefits_num <- NA_real_
+DataClean$redis_social_benefits_num[clean$redis_prev_freerider == "Most of the time"] <- 1
+DataClean$redis_social_benefits_num[clean$redis_prev_freerider == "Sometimes"] <- 0.66
+DataClean$redis_social_benefits_num[clean$redis_prev_freerider == "Rarely"] <- 0.33
+DataClean$redis_social_benefits_num[clean$redis_prev_freerider == "Never"] <- 0
+table(DataClean$redis_social_benefits_num)
+
+DataClean$redis_social_benefits_bin <- ifelse(
+  DataClean$redis_social_benefits_num %in% c(0.66, 1), 1, 0
+)
+
+# redis_iden_freerider: most = 0, never = 1 ⚠ INVERSÉ
+table(clean$redis_iden_freerider)
+
+DataClean$redis_welfare_num <- NA_real_
+DataClean$redis_welfare_num[clean$redis_iden_freerider == "Most of the time"] <- 0   # CHANGÉ de 1 à 0
+DataClean$redis_welfare_num[clean$redis_iden_freerider == "Sometimes"] <- 0.33       # CHANGÉ de 0.66 à 0.33
+DataClean$redis_welfare_num[clean$redis_iden_freerider == "Rarely"] <- 0.66          # CHANGÉ de 0.33 à 0.66
+DataClean$redis_welfare_num[clean$redis_iden_freerider == "Never"] <- 1              # CHANGÉ de 0 à 1
+table(DataClean$redis_welfare_num)
+
+DataClean$redis_welfare_bin <- ifelse(
+  DataClean$redis_welfare_num %in% c(0.66, 1), 1, 0
+)
+
+# redis_human_nature.: most = 1, never = 0 
+table(clean$redis_human_nature.)
+
+DataClean$redis_no_cheat_system_num <- NA_real_
+DataClean$redis_no_cheat_system_num[clean$redis_human_nature. == "Most of the time"] <- 1
+DataClean$redis_no_cheat_system_num[clean$redis_human_nature. == "Sometimes"] <- 0.66
+DataClean$redis_no_cheat_system_num[clean$redis_human_nature. == "Rarely"] <- 0.33
+DataClean$redis_no_cheat_system_num[clean$redis_human_nature. == "Never"] <- 0
+table(DataClean$redis_no_cheat_system_num)
+
+DataClean$redis_no_cheat_system_bin <- ifelse(
+  DataClean$redis_no_cheat_system_num %in% c(0.66, 1), 1, 0
+)
+
+cat("✅ Variables de redistribution nettoyées!\n")
+
+#------------------------------------------------------------------------------------
+#ideo_vote_fed_clean
+#1deo_vote_prov_clean
+
+#--------------------------------------------------------------------------------------
+#trust
+
+# Generally speaking would you say that most people can be trusted, or, that you need to be very careful when dealing with people? 
+# On a scale of 0 to 10 where 0 means no trust and 10 means complete trust.
+
+table(clean$trust_social_clean)
+
+# Convertir en numérique
+DataClean$trust_social_num <- as.numeric(clean$trust_social_clean)
+
+# Créer variable binaire: 1 = confiance élevée (6-10), 0 = confiance faible (0-5)
+DataClean$trust_social_bin <- ifelse(
+  DataClean$trust_social_num >= 6, 1, 
+  ifelse(DataClean$trust_social_num <= 5, 0, NA)
+)
+
+# Vérification
+cat("Variable numérique (0-10):\n")
+table(DataClean$trust_social_num, useNA = "ifany")
+
+cat("\nVariable binaire (0 = faible confiance, 1 = haute confiance):\n")
+table(DataClean$trust_social_bin, useNA = "ifany")
 
 
-##----------------------------------------------------------------------------------------
-##Tradeoff
+##Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - Political parties
+
+table(clean$trust_inst_pp)
+
+# Convertir en numérique
+DataClean$trust_inst_pp_num <- as.numeric(clean$trust_inst_pp)
+
+# Créer variable binaire: 1 = confiance élevée (6-10), 0 = confiance faible (0-5)
+DataClean$trust_inst_pp_bin <- ifelse(
+  DataClean$trust_inst_pp_num >= 6, 1, 
+  ifelse(DataClean$trust_inst_pp_num <= 5, 0, NA)
+)
+
+# Vérification
+cat("Variable numérique (0-10):\n")
+table(DataClean$trust_inst_pp_num, useNA = "ifany")
+
+cat("\nVariable binaire (0 = faible confiance, 1 = haute confiance):\n")
+table(DataClean$trust_inst_pp_bin, useNA = "ifany")
 
 
-"budget_tradeoff_cc1_17" tradeoff_cc1_tax
-"budget_tradeoff_cc1_18" tradeoff_cc1_cut
-"budget_tradeoff_cc1_19" tradeoff_cc1_debt
-"budget_tradeoff_cc1_20" tradeoff_cc1_no_spend
+##Please indicate how much trust you have in the following: (On a scale of 0  to 10 where 0 means no trust and 10 means complete trust.) - The federal government
+# Trust in federal government
+# On a scale of 0 to 10 where 0 means no trust and 10 means complete trust.
 
-"budget_tradeoff_ge_6" tradeoff_ge_tax
-"budget_tradeoff_ge_7"  tradeoff_ge_cut
-"budget_tradeoff_ge_8"  tradeoff_ge_debt
-"budget_tradeoff_ge_9" tradeoff_ge_no_spend
+table(clean$trust_inst_fed)
 
-"budget_tradeoff_tax_6" tradeoff_tax_less_services
-"budget_tradeoff_tax_7" tradeoff_tax_sales_tax
-"budget_tradeoff_tax_8" tradeoff_tax_inc_tax
-"budget_tradeoff_tax_9" tradeoff_tax_wealth_tax
+# Convertir en numérique
+DataClean$trust_inst_fed_num <- as.numeric(clean$trust_inst_fed)
 
-"budget_tradeoff_hc_21" tradeoff_hc_all
-"budget_tradeoff_hc_22" tradeoff_hc_spend
-"budget_tradeoff_hc_23" tradeoff_hc_pensions
+# Créer variable binaire: 1 = confiance élevée (6-10), 0 = confiance faible (0-5)
+DataClean$trust_inst_fed_bin <- ifelse(
+  DataClean$trust_inst_fed_num >= 6, 1, 
+  ifelse(DataClean$trust_inst_fed_num <= 5, 0, NA)
+)
 
-"budget_tradeoff_cc2_21" tradeoff_cc2_all
-"budget_tradeoff_cc2_22" tradeoff_cc1_low_inc
-"budget_tradeoff_cc2_23" tradeoff_cc1_educ_all
-"budget_tradeoff_cc2_24" tradeoff_cc1_educ_low_inc
+# Vérification
+cat("trust_inst_fed - Variable numérique (0-10):\n")
+table(DataClean$trust_inst_fed_num, useNA = "ifany")
+
+cat("\ntrust_inst_fed - Variable binaire:\n")
+table(DataClean$trust_inst_fed_bin, useNA = "ifany")
+
+
+
+
+# Trust in provincial government
+# On a scale of 0 to 10 where 0 means no trust and 10 means complete trust.
+
+table(clean$trust_inst_prov)
+
+# Convertir en numérique
+DataClean$trust_inst_prov_num <- as.numeric(clean$trust_inst_prov)
+
+# Créer variable binaire: 1 = confiance élevée (6-10), 0 = confiance faible (0-5)
+DataClean$trust_inst_prov_bin <- ifelse(
+  DataClean$trust_inst_prov_num >= 6, 1, 
+  ifelse(DataClean$trust_inst_prov_num <= 5, 0, NA)
+)
+
+# Vérification
+cat("trust_inst_prov - Variable numérique (0-10):\n")
+table(DataClean$trust_inst_prov_num, useNA = "ifany")
+
+cat("\ntrust_inst_prov - Variable binaire:\n")
+table(DataClean$trust_inst_prov_bin, useNA = "ifany")
+
+# Trust in media
+# On a scale of 0 to 10 where 0 means no trust and 10 means complete trust.
+
+table(clean$trust_inst_media)
+
+# Convertir en numérique
+DataClean$trust_inst_media_num <- as.numeric(clean$trust_inst_media)
+
+# Créer variable binaire: 1 = confiance élevée (6-10), 0 = confiance faible (0-5)
+DataClean$trust_inst_media_bin <- ifelse(
+  DataClean$trust_inst_media_num >= 6, 1, 
+  ifelse(DataClean$trust_inst_media_num <= 5, 0, NA)
+)
+
+# Vérification
+cat("trust_inst_media - Variable numérique (0-10):\n")
+table(DataClean$trust_inst_media_num, useNA = "ifany")
+
+cat("\ntrust_inst_media - Variable binaire:\n")
+table(DataClean$trust_inst_media_bin, useNA = "ifany")
+
+
 
 write.csv(DataClean, "data/clean_df_full.csv")
+
