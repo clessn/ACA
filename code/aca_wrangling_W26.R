@@ -898,140 +898,89 @@ table(DataClean$budget_imp_debt_bin, useNA = "always")
 
 # 100 points questions: For each question, you have 100 points to allocate...
 #-----------------------------------------------------------------------------------------
+
 ##budget prio
 
-# 1. Renommer les variables
-DataClean <- clean %>%
-  rename(
-    budget_prio_health = budget_spend_prio_6,
-    budget_prio_seniors = budget_spend_prio_7,
-    budget_prio_cc = budget_spend_prio_8,
-    budget_prio_ecn = budget_spend_prio_9,
-    budget_prio_clim = budget_spend_prio_10
-  )
+# Ajouter les colonnes de clean à DataClean avec les nouveaux noms
+DataClean$budget_prio_health <- as.numeric(clean$budget_spend_prio_6)
+DataClean$budget_prio_seniors <- as.numeric(clean$budget_spend_prio_7)
+DataClean$budget_prio_cc <- as.numeric(clean$budget_spend_prio_8)
+DataClean$budget_prio_ecn <- as.numeric(clean$budget_spend_prio_9)
+DataClean$budget_prio_clim <- as.numeric(clean$budget_spend_prio_10)
 
-# 2. Créer les variables binaires (1 = priorité #1, 0 = pas priorité #1)
+# Créer les deux types de binaires
 DataClean <- DataClean %>%
   rowwise() %>%
   mutate(
-    max_budget = max(c(budget_prio_health, budget_prio_seniors, budget_prio_cc, 
-                       budget_prio_ecn, budget_prio_clim), na.rm = TRUE),
+    # Trouver le max
+    max_budget = suppressWarnings(max(c(budget_prio_health, budget_prio_seniors, budget_prio_cc, budget_prio_ecn, budget_prio_clim), na.rm = TRUE)),
+    max_budget = ifelse(is.infinite(max_budget), NA, max_budget),
     
-    # Compter combien de priorités partagent le maximum
-    n_at_max = sum(c(budget_prio_health, budget_prio_seniors, budget_prio_cc, 
-                     budget_prio_ecn, budget_prio_clim) == max_budget, na.rm = TRUE),
+    # TYPE 1: Préférence (celui qui a le plus de points)
+    budget_prio_health_pref = as.integer(budget_prio_health == max_budget & !is.na(max_budget)),
+    budget_prio_seniors_pref = as.integer(budget_prio_seniors == max_budget & !is.na(max_budget)),
+    budget_prio_cc_pref = as.integer(budget_prio_cc == max_budget & !is.na(max_budget)),
+    budget_prio_ecn_pref = as.integer(budget_prio_ecn == max_budget & !is.na(max_budget)),
+    budget_prio_clim_pref = as.integer(budget_prio_clim == max_budget & !is.na(max_budget)),
     
-    # Binaire = 1 seulement si c'est le seul maximum
-    budget_prio_health_bin = as.integer(budget_prio_health == max_budget & n_at_max == 1),
-    budget_prio_seniors_bin = as.integer(budget_prio_seniors == max_budget & n_at_max == 1),
-    budget_prio_cc_bin = as.integer(budget_prio_cc == max_budget & n_at_max == 1),
-    budget_prio_ecn_bin = as.integer(budget_prio_ecn == max_budget & n_at_max == 1),
-    budget_prio_clim_bin = as.integer(budget_prio_clim == max_budget & n_at_max == 1)
+    # TYPE 2: Intensité (plus de 50 points)
+    budget_prio_health_intense = as.integer(budget_prio_health > 50),
+    budget_prio_seniors_intense = as.integer(budget_prio_seniors > 50),
+    budget_prio_cc_intense = as.integer(budget_prio_cc > 50),
+    budget_prio_ecn_intense = as.integer(budget_prio_ecn > 50),
+    budget_prio_clim_intense = as.integer(budget_prio_clim > 50)
   ) %>%
   ungroup() %>%
-  # Nettoyer les colonnes d'aide
-  select(-max_budget, -n_at_max)
+  select(-max_budget)
 
 # Vérification
 
-cat("=== VÉRIFICATION DES VARIABLES BINAIRES ===\n\n")
-
-# Compter les 1 et les 0 pour chaque variable binaire
-bin_vars <- c("budget_prio_health_bin", "budget_prio_seniors_bin", 
-              "budget_prio_cc_bin", "budget_prio_ecn_bin", "budget_prio_clim_bin")
-
-for (var in bin_vars) {
-  cat(var, ":\n")
-  print(table(DataClean[[var]], useNA = "ifany"))
-  cat("\n")
-}
-
-# Résumé 
-cat("=== RÉSUMÉ GLOBAL ===\n")
-summary_bin <- DataClean %>%
-  select(all_of(bin_vars)) %>%
-  summarise(across(everything(), 
-                   list(
-                     zeros = ~sum(. == 0, na.rm = TRUE),
-                     ones = ~sum(. == 1, na.rm = TRUE),
-                     NAs = ~sum(is.na(.))
-                   )))
-
-print(summary_bin)
-
-# Vérifier que chaque répondant a maximum 1 priorité
-cat("\n=== VÉRIFICATION: Nombre de '1' par répondant ===\n")
-DataClean <- DataClean %>%
-  mutate(total_bins = budget_prio_health_bin + budget_prio_seniors_bin + 
-           budget_prio_cc_bin + budget_prio_ecn_bin + budget_prio_clim_bin)
-
-cat("Distribution du nombre de priorités #1 par répondant:\n")
-print(table(DataClean$total_bins, useNA = "ifany"))
-#1753 répondants ont une seule priorité claire (ils ont mis plus de points sur UN seul secteur) 
-#662 répondants ont une égalité (ils ont mis le même nombre de points maximum sur 2+ secteurs) → pas de priorité claire, donc tous leurs "_bin" sont à 0
+cat("Exemple - Health:\n")
+cat("Préférence:\n")
+print(table(DataClean$budget_prio_health_pref, useNA = "ifany"))
+cat("\nIntensité:\n")
+print(table(DataClean$budget_prio_health_intense, useNA = "ifany"))
 
 ##----------------------------------------------------------------------------------------
 ##Tradeoff
 
 # ============================================================
-# FONCTION 
+# ÉTAPE 1: RENOMMER ET CONVERTIR EN NUMÉRIQUE
 # ============================================================
-
-create_policy_vars <- function(df, policy_cols) {
-  df <- df %>%
-    rowwise() %>%
-    mutate(
-      max_val = suppressWarnings(max(c_across(all_of(policy_cols)), na.rm = TRUE)),
-      max_val = ifelse(is.infinite(max_val), NA, max_val),
-      n_at_max = sum(c_across(all_of(policy_cols)) == max_val, na.rm = TRUE),
-      mean_allocation = mean(c_across(all_of(policy_cols)), na.rm = TRUE)
-    ) %>%
-    ungroup()
-  
-  for (col in policy_cols) {
-    bin_name <- paste0(col, "_bin")
-    int_name <- paste0(col, "_intensity")
-    
-    df <- df %>%
-      mutate(
-        !!bin_name := ifelse(is.na(max_val), NA, as.integer(!!sym(col) == max_val & n_at_max == 1)),
-        !!int_name := !!sym(col) - mean_allocation
-      )
-  }
-  
-  df <- df %>% select(-max_val, -n_at_max, -mean_allocation)
-  return(df)
-}
-
-# nettoyage
 
 DataClean <- clean %>%
   rename(
+    # budget_tradeoff_cc1
     tradeoff_cc1_tax = budget_tradeoff_cc1_17,
     tradeoff_cc1_cut = budget_tradeoff_cc1_18,
     tradeoff_cc1_debt = budget_tradeoff_cc1_19,
     tradeoff_cc1_no_spend = budget_tradeoff_cc1_20,
     
+    # budget_tradeoff_ge
     tradeoff_ge_tax = budget_tradeoff_ge_6,
     tradeoff_ge_cut = budget_tradeoff_ge_7,
     tradeoff_ge_debt = budget_tradeoff_ge_8,
     tradeoff_ge_no_spend = budget_tradeoff_ge_9,
     
+    # budget_tradeoff_tax
     tradeoff_tax_less_services = budget_tradeoff_tax_6,
     tradeoff_tax_sales_tax = budget_tradeoff_tax_7,
     tradeoff_tax_inc_tax = budget_tradeoff_tax_8,
     tradeoff_tax_wealth_tax = budget_tradeoff_tax_9,
     
+    # budget_tradeoff_hc
     tradeoff_hc_all = budget_tradeoff_hc_21,
     tradeoff_hc_spend = budget_tradeoff_hc_22,
     tradeoff_hc_pensions = budget_tradeoff_hc_23,
     
+    # budget_tradeoff_cc2
     tradeoff_cc2_all = budget_tradeoff_cc2_21,
     tradeoff_cc2_low_inc = budget_tradeoff_cc2_22,
     tradeoff_cc2_educ_all = budget_tradeoff_cc2_23,
     tradeoff_cc2_educ_low_inc = budget_tradeoff_cc2_24
   ) %>%
   mutate(
+    # Convertir en numérique
     tradeoff_cc1_tax = as.numeric(tradeoff_cc1_tax),
     tradeoff_cc1_cut = as.numeric(tradeoff_cc1_cut),
     tradeoff_cc1_debt = as.numeric(tradeoff_cc1_debt),
@@ -1057,438 +1006,146 @@ DataClean <- clean %>%
     tradeoff_cc2_educ_low_inc = as.numeric(tradeoff_cc2_educ_low_inc)
   )
 
-# Créer variables binaires et intensité
-DataClean <- create_policy_vars(DataClean, c("tradeoff_cc1_tax", "tradeoff_cc1_cut", "tradeoff_cc1_debt", "tradeoff_cc1_no_spend"))
-DataClean <- create_policy_vars(DataClean, c("tradeoff_ge_tax", "tradeoff_ge_cut", "tradeoff_ge_debt", "tradeoff_ge_no_spend"))
-DataClean <- create_policy_vars(DataClean, c("tradeoff_tax_less_services", "tradeoff_tax_sales_tax", "tradeoff_tax_inc_tax", "tradeoff_tax_wealth_tax"))
-DataClean <- create_policy_vars(DataClean, c("tradeoff_hc_all", "tradeoff_hc_spend", "tradeoff_hc_pensions"))
-DataClean <- create_policy_vars(DataClean, c("tradeoff_cc2_all", "tradeoff_cc2_low_inc", "tradeoff_cc2_educ_all", "tradeoff_cc2_educ_low_inc"))
-
 # ============================================================
-# CRÉER VARIABLES BINAIRES BASÉES SUR INTENSITÉ >= 50
+# ÉTAPE 2: CRÉER LES DEUX TYPES DE BINAIRES
 # ============================================================
 
 DataClean <- DataClean %>%
+  rowwise() %>%
   mutate(
-    # cc1
-    tradeoff_cc1_tax_strong = as.integer(tradeoff_cc1_tax_intensity >= 50),
-    tradeoff_cc1_cut_strong = as.integer(tradeoff_cc1_cut_intensity >= 50),
-    tradeoff_cc1_debt_strong = as.integer(tradeoff_cc1_debt_intensity >= 50),
-    tradeoff_cc1_no_spend_strong = as.integer(tradeoff_cc1_no_spend_intensity >= 50),
+    # CC1 - Trouver le max
+    max_cc1 = suppressWarnings(max(c(tradeoff_cc1_tax, tradeoff_cc1_cut, tradeoff_cc1_debt, tradeoff_cc1_no_spend), na.rm = TRUE)),
+    max_cc1 = ifelse(is.infinite(max_cc1), NA, max_cc1),
     
-    # ge
-    tradeoff_ge_tax_strong = as.integer(tradeoff_ge_tax_intensity >= 50),
-    tradeoff_ge_cut_strong = as.integer(tradeoff_ge_cut_intensity >= 50),
-    tradeoff_ge_debt_strong = as.integer(tradeoff_ge_debt_intensity >= 50),
-    tradeoff_ge_no_spend_strong = as.integer(tradeoff_ge_no_spend_intensity >= 50),
+    # TYPE 1: Binaire basé sur la préférence (celui qui a le plus de points)
+    tradeoff_cc1_tax_pref = as.integer(tradeoff_cc1_tax == max_cc1 & !is.na(max_cc1)),
+    tradeoff_cc1_cut_pref = as.integer(tradeoff_cc1_cut == max_cc1 & !is.na(max_cc1)),
+    tradeoff_cc1_debt_pref = as.integer(tradeoff_cc1_debt == max_cc1 & !is.na(max_cc1)),
+    tradeoff_cc1_no_spend_pref = as.integer(tradeoff_cc1_no_spend == max_cc1 & !is.na(max_cc1)),
     
-    # tax
-    tradeoff_tax_less_services_strong = as.integer(tradeoff_tax_less_services_intensity >= 50),
-    tradeoff_tax_sales_tax_strong = as.integer(tradeoff_tax_sales_tax_intensity >= 50),
-    tradeoff_tax_inc_tax_strong = as.integer(tradeoff_tax_inc_tax_intensity >= 50),
-    tradeoff_tax_wealth_tax_strong = as.integer(tradeoff_tax_wealth_tax_intensity >= 50),
+    # TYPE 2: Binaire basé sur l'intensité (plus de 50 points)
+    tradeoff_cc1_tax_intense = as.integer(tradeoff_cc1_tax > 50),
+    tradeoff_cc1_cut_intense = as.integer(tradeoff_cc1_cut > 50),
+    tradeoff_cc1_debt_intense = as.integer(tradeoff_cc1_debt > 50),
+    tradeoff_cc1_no_spend_intense = as.integer(tradeoff_cc1_no_spend > 50)
+  ) %>%
+  ungroup() %>%
+  select(-max_cc1)
+
+DataClean <- DataClean %>%
+  rowwise() %>%
+  mutate(
+    # GE - Trouver le max
+    max_ge = suppressWarnings(max(c(tradeoff_ge_tax, tradeoff_ge_cut, tradeoff_ge_debt, tradeoff_ge_no_spend), na.rm = TRUE)),
+    max_ge = ifelse(is.infinite(max_ge), NA, max_ge),
     
-    # hc
-    tradeoff_hc_all_strong = as.integer(tradeoff_hc_all_intensity >= 50),
-    tradeoff_hc_spend_strong = as.integer(tradeoff_hc_spend_intensity >= 50),
-    tradeoff_hc_pensions_strong = as.integer(tradeoff_hc_pensions_intensity >= 50),
+    # TYPE 1: Préférence
+    tradeoff_ge_tax_pref = as.integer(tradeoff_ge_tax == max_ge & !is.na(max_ge)),
+    tradeoff_ge_cut_pref = as.integer(tradeoff_ge_cut == max_ge & !is.na(max_ge)),
+    tradeoff_ge_debt_pref = as.integer(tradeoff_ge_debt == max_ge & !is.na(max_ge)),
+    tradeoff_ge_no_spend_pref = as.integer(tradeoff_ge_no_spend == max_ge & !is.na(max_ge)),
     
-    # cc2
-    tradeoff_cc2_all_strong = as.integer(tradeoff_cc2_all_intensity >= 50),
-    tradeoff_cc2_low_inc_strong = as.integer(tradeoff_cc2_low_inc_intensity >= 50),
-    tradeoff_cc2_educ_all_strong = as.integer(tradeoff_cc2_educ_all_intensity >= 50),
-    tradeoff_cc2_educ_low_inc_strong = as.integer(tradeoff_cc2_educ_low_inc_intensity >= 50)
-  )
+    # TYPE 2: Intensité
+    tradeoff_ge_tax_intense = as.integer(tradeoff_ge_tax > 50),
+    tradeoff_ge_cut_intense = as.integer(tradeoff_ge_cut > 50),
+    tradeoff_ge_debt_intense = as.integer(tradeoff_ge_debt > 50),
+    tradeoff_ge_no_spend_intense = as.integer(tradeoff_ge_no_spend > 50)
+  ) %>%
+  ungroup() %>%
+  select(-max_ge)
 
-# vérification
+DataClean <- DataClean %>%
+  rowwise() %>%
+  mutate(
+    # TAX - Trouver le max
+    max_tax = suppressWarnings(max(c(tradeoff_tax_less_services, tradeoff_tax_sales_tax, tradeoff_tax_inc_tax, tradeoff_tax_wealth_tax), na.rm = TRUE)),
+    max_tax = ifelse(is.infinite(max_tax), NA, max_tax),
+    
+    # TYPE 1: Préférence
+    tradeoff_tax_less_services_pref = as.integer(tradeoff_tax_less_services == max_tax & !is.na(max_tax)),
+    tradeoff_tax_sales_tax_pref = as.integer(tradeoff_tax_sales_tax == max_tax & !is.na(max_tax)),
+    tradeoff_tax_inc_tax_pref = as.integer(tradeoff_tax_inc_tax == max_tax & !is.na(max_tax)),
+    tradeoff_tax_wealth_tax_pref = as.integer(tradeoff_tax_wealth_tax == max_tax & !is.na(max_tax)),
+    
+    # TYPE 2: Intensité
+    tradeoff_tax_less_services_intense = as.integer(tradeoff_tax_less_services > 50),
+    tradeoff_tax_sales_tax_intense = as.integer(tradeoff_tax_sales_tax > 50),
+    tradeoff_tax_inc_tax_intense = as.integer(tradeoff_tax_inc_tax > 50),
+    tradeoff_tax_wealth_tax_intense = as.integer(tradeoff_tax_wealth_tax > 50)
+  ) %>%
+  ungroup() %>%
+  select(-max_tax)
 
+DataClean <- DataClean %>%
+  rowwise() %>%
+  mutate(
+    # HC - Trouver le max
+    max_hc = suppressWarnings(max(c(tradeoff_hc_all, tradeoff_hc_spend, tradeoff_hc_pensions), na.rm = TRUE)),
+    max_hc = ifelse(is.infinite(max_hc), NA, max_hc),
+    
+    # TYPE 1: Préférence
+    tradeoff_hc_all_pref = as.integer(tradeoff_hc_all == max_hc & !is.na(max_hc)),
+    tradeoff_hc_spend_pref = as.integer(tradeoff_hc_spend == max_hc & !is.na(max_hc)),
+    tradeoff_hc_pensions_pref = as.integer(tradeoff_hc_pensions == max_hc & !is.na(max_hc)),
+    
+    # TYPE 2: Intensité
+    tradeoff_hc_all_intense = as.integer(tradeoff_hc_all > 50),
+    tradeoff_hc_spend_intense = as.integer(tradeoff_hc_spend > 50),
+    tradeoff_hc_pensions_intense = as.integer(tradeoff_hc_pensions > 50)
+  ) %>%
+  ungroup() %>%
+  select(-max_hc)
 
-cat("=== VÉRIFICATION DES PRÉFÉRENCES FORTES (>= 50 points) ===\n\n")
-
-cat("cc1:\n")
-cat("Tax strong:", sum(DataClean$tradeoff_cc1_tax_strong, na.rm = TRUE), "\n")
-cat("Cut strong:", sum(DataClean$tradeoff_cc1_cut_strong, na.rm = TRUE), "\n")
-cat("Debt strong:", sum(DataClean$tradeoff_cc1_debt_strong, na.rm = TRUE), "\n")
-cat("No spend strong:", sum(DataClean$tradeoff_cc1_no_spend_strong, na.rm = TRUE), "\n\n")
-
-cat("ge:\n")
-cat("Tax strong:", sum(DataClean$tradeoff_ge_tax_strong, na.rm = TRUE), "\n")
-cat("Cut strong:", sum(DataClean$tradeoff_ge_cut_strong, na.rm = TRUE), "\n")
-cat("Debt strong:", sum(DataClean$tradeoff_ge_debt_strong, na.rm = TRUE), "\n")
-cat("No spend strong:", sum(DataClean$tradeoff_ge_no_spend_strong, na.rm = TRUE), "\n\n")
-
-cat("tax:\n")
-cat("Less services strong:", sum(DataClean$tradeoff_tax_less_services_strong, na.rm = TRUE), "\n")
-cat("Sales tax strong:", sum(DataClean$tradeoff_tax_sales_tax_strong, na.rm = TRUE), "\n")
-cat("Inc tax strong:", sum(DataClean$tradeoff_tax_inc_tax_strong, na.rm = TRUE), "\n")
-cat("Wealth tax strong:", sum(DataClean$tradeoff_tax_wealth_tax_strong, na.rm = TRUE), "\n\n")
-
-cat("hc:\n")
-cat("All strong:", sum(DataClean$tradeoff_hc_all_strong, na.rm = TRUE), "\n")
-cat("Spend strong:", sum(DataClean$tradeoff_hc_spend_strong, na.rm = TRUE), "\n")
-cat("Pensions strong:", sum(DataClean$tradeoff_hc_pensions_strong, na.rm = TRUE), "\n\n")
-
-cat("cc2:\n")
-cat("All strong:", sum(DataClean$tradeoff_cc2_all_strong, na.rm = TRUE), "\n")
-cat("Low inc strong:", sum(DataClean$tradeoff_cc2_low_inc_strong, na.rm = TRUE), "\n")
-cat("Educ all strong:", sum(DataClean$tradeoff_cc2_educ_all_strong, na.rm = TRUE), "\n")
-cat("Educ low inc strong:", sum(DataClean$tradeoff_cc2_educ_low_inc_strong, na.rm = TRUE), "\n")
-
-# ============================================================
-# VÉRIFICATIONS COMPLÈTES
-# ============================================================
-
-cat("\n========================================\n")
-cat("VÉRIFICATIONS DES 3 TYPES DE VARIABLES\n")
-cat("========================================\n\n")
-
-# QUESTION CC1
-
-##binaires, intensité et préférence forte
-
-cat("--- BINAIRES (_bin) - Priorité #1 claire ---\n")
-cat("tradeoff_cc1_tax_bin:\n")
-print(table(DataClean$tradeoff_cc1_tax_bin, useNA = "ifany"))
-cat("\ntradeoff_cc1_cut_bin:\n")
-print(table(DataClean$tradeoff_cc1_cut_bin, useNA = "ifany"))
-cat("\ntradeoff_cc1_debt_bin:\n")
-print(table(DataClean$tradeoff_cc1_debt_bin, useNA = "ifany"))
-cat("\ntradeoff_cc1_no_spend_bin:\n")
-print(table(DataClean$tradeoff_cc1_no_spend_bin, useNA = "ifany"))
-
-cat("\n--- INTENSITÉ (_intensity) - Écart par rapport à la moyenne ---\n")
-print(summary(DataClean[, c("tradeoff_cc1_tax_intensity", "tradeoff_cc1_cut_intensity", 
-                            "tradeoff_cc1_debt_intensity", "tradeoff_cc1_no_spend_intensity")]))
-
-cat("\n--- PRÉFÉRENCES FORTES (_strong) - Intensité >= 50 points ---\n")
-cat("Tax strong:", sum(DataClean$tradeoff_cc1_tax_strong, na.rm = TRUE), "personnes\n")
-cat("Cut strong:", sum(DataClean$tradeoff_cc1_cut_strong, na.rm = TRUE), "personnes\n")
-cat("Debt strong:", sum(DataClean$tradeoff_cc1_debt_strong, na.rm = TRUE), "personnes\n")
-cat("No spend strong:", sum(DataClean$tradeoff_cc1_no_spend_strong, na.rm = TRUE), "personnes\n")
-
-# ============================================================
-# QUESTION GE (Green economy)
-
-
-cat("--- BINAIRES (_bin) ---\n")
-cat("tradeoff_ge_tax_bin:\n")
-print(table(DataClean$tradeoff_ge_tax_bin, useNA = "ifany"))
-cat("\ntradeoff_ge_cut_bin:\n")
-print(table(DataClean$tradeoff_ge_cut_bin, useNA = "ifany"))
-cat("\ntradeoff_ge_debt_bin:\n")
-print(table(DataClean$tradeoff_ge_debt_bin, useNA = "ifany"))
-cat("\ntradeoff_ge_no_spend_bin:\n")
-print(table(DataClean$tradeoff_ge_no_spend_bin, useNA = "ifany"))
-
-cat("\n--- INTENSITÉ (_intensity) ---\n")
-print(summary(DataClean[, c("tradeoff_ge_tax_intensity", "tradeoff_ge_cut_intensity", 
-                            "tradeoff_ge_debt_intensity", "tradeoff_ge_no_spend_intensity")]))
-
-cat("\n--- PRÉFÉRENCES FORTES (_strong) ---\n")
-cat("Tax strong:", sum(DataClean$tradeoff_ge_tax_strong, na.rm = TRUE), "personnes\n")
-cat("Cut strong:", sum(DataClean$tradeoff_ge_cut_strong, na.rm = TRUE), "personnes\n")
-cat("Debt strong:", sum(DataClean$tradeoff_ge_debt_strong, na.rm = TRUE), "personnes\n")
-cat("No spend strong:", sum(DataClean$tradeoff_ge_no_spend_strong, na.rm = TRUE), "personnes\n")
+DataClean <- DataClean %>%
+  rowwise() %>%
+  mutate(
+    # CC2 - Trouver le max
+    max_cc2 = suppressWarnings(max(c(tradeoff_cc2_all, tradeoff_cc2_low_inc, tradeoff_cc2_educ_all, tradeoff_cc2_educ_low_inc), na.rm = TRUE)),
+    max_cc2 = ifelse(is.infinite(max_cc2), NA, max_cc2),
+    
+    # TYPE 1: Préférence
+    tradeoff_cc2_all_pref = as.integer(tradeoff_cc2_all == max_cc2 & !is.na(max_cc2)),
+    tradeoff_cc2_low_inc_pref = as.integer(tradeoff_cc2_low_inc == max_cc2 & !is.na(max_cc2)),
+    tradeoff_cc2_educ_all_pref = as.integer(tradeoff_cc2_educ_all == max_cc2 & !is.na(max_cc2)),
+    tradeoff_cc2_educ_low_inc_pref = as.integer(tradeoff_cc2_educ_low_inc == max_cc2 & !is.na(max_cc2)),
+    
+    # TYPE 2: Intensité
+    tradeoff_cc2_all_intense = as.integer(tradeoff_cc2_all > 50),
+    tradeoff_cc2_low_inc_intense = as.integer(tradeoff_cc2_low_inc > 50),
+    tradeoff_cc2_educ_all_intense = as.integer(tradeoff_cc2_educ_all > 50),
+    tradeoff_cc2_educ_low_inc_intense = as.integer(tradeoff_cc2_educ_low_inc > 50)
+  ) %>%
+  ungroup() %>%
+  select(-max_cc2)
 
 # ============================================================
-# QUESTION TAX
-
-
-cat("--- BINAIRES (_bin) ---\n")
-cat("tradeoff_tax_less_services_bin:\n")
-print(table(DataClean$tradeoff_tax_less_services_bin, useNA = "ifany"))
-cat("\ntradeoff_tax_sales_tax_bin:\n")
-print(table(DataClean$tradeoff_tax_sales_tax_bin, useNA = "ifany"))
-cat("\ntradeoff_tax_inc_tax_bin:\n")
-print(table(DataClean$tradeoff_tax_inc_tax_bin, useNA = "ifany"))
-cat("\ntradeoff_tax_wealth_tax_bin:\n")
-print(table(DataClean$tradeoff_tax_wealth_tax_bin, useNA = "ifany"))
-
-cat("\n--- INTENSITÉ (_intensity) ---\n")
-print(summary(DataClean[, c("tradeoff_tax_less_services_intensity", "tradeoff_tax_sales_tax_intensity", 
-                            "tradeoff_tax_inc_tax_intensity", "tradeoff_tax_wealth_tax_intensity")]))
-
-cat("\n--- PRÉFÉRENCES FORTES (_strong) ---\n")
-cat("Less services strong:", sum(DataClean$tradeoff_tax_less_services_strong, na.rm = TRUE), "personnes\n")
-cat("Sales tax strong:", sum(DataClean$tradeoff_tax_sales_tax_strong, na.rm = TRUE), "personnes\n")
-cat("Inc tax strong:", sum(DataClean$tradeoff_tax_inc_tax_strong, na.rm = TRUE), "personnes\n")
-cat("Wealth tax strong:", sum(DataClean$tradeoff_tax_wealth_tax_strong, na.rm = TRUE), "personnes\n")
-
+# VÉRIFICATION
 # ============================================================
-# QUESTION HC
 
-cat("--- BINAIRES (_bin) ---\n")
-cat("tradeoff_hc_all_bin:\n")
-print(table(DataClean$tradeoff_hc_all_bin, useNA = "ifany"))
-cat("\ntradeoff_hc_spend_bin:\n")
-print(table(DataClean$tradeoff_hc_spend_bin, useNA = "ifany"))
-cat("\ntradeoff_hc_pensions_bin:\n")
-print(table(DataClean$tradeoff_hc_pensions_bin, useNA = "ifany"))
+cat("DEUX TYPES DE VARIABLES CRÉÉES:\n\n")
 
-cat("\n--- INTENSITÉ (_intensity) ---\n")
-print(summary(DataClean[, c("tradeoff_hc_all_intensity", "tradeoff_hc_spend_intensity", 
-                            "tradeoff_hc_pensions_intensity")]))
+cat("1. Variables '_pref' (préférence):\n")
+cat("   - 1 = C'est le choix avec le PLUS de points pour ce répondant\n")
+cat("   - 0 = Ce n'est PAS le choix avec le plus de points\n\n")
 
-cat("\n--- PRÉFÉRENCES FORTES (_strong) ---\n")
-cat("All strong:", sum(DataClean$tradeoff_hc_all_strong, na.rm = TRUE), "personnes\n")
-cat("Spend strong:", sum(DataClean$tradeoff_hc_spend_strong, na.rm = TRUE), "personnes\n")
-cat("Pensions strong:", sum(DataClean$tradeoff_hc_pensions_strong, na.rm = TRUE), "personnes\n")
-
-# ============================================================
-# QUESTION CC2
+cat("2. Variables '_intense' (intensité):\n")
+cat("   - 1 = Le répondant a mis PLUS de 50 points sur ce choix\n")
+cat("   - 0 = Le répondant a mis 50 points ou MOINS sur ce choix\n\n")
 
 
-cat("--- BINAIRES (_bin) ---\n")
-cat("tradeoff_cc2_all_bin:\n")
-print(table(DataClean$tradeoff_cc2_all_bin, useNA = "ifany"))
-cat("\ntradeoff_cc2_low_inc_bin:\n")
-print(table(DataClean$tradeoff_cc2_low_inc_bin, useNA = "ifany"))
-cat("\ntradeoff_cc2_educ_all_bin:\n")
-print(table(DataClean$tradeoff_cc2_educ_all_bin, useNA = "ifany"))
-cat("\ntradeoff_cc2_educ_low_inc_bin:\n")
-print(table(DataClean$tradeoff_cc2_educ_low_inc_bin, useNA = "ifany"))
 
-cat("\n--- INTENSITÉ (_intensity) ---\n")
-print(summary(DataClean[, c("tradeoff_cc2_all_intensity", "tradeoff_cc2_low_inc_intensity", 
-                            "tradeoff_cc2_educ_all_intensity", "tradeoff_cc2_educ_low_inc_intensity")]))
-
-cat("\n--- PRÉFÉRENCES FORTES (_strong) ---\n")
-cat("All strong:", sum(DataClean$tradeoff_cc2_all_strong, na.rm = TRUE), "personnes\n")
-cat("Low inc strong:", sum(DataClean$tradeoff_cc2_low_inc_strong, na.rm = TRUE), "personnes\n")
-cat("Educ all strong:", sum(DataClean$tradeoff_cc2_educ_all_strong, na.rm = TRUE), "personnes\n")
-cat("Educ low inc strong:", sum(DataClean$tradeoff_cc2_educ_low_inc_strong, na.rm = TRUE), "personnes\n")
-
-# ============================================================
-# RÉSUMÉ GLOBAL
+cat("Exemple pour CC1:\n")
+cat("Préférences:\n")
+print(table(DataClean$tradeoff_cc1_tax_pref, useNA = "ifany"))
+table(DataClean$tradeoff_cc1_cut_pref)
 
 
-cat("Total de variables créées par question:\n")
-cat("- CC1: ", length(grep("^tradeoff_cc1_.*_(bin|intensity|strong)$", names(DataClean))), " variables\n")
-cat("- GE: ", length(grep("^tradeoff_ge_.*_(bin|intensity|strong)$", names(DataClean))), " variables\n")
-cat("- TAX: ", length(grep("^tradeoff_tax_.*_(bin|intensity|strong)$", names(DataClean))), " variables\n")
-cat("- HC: ", length(grep("^tradeoff_hc_.*_(bin|intensity|strong)$", names(DataClean))), " variables\n")
-cat("- CC2: ", length(grep("^tradeoff_cc2_.*_(bin|intensity|strong)$", names(DataClean))), " variables\n")
+cat("\nIntensités:\n")
+print(table(DataClean$tradeoff_cc1_tax_intense, useNA = "ifany"))
+table(DataClean$tradeoff_cc1_cut_intense)
 
+#-----------------------------------------------------------------------------------------
 
-##To what extent do you agree with the following statement: The government should increase spending on childcare.
-#table(clean$tradeoff_invest_cc0)
-#
-#DataClean$tradeoff_childcare_num <- NA_real_
-#DataClean$tradeoff_childcare_num[clean$tradeoff_invest_cc0 == "Strongly agree"] <- 1
-#DataClean$tradeoff_childcare_num[clean$tradeoff_invest_cc0 == "Somewhat agree"] <- 0.66
-#DataClean$tradeoff_childcare_num[clean$tradeoff_invest_cc0 == "Somewhat disagree"] <- 0.33
-#DataClean$tradeoff_childcare_num[clean$tradeoff_invest_cc0 == "Strongly disagree"] <- 0
-#table(DataClean$tradeoff_childcare_num)
-#
-## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-#DataClean$tradeoff_childcare_num_bin <- ifelse(
-#  DataClean$tradeoff_childcare_num %in% c(0.66, 1), 1, 0
-#)
-#
-#To what extent do you agree with the following statement: The government should increase spending on childcare, even if that implies higher taxes.
-#table(clean$tradeoff_invest_cc1)      
-#
-#DataClean$tradeoff_childcare_higher_taxes_num <- NA_real_
-#DataClean$tradeoff_childcare_higher_taxes_num[clean$tradeoff_invest_cc1 == "Strongly agree"] <- 1
-#DataClean$tradeoff_childcare_higher_taxes_num[clean$tradeoff_invest_cc1 == "Somewhat agree"] <- 0.66
-#DataClean$tradeoff_childcare_higher_taxes_num[clean$tradeoff_invest_cc1 == "Somewhat disagree"] <- 0.33
-#DataClean$tradeoff_childcare_higher_taxes_num[clean$tradeoff_invest_cc1 == "Strongly disagree"] <- 0
-#table(DataClean$tradeoff_childcare_higher_taxes_num)
-#
-## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-#DataClean$tradeoff_childcare_higher_taxes_bin <- ifelse(
-#  DataClean$tradeoff_childcare_higher_taxes_num %in% c(0.66, 1), 1, 0
-#)
-#
-##To what extent do you agree with the following statement: The government should increase spending on childcare, even if that implies cutting back in other areas.
-#table(clean$tradeoff_childcare_by_cutting_num)      
-#
-#DataClean$tradeoff_childcare_by_cutting_num <- NA_real_
-#DataClean$tradeoff_childcare_by_cutting_num[clean$tradeoff_invest_cc2 == "Strongly agree"] <- 1
-#DataClean$tradeoff_childcare_by_cutting_num[clean$tradeoff_invest_cc2 == "Somewhat agree"] <- 0.66
-#DataClean$tradeoff_childcare_by_cutting_num[clean$tradeoff_invest_cc2 == "Somewhat disagree"] <- 0.33
-#DataClean$tradeoff_childcare_by_cutting_num[clean$tradeoff_invest_cc2 == "Strongly disagree"] <- 0
-#table(DataClean$tradeoff_childcare_by_cutting_num)
-#
-## Création de la variable binaire : 1 = priorité forte à la dette (0.75 ou 1), 0 = le reste
-#DataClean$tradeoff_childcare_by_cutting_bin <- ifelse(
-#  DataClean$tradeoff_childcare_by_cutting_num %in% c(0.66, 1), 1, 0
-#)
-#
-##To what extent do you agree with the following statement: The government should increase spending on childcare, even if that implies a higher public debt.
-#table(clean$tradeoff_childcare_debt_num)      
-#
-#DataClean$tradeoff_childcare_debt_num <- NA_real_
-#DataClean$tradeoff_childcare_debt_num[clean$tradeoff_invest_cc3 == "Strongly agree"] <- 1
-#DataClean$tradeoff_childcare_debt_num[clean$tradeoff_invest_cc3 == "Somewhat agree"] <- 0.66
-#DataClean$tradeoff_childcare_debt_num[clean$tradeoff_invest_cc3 == "Somewhat disagree"] <- 0.33
-#DataClean$tradeoff_childcare_debt_num[clean$tradeoff_invest_cc3 == "Strongly disagree"] <- 0
-#table(DataClean$tradeoff_childcare_debt_num)
-#
-## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-#DataClean$tradeoff_childcare_debt_bin <- ifelse(
-#  DataClean$tradeoff_childcare_debt_num %in% c(0.66, 1), 1, 0
-#)
-#
-##To what extent do you agree with the following statement:  Taxes are already high. The government should not collect more money from citizens through taxes.
-#table(clean$tradeoff_taxconst_0)
-#
-#DataClean$tradeoff_no_taxes_num <- NA_real_
-#DataClean$tradeoff_no_taxes_num[clean$tradeoff_taxconst_0 == "Strongly agree"] <- 1
-#DataClean$tradeoff_no_taxes_num[clean$tradeoff_taxconst_0 == "Somewhat agree"] <- 0.66
-#DataClean$tradeoff_no_taxes_num[clean$tradeoff_taxconst_0 == "Somewhat disagree"] <- 0.33
-#DataClean$tradeoff_no_taxes_num[clean$tradeoff_taxconst_0 == "Strongly disagree"] <- 0
-#table(DataClean$tradeoff_no_taxes_num)
-#
-## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-#DataClean$tradeoff_no_taxes_bin <- ifelse(
-#  DataClean$tradeoff_no_taxes_num %in% c(0.66, 1), 1, 0
-#)
-#
-##To what extent do you agree with the following statement:  Taxes are already high. The government should not collect more money from citizens unless it is targeted at all citizens, through an increase in sales taxes. (Note: a tax added to the price of goods or services at the time of purchase).
-#table(clean$tradeoff_taxconst_1)
-#
-#DataClean$tradeoff_taxes_sales_num <- NA_real_
-#DataClean$tradeoff_taxes_sales_num[clean$tradeoff_taxconst_1 == "Strongly agree"] <- 1
-#DataClean$tradeoff_taxes_sales_num[clean$tradeoff_taxconst_1 == "Somewhat agree"] <- 0.66
-#DataClean$tradeoff_taxes_sales_num[clean$tradeoff_taxconst_1 == "Somewhat disagree"] <- 0.33
-#DataClean$tradeoff_taxes_sales_num[clean$tradeoff_taxconst_1 == "Strongly disagree"] <- 0
-#table(DataClean$tradeoff_taxes_sales_num)
-#
-## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-#DataClean$tradeoff_taxes_sales_bin <- ifelse(
-#  DataClean$tradeoff_taxes_sales_num %in% c(0.66, 1), 1, 0
-#)
-#
-##To what extent do you agree with the following statement: Taxes are already high. The government should not collect more money from citizens unless it is targeted at high income citizens, like a tax on high incomes.
-#table(clean$tradeoff_taxconst_2)
-#
-
-#DataClean$tradeoff_taxes_high_income_num <- NA_real_
-#DataClean$tradeoff_taxes_high_income_num[clean$tradeoff_taxconst_2 == "Strongly agree"] <- 1
-#DataClean$tradeoff_taxes_high_income_num[clean$tradeoff_taxconst_2 == "Somewhat agree"] <- 0.66
-#DataClean$tradeoff_taxes_high_income_num[clean$tradeoff_taxconst_2 == "Somewhat disagree"] <- 0.33
-#DataClean$tradeoff_taxes_high_income_num[clean$tradeoff_taxconst_2 == "Strongly disagree"] <- 0
-#table(DataClean$tradeoff_taxes_high_income_num)
-#
-## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-#DataClean$tradeoff_taxes_high_income_bin <- ifelse(
-#  DataClean$tradeoff_taxes_high_income_num %in% c(0.66, 1), 1, 0
-#)
-#
-##To what extent do you agree with the following statement:  Taxes are already high. The government should not collect more money from citizens unless it is targeted at wealthy citizens, like a capital gains tax. (Note: a tax you pay when you make money from selling something valuable for more than you paid for it, like property or stocks.)
-#table(clean$tradeoff_taxconst_3)
-#
-#DataClean$tradeoff_taxes_wealthy_num <- NA_real_
-#DataClean$tradeoff_taxes_wealthy_num[clean$tradeoff_taxconst_3 == "Strongly agree"] <- 1
-#DataClean$tradeoff_taxes_wealthy_num[clean$tradeoff_taxconst_3 == "Somewhat agree"] <- 0.66
-#DataClean$tradeoff_taxes_wealthy_num[clean$tradeoff_taxconst_3 == "Somewhat disagree"] <- 0.33
-#DataClean$tradeoff_taxes_wealthy_num[clean$tradeoff_taxconst_3 == "Strongly disagree"] <- 0
-#table(DataClean$tradeoff_taxes_wealthy_num)
-#
-## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-#DataClean$tradeoff_taxes_wealthy_bin <- ifelse(
-#  DataClean$tradeoff_taxes_wealthy_num %in% c(0.66, 1), 1, 0
-#)
-#
-##In the question you just answered, which taxation policy was mentioned as a possible exception to the statement that the government should not collect more money from citizens?
-#table(clean$tradeoff_taxconst_m)
-#
-#DataClean$tradeoff_taxconst_char <- NA
-#DataClean$tradeoff_taxconst_char[clean$tradeoff_taxconst_m == "A capital gains tax."]   <- "A capital gains tax."
-#DataClean$tradeoff_taxconst_char[clean$tradeoff_taxconst_m == "An increase in sales taxes."]  <- "An increase in sales taxes."
-#DataClean$tradeoff_taxconst_char[clean$tradeoff_taxconst_m == "A tax on high incomes."]  <- "A tax on high incomes."
-#DataClean$tradeoff_taxconst_char[clean$tradeoff_taxconst_m == "No exception was mentioned."]   <- "No exception was mentioned."
-#DataClean$tradeoff_taxconst_char[clean$tradeoff_taxconst_m == "I don’t remember."]   <- "I don’t remember."
-#
-#table(DataClean$tradeoff_taxconst_char)
-#
-##binaires
-#DataClean$attention_tradeoff_capital_bin <- ifelse(DataClean$tradeoff_taxconst_char == "A capital gains tax.", 1, 0)
-#DataClean$attention_tradeoff_sales_bin <- ifelse(DataClean$tradeoff_taxconst_char == "An increase in sales taxes.", 1, 0)
-#DataClean$attention_tradeoff_income_bin <- ifelse(DataClean$tradeoff_taxconst_char == "A tax on high incomes.", 1, 0)
-#DataClean$attention_tradeoff_no_exception_bin <- ifelse(DataClean$tradeoff_taxconst_char == "No exception was mentioned.", 1, 0)
-#DataClean$attention_tradeoff_dontremember_bin <- ifelse(DataClean$tradeoff_taxconst_char == "I don’t remember.", 1, 0)
-#table(DataClean$attention_tradeoff_capital_bin)
-#
-#Please imagine that the government wants to improve certain social benefits. However, it can only do so by cutting back on other social benefits. To what extent do you find the following cutbacks acceptable in comparison to the improvement they allow? The government subsidizes child care for all families at a cost of lowering other family benefits (e.g., child tax credits or parental leave payments).
-#table(clean$tradeoff_spend_cc_1)
-#
-#DataClean$tradeoff_childcare_benefits_num <- NA_real_
-#DataClean$tradeoff_childcare_benefits_num[clean$tradeoff_spend_cc_1 == "Strongly agree"] <- 1
-#DataClean$tradeoff_childcare_benefits_num[clean$tradeoff_spend_cc_1 == "Somewhat agree"] <- 0.66
-#DataClean$tradeoff_childcare_benefits_num[clean$tradeoff_spend_cc_1 == "Somewhat disagree"] <- 0.33
-#DataClean$tradeoff_childcare_benefits_num[clean$tradeoff_spend_cc_1 == "Strongly disagree"] <- 0
-#table(DataClean$tradeoff_childcare_benefits_num)
-#
-## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-#DataClean$tradeoff_childcare_benefits_bin <- ifelse(
-#  DataClean$tradeoff_childcare_benefits_num %in% c(0.66, 1), 1, 0
-#)
-#
-##Please imagine that the government wants to improve certain social benefits. However, it can only do so by cutting back on other social benefits. To what extent do you find the following cutbacks acceptable in comparison to the improvement they allow? The government subsidizes childcare for low-income families at a cost of increasing the price of childcare for middle and upper-class families.
-#table(clean$tradeoff_spend_cc_2)
-#
-#DataClean$tradeoff_childcare_lowincome_num <- NA_real_
-#DataClean$tradeoff_childcare_lowincome_num[clean$tradeoff_spend_cc_2 == "Strongly agree"] <- 1
-#DataClean$tradeoff_childcare_lowincome_num[clean$tradeoff_spend_cc_2 == "Somewhat agree"] <- 0.66
-#DataClean$tradeoff_childcare_lowincome_num[clean$tradeoff_spend_cc_2 == "Somewhat disagree"] <- 0.33
-#DataClean$tradeoff_childcare_lowincome_num[clean$tradeoff_spend_cc_2 == "Strongly disagree"] <- 0
-#table(DataClean$tradeoff_childcare_lowincome_num)
-#
-## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-#DataClean$tradeoff_childcare_lowincome_bin <- ifelse(
-#  DataClean$tradeoff_childcare_lowincome_num %in% c(0.66, 1), 1, 0
-#)
-#
-##In the question  you just answered, what was mentioned as the trade-off for increasing childcare subsidies?
-#table(clean$tradeoff_spend_cc_m)
-#DataClean$tradeoff_childcare_char <- NA
-#DataClean$tradeoff_childcare_char[clean$tradeoff_spend_cc_m == "A reduction in other family benefits (e.g., child tax credits or parental leave payments)."]   <- "A reduction in other family benefits (e.g., child tax credits or parental leave payments)."
-#DataClean$tradeoff_childcare_char[clean$tradeoff_spend_cc_m == "An increase in the price of childcare for middle- and upper-class families."]  <- "An increase in the price of childcare for middle- and upper-class families."
-#DataClean$tradeoff_childcare_char[clean$tradeoff_spend_cc_m == "I don’t remember."]  <- "I don’t remember."
-#DataClean$tradeoff_childcare_char[clean$tradeoff_spend_cc_m == "No trade-off was mentioned."]   <- "No trade-off was mentioned."
-#
-#table(DataClean$tradeoff_childcare_char)
-#
-##binaires
-#DataClean$attention_tradeoff_childcare_benefits_bin <- ifelse(DataClean$tradeoff_childcare_char == "A reduction in other family benefits (e.g., child tax credits or parental leave payments).", 1, 0)
-#DataClean$attention_tradeoff_childcare_income_bin <- ifelse(DataClean$tradeoff_childcare_char == "An increase in the price of childcare for middle- and upper-class families.", 1, 0)
-#DataClean$attention_tradeoff_childcare_dontremember_bin <- ifelse(DataClean$tradeoff_childcare_char == "I don’t remember.", 1, 0)
-#DataClean$attention_tradeoff_childcare_no_mention_bin <- ifelse(DataClean$tradeoff_childcare_char == "No trade-off was mentioned.", 1, 0)
-#table(DataClean$attention_tradeoff_childcare_benefits_bin)
-#
-##Please imagine that the government wants to improve certain social benefits. However, it can only do so by cutting back on other social benefits. To what extent do you find the following cutbacks acceptable in comparison to the improvement they allow? The government increases home care for all seniors at a cost of lowering maximum old age pension benefits.
-#table(clean$tradeoff_spend_hc_1)
-#
-#DataClean$tradeoff_senior_benefits_num <- NA_real_
-#DataClean$tradeoff_senior_benefits_num[clean$tradeoff_spend_hc_1 == "Strongly agree"] <- 1
-#DataClean$tradeoff_senior_benefits_num[clean$tradeoff_spend_hc_1 == "Somewhat agree"] <- 0.66
-#DataClean$tradeoff_senior_benefits_num[clean$tradeoff_spend_hc_1 == "Somewhat disagree"] <- 0.33
-#DataClean$tradeoff_senior_benefits_num[clean$tradeoff_spend_hc_1 == "Strongly disagree"] <- 0
-#table(DataClean$tradeoff_senior_benefits_num)
-#
-## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-#DataClean$tradeoff_senior_benefits_bin <- ifelse(
-#  DataClean$tradeoff_senior_benefits_num %in% c(0.66, 1), 1, 0
-#)
-#
-##Please imagine that the government wants to improve certain social benefits. However, it can only do so by cutting back on other social benefits. To what extent do you find the following cutbacks acceptable in comparison to the improvement they allow? The government increases home care for low-income seniors at a cost of increasing the price of home care for middle and upper-class seniors.
-#table(clean$tradeoff_spend_hc_2)
-#
-#DataClean$tradeoff_senior_income_num <- NA_real_
-#DataClean$tradeoff_senior_income_num[clean$tradeoff_spend_hc_2 == "Strongly agree"] <- 1
-#DataClean$tradeoff_senior_income_num[clean$tradeoff_spend_hc_2 == "Somewhat agree"] <- 0.66
-#DataClean$tradeoff_senior_income_num[clean$tradeoff_spend_hc_2 == "Somewhat disagree"] <- 0.33
-#DataClean$tradeoff_senior_income_num[clean$tradeoff_spend_hc_2 == "Strongly disagree"] <- 0
-#table(DataClean$tradeoff_senior_income_num)
-#
-## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
-#DataClean$tradeoff_senior_income_bin <- ifelse(
-#  DataClean$tradeoff_senior_income_num %in% c(0.66, 1), 1, 0
-#)
-
-# ============================================================
 #REDISTRIBUTION
 
 
@@ -1723,6 +1380,228 @@ cat("\ntrust_inst_media - Variable binaire:\n")
 table(DataClean$trust_inst_media_bin, useNA = "ifany")
 
 
+
+#------------------------------------------------------------------------------------------
+
+##To what extent do you agree with the following statement: The government should increase spending on childcare.
+#table(clean$tradeoff_invest_cc0)
+#
+#DataClean$tradeoff_childcare_num <- NA_real_
+#DataClean$tradeoff_childcare_num[clean$tradeoff_invest_cc0 == "Strongly agree"] <- 1
+#DataClean$tradeoff_childcare_num[clean$tradeoff_invest_cc0 == "Somewhat agree"] <- 0.66
+#DataClean$tradeoff_childcare_num[clean$tradeoff_invest_cc0 == "Somewhat disagree"] <- 0.33
+#DataClean$tradeoff_childcare_num[clean$tradeoff_invest_cc0 == "Strongly disagree"] <- 0
+#table(DataClean$tradeoff_childcare_num)
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
+#DataClean$tradeoff_childcare_num_bin <- ifelse(
+#  DataClean$tradeoff_childcare_num %in% c(0.66, 1), 1, 0
+#)
+#
+#To what extent do you agree with the following statement: The government should increase spending on childcare, even if that implies higher taxes.
+#table(clean$tradeoff_invest_cc1)      
+#
+#DataClean$tradeoff_childcare_higher_taxes_num <- NA_real_
+#DataClean$tradeoff_childcare_higher_taxes_num[clean$tradeoff_invest_cc1 == "Strongly agree"] <- 1
+#DataClean$tradeoff_childcare_higher_taxes_num[clean$tradeoff_invest_cc1 == "Somewhat agree"] <- 0.66
+#DataClean$tradeoff_childcare_higher_taxes_num[clean$tradeoff_invest_cc1 == "Somewhat disagree"] <- 0.33
+#DataClean$tradeoff_childcare_higher_taxes_num[clean$tradeoff_invest_cc1 == "Strongly disagree"] <- 0
+#table(DataClean$tradeoff_childcare_higher_taxes_num)
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
+#DataClean$tradeoff_childcare_higher_taxes_bin <- ifelse(
+#  DataClean$tradeoff_childcare_higher_taxes_num %in% c(0.66, 1), 1, 0
+#)
+#
+##To what extent do you agree with the following statement: The government should increase spending on childcare, even if that implies cutting back in other areas.
+#table(clean$tradeoff_childcare_by_cutting_num)      
+#
+#DataClean$tradeoff_childcare_by_cutting_num <- NA_real_
+#DataClean$tradeoff_childcare_by_cutting_num[clean$tradeoff_invest_cc2 == "Strongly agree"] <- 1
+#DataClean$tradeoff_childcare_by_cutting_num[clean$tradeoff_invest_cc2 == "Somewhat agree"] <- 0.66
+#DataClean$tradeoff_childcare_by_cutting_num[clean$tradeoff_invest_cc2 == "Somewhat disagree"] <- 0.33
+#DataClean$tradeoff_childcare_by_cutting_num[clean$tradeoff_invest_cc2 == "Strongly disagree"] <- 0
+#table(DataClean$tradeoff_childcare_by_cutting_num)
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.75 ou 1), 0 = le reste
+#DataClean$tradeoff_childcare_by_cutting_bin <- ifelse(
+#  DataClean$tradeoff_childcare_by_cutting_num %in% c(0.66, 1), 1, 0
+#)
+#
+##To what extent do you agree with the following statement: The government should increase spending on childcare, even if that implies a higher public debt.
+#table(clean$tradeoff_childcare_debt_num)      
+#
+#DataClean$tradeoff_childcare_debt_num <- NA_real_
+#DataClean$tradeoff_childcare_debt_num[clean$tradeoff_invest_cc3 == "Strongly agree"] <- 1
+#DataClean$tradeoff_childcare_debt_num[clean$tradeoff_invest_cc3 == "Somewhat agree"] <- 0.66
+#DataClean$tradeoff_childcare_debt_num[clean$tradeoff_invest_cc3 == "Somewhat disagree"] <- 0.33
+#DataClean$tradeoff_childcare_debt_num[clean$tradeoff_invest_cc3 == "Strongly disagree"] <- 0
+#table(DataClean$tradeoff_childcare_debt_num)
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
+#DataClean$tradeoff_childcare_debt_bin <- ifelse(
+#  DataClean$tradeoff_childcare_debt_num %in% c(0.66, 1), 1, 0
+#)
+#
+##To what extent do you agree with the following statement:  Taxes are already high. The government should not collect more money from citizens through taxes.
+#table(clean$tradeoff_taxconst_0)
+#
+#DataClean$tradeoff_no_taxes_num <- NA_real_
+#DataClean$tradeoff_no_taxes_num[clean$tradeoff_taxconst_0 == "Strongly agree"] <- 1
+#DataClean$tradeoff_no_taxes_num[clean$tradeoff_taxconst_0 == "Somewhat agree"] <- 0.66
+#DataClean$tradeoff_no_taxes_num[clean$tradeoff_taxconst_0 == "Somewhat disagree"] <- 0.33
+#DataClean$tradeoff_no_taxes_num[clean$tradeoff_taxconst_0 == "Strongly disagree"] <- 0
+#table(DataClean$tradeoff_no_taxes_num)
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
+#DataClean$tradeoff_no_taxes_bin <- ifelse(
+#  DataClean$tradeoff_no_taxes_num %in% c(0.66, 1), 1, 0
+#)
+#
+##To what extent do you agree with the following statement:  Taxes are already high. The government should not collect more money from citizens unless it is targeted at all citizens, through an increase in sales taxes. (Note: a tax added to the price of goods or services at the time of purchase).
+#table(clean$tradeoff_taxconst_1)
+#
+#DataClean$tradeoff_taxes_sales_num <- NA_real_
+#DataClean$tradeoff_taxes_sales_num[clean$tradeoff_taxconst_1 == "Strongly agree"] <- 1
+#DataClean$tradeoff_taxes_sales_num[clean$tradeoff_taxconst_1 == "Somewhat agree"] <- 0.66
+#DataClean$tradeoff_taxes_sales_num[clean$tradeoff_taxconst_1 == "Somewhat disagree"] <- 0.33
+#DataClean$tradeoff_taxes_sales_num[clean$tradeoff_taxconst_1 == "Strongly disagree"] <- 0
+#table(DataClean$tradeoff_taxes_sales_num)
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
+#DataClean$tradeoff_taxes_sales_bin <- ifelse(
+#  DataClean$tradeoff_taxes_sales_num %in% c(0.66, 1), 1, 0
+#)
+#
+##To what extent do you agree with the following statement: Taxes are already high. The government should not collect more money from citizens unless it is targeted at high income citizens, like a tax on high incomes.
+#table(clean$tradeoff_taxconst_2)
+#
+
+#DataClean$tradeoff_taxes_high_income_num <- NA_real_
+#DataClean$tradeoff_taxes_high_income_num[clean$tradeoff_taxconst_2 == "Strongly agree"] <- 1
+#DataClean$tradeoff_taxes_high_income_num[clean$tradeoff_taxconst_2 == "Somewhat agree"] <- 0.66
+#DataClean$tradeoff_taxes_high_income_num[clean$tradeoff_taxconst_2 == "Somewhat disagree"] <- 0.33
+#DataClean$tradeoff_taxes_high_income_num[clean$tradeoff_taxconst_2 == "Strongly disagree"] <- 0
+#table(DataClean$tradeoff_taxes_high_income_num)
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
+#DataClean$tradeoff_taxes_high_income_bin <- ifelse(
+#  DataClean$tradeoff_taxes_high_income_num %in% c(0.66, 1), 1, 0
+#)
+#
+##To what extent do you agree with the following statement:  Taxes are already high. The government should not collect more money from citizens unless it is targeted at wealthy citizens, like a capital gains tax. (Note: a tax you pay when you make money from selling something valuable for more than you paid for it, like property or stocks.)
+#table(clean$tradeoff_taxconst_3)
+#
+#DataClean$tradeoff_taxes_wealthy_num <- NA_real_
+#DataClean$tradeoff_taxes_wealthy_num[clean$tradeoff_taxconst_3 == "Strongly agree"] <- 1
+#DataClean$tradeoff_taxes_wealthy_num[clean$tradeoff_taxconst_3 == "Somewhat agree"] <- 0.66
+#DataClean$tradeoff_taxes_wealthy_num[clean$tradeoff_taxconst_3 == "Somewhat disagree"] <- 0.33
+#DataClean$tradeoff_taxes_wealthy_num[clean$tradeoff_taxconst_3 == "Strongly disagree"] <- 0
+#table(DataClean$tradeoff_taxes_wealthy_num)
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
+#DataClean$tradeoff_taxes_wealthy_bin <- ifelse(
+#  DataClean$tradeoff_taxes_wealthy_num %in% c(0.66, 1), 1, 0
+#)
+#
+##In the question you just answered, which taxation policy was mentioned as a possible exception to the statement that the government should not collect more money from citizens?
+#table(clean$tradeoff_taxconst_m)
+#
+#DataClean$tradeoff_taxconst_char <- NA
+#DataClean$tradeoff_taxconst_char[clean$tradeoff_taxconst_m == "A capital gains tax."]   <- "A capital gains tax."
+#DataClean$tradeoff_taxconst_char[clean$tradeoff_taxconst_m == "An increase in sales taxes."]  <- "An increase in sales taxes."
+#DataClean$tradeoff_taxconst_char[clean$tradeoff_taxconst_m == "A tax on high incomes."]  <- "A tax on high incomes."
+#DataClean$tradeoff_taxconst_char[clean$tradeoff_taxconst_m == "No exception was mentioned."]   <- "No exception was mentioned."
+#DataClean$tradeoff_taxconst_char[clean$tradeoff_taxconst_m == "I don’t remember."]   <- "I don’t remember."
+#
+#table(DataClean$tradeoff_taxconst_char)
+#
+##binaires
+#DataClean$attention_tradeoff_capital_bin <- ifelse(DataClean$tradeoff_taxconst_char == "A capital gains tax.", 1, 0)
+#DataClean$attention_tradeoff_sales_bin <- ifelse(DataClean$tradeoff_taxconst_char == "An increase in sales taxes.", 1, 0)
+#DataClean$attention_tradeoff_income_bin <- ifelse(DataClean$tradeoff_taxconst_char == "A tax on high incomes.", 1, 0)
+#DataClean$attention_tradeoff_no_exception_bin <- ifelse(DataClean$tradeoff_taxconst_char == "No exception was mentioned.", 1, 0)
+#DataClean$attention_tradeoff_dontremember_bin <- ifelse(DataClean$tradeoff_taxconst_char == "I don’t remember.", 1, 0)
+#table(DataClean$attention_tradeoff_capital_bin)
+#
+#Please imagine that the government wants to improve certain social benefits. However, it can only do so by cutting back on other social benefits. To what extent do you find the following cutbacks acceptable in comparison to the improvement they allow? The government subsidizes child care for all families at a cost of lowering other family benefits (e.g., child tax credits or parental leave payments).
+#table(clean$tradeoff_spend_cc_1)
+#
+#DataClean$tradeoff_childcare_benefits_num <- NA_real_
+#DataClean$tradeoff_childcare_benefits_num[clean$tradeoff_spend_cc_1 == "Strongly agree"] <- 1
+#DataClean$tradeoff_childcare_benefits_num[clean$tradeoff_spend_cc_1 == "Somewhat agree"] <- 0.66
+#DataClean$tradeoff_childcare_benefits_num[clean$tradeoff_spend_cc_1 == "Somewhat disagree"] <- 0.33
+#DataClean$tradeoff_childcare_benefits_num[clean$tradeoff_spend_cc_1 == "Strongly disagree"] <- 0
+#table(DataClean$tradeoff_childcare_benefits_num)
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
+#DataClean$tradeoff_childcare_benefits_bin <- ifelse(
+#  DataClean$tradeoff_childcare_benefits_num %in% c(0.66, 1), 1, 0
+#)
+#
+##Please imagine that the government wants to improve certain social benefits. However, it can only do so by cutting back on other social benefits. To what extent do you find the following cutbacks acceptable in comparison to the improvement they allow? The government subsidizes childcare for low-income families at a cost of increasing the price of childcare for middle and upper-class families.
+#table(clean$tradeoff_spend_cc_2)
+#
+#DataClean$tradeoff_childcare_lowincome_num <- NA_real_
+#DataClean$tradeoff_childcare_lowincome_num[clean$tradeoff_spend_cc_2 == "Strongly agree"] <- 1
+#DataClean$tradeoff_childcare_lowincome_num[clean$tradeoff_spend_cc_2 == "Somewhat agree"] <- 0.66
+#DataClean$tradeoff_childcare_lowincome_num[clean$tradeoff_spend_cc_2 == "Somewhat disagree"] <- 0.33
+#DataClean$tradeoff_childcare_lowincome_num[clean$tradeoff_spend_cc_2 == "Strongly disagree"] <- 0
+#table(DataClean$tradeoff_childcare_lowincome_num)
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
+#DataClean$tradeoff_childcare_lowincome_bin <- ifelse(
+#  DataClean$tradeoff_childcare_lowincome_num %in% c(0.66, 1), 1, 0
+#)
+#
+##In the question  you just answered, what was mentioned as the trade-off for increasing childcare subsidies?
+#table(clean$tradeoff_spend_cc_m)
+#DataClean$tradeoff_childcare_char <- NA
+#DataClean$tradeoff_childcare_char[clean$tradeoff_spend_cc_m == "A reduction in other family benefits (e.g., child tax credits or parental leave payments)."]   <- "A reduction in other family benefits (e.g., child tax credits or parental leave payments)."
+#DataClean$tradeoff_childcare_char[clean$tradeoff_spend_cc_m == "An increase in the price of childcare for middle- and upper-class families."]  <- "An increase in the price of childcare for middle- and upper-class families."
+#DataClean$tradeoff_childcare_char[clean$tradeoff_spend_cc_m == "I don’t remember."]  <- "I don’t remember."
+#DataClean$tradeoff_childcare_char[clean$tradeoff_spend_cc_m == "No trade-off was mentioned."]   <- "No trade-off was mentioned."
+#
+#table(DataClean$tradeoff_childcare_char)
+#
+##binaires
+#DataClean$attention_tradeoff_childcare_benefits_bin <- ifelse(DataClean$tradeoff_childcare_char == "A reduction in other family benefits (e.g., child tax credits or parental leave payments).", 1, 0)
+#DataClean$attention_tradeoff_childcare_income_bin <- ifelse(DataClean$tradeoff_childcare_char == "An increase in the price of childcare for middle- and upper-class families.", 1, 0)
+#DataClean$attention_tradeoff_childcare_dontremember_bin <- ifelse(DataClean$tradeoff_childcare_char == "I don’t remember.", 1, 0)
+#DataClean$attention_tradeoff_childcare_no_mention_bin <- ifelse(DataClean$tradeoff_childcare_char == "No trade-off was mentioned.", 1, 0)
+#table(DataClean$attention_tradeoff_childcare_benefits_bin)
+#
+##Please imagine that the government wants to improve certain social benefits. However, it can only do so by cutting back on other social benefits. To what extent do you find the following cutbacks acceptable in comparison to the improvement they allow? The government increases home care for all seniors at a cost of lowering maximum old age pension benefits.
+#table(clean$tradeoff_spend_hc_1)
+#
+#DataClean$tradeoff_senior_benefits_num <- NA_real_
+#DataClean$tradeoff_senior_benefits_num[clean$tradeoff_spend_hc_1 == "Strongly agree"] <- 1
+#DataClean$tradeoff_senior_benefits_num[clean$tradeoff_spend_hc_1 == "Somewhat agree"] <- 0.66
+#DataClean$tradeoff_senior_benefits_num[clean$tradeoff_spend_hc_1 == "Somewhat disagree"] <- 0.33
+#DataClean$tradeoff_senior_benefits_num[clean$tradeoff_spend_hc_1 == "Strongly disagree"] <- 0
+#table(DataClean$tradeoff_senior_benefits_num)
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
+#DataClean$tradeoff_senior_benefits_bin <- ifelse(
+#  DataClean$tradeoff_senior_benefits_num %in% c(0.66, 1), 1, 0
+#)
+#
+##Please imagine that the government wants to improve certain social benefits. However, it can only do so by cutting back on other social benefits. To what extent do you find the following cutbacks acceptable in comparison to the improvement they allow? The government increases home care for low-income seniors at a cost of increasing the price of home care for middle and upper-class seniors.
+#table(clean$tradeoff_spend_hc_2)
+#
+#DataClean$tradeoff_senior_income_num <- NA_real_
+#DataClean$tradeoff_senior_income_num[clean$tradeoff_spend_hc_2 == "Strongly agree"] <- 1
+#DataClean$tradeoff_senior_income_num[clean$tradeoff_spend_hc_2 == "Somewhat agree"] <- 0.66
+#DataClean$tradeoff_senior_income_num[clean$tradeoff_spend_hc_2 == "Somewhat disagree"] <- 0.33
+#DataClean$tradeoff_senior_income_num[clean$tradeoff_spend_hc_2 == "Strongly disagree"] <- 0
+#table(DataClean$tradeoff_senior_income_num)
+#
+## Création de la variable binaire : 1 = priorité forte à la dette (0.66 ou 1), 0 = le reste
+#DataClean$tradeoff_senior_income_bin <- ifelse(
+#  DataClean$tradeoff_senior_income_num %in% c(0.66, 1), 1, 0
+#)
+
+# ============================================================
 
 write.csv(DataClean, "data/clean_df_full.csv")
 
