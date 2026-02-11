@@ -192,23 +192,39 @@ DataClean$ses_male_bin <- ifelse(clean$ses_gender == "Male", 1, 0)
 DataClean$ses_male_bin[clean$ses_gender == "Other"] <- NA
 table(DataClean$ses_male_bin)
 
+
 #In which year you were born?-------------------------------------------------------------
-attributes(clean$ses_year_born.)
-table(clean$ses_year_born.)
+table(clean$ses_year_born., useNA = "ifany")
 
-# Calcul de l'âge basé sur l'année de naissance
-DataClean$ses_age <- 2025 - as.numeric(clean$ses_year_born.)
+# 2) Calculer l'âge 
+DataClean$ses_age <- NA
+DataClean$ses_age <- 2025 - as.numeric(clean$ses_year_born)
 
-# Création des catégories d'âge
-DataClean$age34    <- ifelse(DataClean$ses_age >= 18 & DataClean$ses_age <= 34, 1, 0)
-DataClean$age35_54 <- ifelse(DataClean$ses_age >= 35 & DataClean$ses_age <= 54, 1, 0)
-#(55 plus becomes reference)
+# 3) Vérifier l'âge
+table(DataClean$ses_age, useNA = "ifany")
 
+# 4) Binaires
 
+# 18-34
+DataClean$age18_34_bin <- NA
+DataClean$age18_34_bin[DataClean$ses_age >= 18 & DataClean$ses_age <= 34] <- 1
+DataClean$age18_34_bin[!(DataClean$ses_age >= 18 & DataClean$ses_age <= 34) &
+                         !is.na(DataClean$ses_age)] <- 0
+table(DataClean$age18_34_bin, useNA = "always")
 
-# Vérification
-table(DataClean$ses_age)
-table(DataClean$age35_54)
+# 35-54
+DataClean$age35_54_bin <- NA
+DataClean$age35_54_bin[DataClean$ses_age >= 35 & DataClean$ses_age <= 54] <- 1
+DataClean$age35_54_bin[!(DataClean$ses_age >= 35 & DataClean$ses_age <= 54) &
+                         !is.na(DataClean$ses_age)] <- 0
+table(DataClean$age35_54_bin, useNA = "always")
+
+# 55+
+DataClean$age55plus_bin <- NA
+DataClean$age55plus_bin[DataClean$ses_age >= 55] <- 1
+DataClean$age55plus_bin[!(DataClean$ses_age >= 55) & !is.na(DataClean$ses_age)] <- 0
+table(DataClean$age55plus_bin, useNA = "always")
+
 
 # ! Check in the new survey, provinces include : AB, ON, QC, NB, NL, NS, PEI 
 #          (to become a categorical variable (AB, ON, QC, EC & a bin for each, e.g. reg_ab [0,1]))
@@ -259,16 +275,22 @@ table(clean$ses_region_cat, useNA="ifany")
 
 DataClean$ses_region_cat <- clean$ses_region_cat
 
+###binaire East Coast
+
+DataClean$region_eastcoast_bin <- NA
+DataClean$region_eastcoast_bin[DataClean$ses_region_cat == "East Coast"] <- 1
+DataClean$region_eastcoast_bin[DataClean$ses_region_cat != "East Coast" &
+                                 !is.na(DataClean$ses_region_cat)] <- 0
+table(DataClean$region_eastcoast_bin, useNA="always")
+
 
 # What language do you speak most often at home?-------------------------------------------------------------------------
-attributes(clean$ses_language)
 table(clean$ses_language)
 DataClean$ses_french_bin <- ifelse(clean$ses_language == "French", 1, 0)
 DataClean$ses_french_bin[clean$ses_language == "Other"] <- NA
 table(DataClean$ses_french_bin)
 
 # What is the highest level of education that you have completed?--------------------------------------------------------
-attributes(clean$ses_education)
 table(clean$ses_education)
 
 # Initialisation
@@ -665,7 +687,7 @@ table(DataClean$ideo_define_num)
 
 #binaire province
 
-# 1) 
+ 
 table(clean$ideo_define_clean, useNA = "ifany")
 
 # 2) QUEBEC
@@ -719,7 +741,7 @@ table(DataClean$ideo_define_PE_first_bin, useNA = "always")
 
 #binaire canada
 
-# 1) Vérifier les modalités
+
 table(clean$ideo_define_clean, useNA = "ifany")
 
 # 2) ALBERTA — First Canadian, second Albertan
@@ -1109,10 +1131,6 @@ table(DataClean$budget_imp_debt_bin, useNA = "always")
 #-----------------------------------------------------------------------------------------
 ##budget prio
 
-# ============================================================
-# ÉTAPE 1: RENOMMER ET CRÉER LES VARIABLES BINAIRES
-# ============================================================
-
 # 1. Renommer les variables
 DataClean <- clean %>%
   rename(
@@ -1134,7 +1152,7 @@ DataClean <- DataClean %>%
     n_at_max = sum(c(budget_prio_health, budget_prio_seniors, budget_prio_cc, 
                      budget_prio_ecn, budget_prio_clim) == max_budget, na.rm = TRUE),
     
-    # Binaire = 1 seulement si c'est le SEUL maximum
+    # Binaire = 1 seulement si c'est le seul maximum
     budget_prio_health_bin = as.integer(budget_prio_health == max_budget & n_at_max == 1),
     budget_prio_seniors_bin = as.integer(budget_prio_seniors == max_budget & n_at_max == 1),
     budget_prio_cc_bin = as.integer(budget_prio_cc == max_budget & n_at_max == 1),
@@ -1145,9 +1163,7 @@ DataClean <- DataClean %>%
   # Nettoyer les colonnes d'aide
   select(-max_budget, -n_at_max)
 
-# ============================================================
-# ÉTAPE 2: VÉRIFICATION
-# ============================================================
+# Vérification
 
 cat("=== VÉRIFICATION DES VARIABLES BINAIRES ===\n\n")
 
@@ -1161,7 +1177,7 @@ for (var in bin_vars) {
   cat("\n")
 }
 
-# Résumé global
+# Résumé 
 cat("=== RÉSUMÉ GLOBAL ===\n")
 summary_bin <- DataClean %>%
   select(all_of(bin_vars)) %>%
@@ -1218,9 +1234,7 @@ create_policy_vars <- function(df, policy_cols) {
   return(df)
 }
 
-# ============================================================
-# NETTOYAGE DES DONNÉES
-# ============================================================
+# nettoyage
 
 DataClean <- clean %>%
   rename(
@@ -1317,11 +1331,8 @@ DataClean <- DataClean %>%
     tradeoff_cc2_educ_low_inc_strong = as.integer(tradeoff_cc2_educ_low_inc_intensity >= 50)
   )
 
-# ============================================================
-# VÉRIFICATION
-# ============================================================
+# vérification
 
-cat("✅ Nettoyage terminé!\n\n")
 
 cat("=== VÉRIFICATION DES PRÉFÉRENCES FORTES (>= 50 points) ===\n\n")
 
@@ -1362,13 +1373,9 @@ cat("\n========================================\n")
 cat("VÉRIFICATIONS DES 3 TYPES DE VARIABLES\n")
 cat("========================================\n\n")
 
-# ============================================================
 # QUESTION CC1
-# ============================================================
 
-cat("=====================================\n")
-cat("QUESTION CC1 (Childcare 1)\n")
-cat("=====================================\n\n")
+##binaires, intensité et préférence forte
 
 cat("--- BINAIRES (_bin) - Priorité #1 claire ---\n")
 cat("tradeoff_cc1_tax_bin:\n")
@@ -1391,12 +1398,8 @@ cat("Debt strong:", sum(DataClean$tradeoff_cc1_debt_strong, na.rm = TRUE), "pers
 cat("No spend strong:", sum(DataClean$tradeoff_cc1_no_spend_strong, na.rm = TRUE), "personnes\n")
 
 # ============================================================
-# QUESTION GE
-# ============================================================
+# QUESTION GE (Green economy)
 
-cat("\n=====================================\n")
-cat("QUESTION GE (Green Economy)\n")
-cat("=====================================\n\n")
 
 cat("--- BINAIRES (_bin) ---\n")
 cat("tradeoff_ge_tax_bin:\n")
@@ -1420,11 +1423,7 @@ cat("No spend strong:", sum(DataClean$tradeoff_ge_no_spend_strong, na.rm = TRUE)
 
 # ============================================================
 # QUESTION TAX
-# ============================================================
 
-cat("\n=====================================\n")
-cat("QUESTION TAX\n")
-cat("=====================================\n\n")
 
 cat("--- BINAIRES (_bin) ---\n")
 cat("tradeoff_tax_less_services_bin:\n")
@@ -1448,11 +1447,6 @@ cat("Wealth tax strong:", sum(DataClean$tradeoff_tax_wealth_tax_strong, na.rm = 
 
 # ============================================================
 # QUESTION HC
-# ============================================================
-
-cat("\n=====================================\n")
-cat("QUESTION HC (Healthcare)\n")
-cat("=====================================\n\n")
 
 cat("--- BINAIRES (_bin) ---\n")
 cat("tradeoff_hc_all_bin:\n")
@@ -1473,11 +1467,7 @@ cat("Pensions strong:", sum(DataClean$tradeoff_hc_pensions_strong, na.rm = TRUE)
 
 # ============================================================
 # QUESTION CC2
-# ============================================================
 
-cat("\n=====================================\n")
-cat("QUESTION CC2 (Childcare 2)\n")
-cat("=====================================\n\n")
 
 cat("--- BINAIRES (_bin) ---\n")
 cat("tradeoff_cc2_all_bin:\n")
@@ -1501,11 +1491,7 @@ cat("Educ low inc strong:", sum(DataClean$tradeoff_cc2_educ_low_inc_strong, na.r
 
 # ============================================================
 # RÉSUMÉ GLOBAL
-# ============================================================
 
-cat("\n\n========================================\n")
-cat("RÉSUMÉ GLOBAL\n")
-cat("========================================\n\n")
 
 cat("Total de variables créées par question:\n")
 cat("- CC1: ", length(grep("^tradeoff_cc1_.*_(bin|intensity|strong)$", names(DataClean))), " variables\n")
@@ -1514,7 +1500,6 @@ cat("- TAX: ", length(grep("^tradeoff_tax_.*_(bin|intensity|strong)$", names(Dat
 cat("- HC: ", length(grep("^tradeoff_hc_.*_(bin|intensity|strong)$", names(DataClean))), " variables\n")
 cat("- CC2: ", length(grep("^tradeoff_cc2_.*_(bin|intensity|strong)$", names(DataClean))), " variables\n")
 
-cat("\n✅ VÉRIFICATIONS TERMINÉES!\n")
 
 ##To what extent do you agree with the following statement: The government should increase spending on childcare.
 #table(clean$tradeoff_invest_cc0)
@@ -1733,11 +1718,10 @@ cat("\n✅ VÉRIFICATIONS TERMINÉES!\n")
 #DataClean$tradeoff_senior_income_bin <- ifelse(
 #  DataClean$tradeoff_senior_income_num %in% c(0.66, 1), 1, 0
 #)
-#---------------------------------------------------------------------------
-##redis
+
 # ============================================================
-# NETTOYAGE DES VARIABLES DE REDISTRIBUTION
-# ============================================================
+#REDISTRIBUTION
+
 
 # redis_fei_can1: most = 1, never = 0 
 table(clean$redis_fei_can1)
@@ -1851,7 +1835,6 @@ DataClean$redis_no_cheat_system_bin <- ifelse(
   DataClean$redis_no_cheat_system_num %in% c(0.66, 1), 1, 0
 )
 
-cat("✅ Variables de redistribution nettoyées!\n")
 
 #------------------------------------------------------------------------------------
 #ideo_vote_fed_clean
