@@ -941,6 +941,7 @@ print(table(DataClean$budget_prio_health_pref, useNA = "ifany"))
 cat("\nIntensité:\n")
 print(table(DataClean$budget_prio_health_intense, useNA = "ifany"))
 
+
 ##----------------------------------------------------------------------------------------
 ##Tradeoff
 
@@ -980,30 +981,49 @@ DataClean <- clean %>%
     tradeoff_cc2_educ_low_inc = budget_tradeoff_cc2_24
   ) %>%
   mutate(
-    # Convertir en numérique
+    # Convertir en numérique et remplacer valeurs négatives par NA
     tradeoff_cc1_tax = as.numeric(tradeoff_cc1_tax),
+    tradeoff_cc1_tax = ifelse(tradeoff_cc1_tax < 0, NA, tradeoff_cc1_tax),
     tradeoff_cc1_cut = as.numeric(tradeoff_cc1_cut),
+    tradeoff_cc1_cut = ifelse(tradeoff_cc1_cut < 0, NA, tradeoff_cc1_cut),
     tradeoff_cc1_debt = as.numeric(tradeoff_cc1_debt),
+    tradeoff_cc1_debt = ifelse(tradeoff_cc1_debt < 0, NA, tradeoff_cc1_debt),
     tradeoff_cc1_no_spend = as.numeric(tradeoff_cc1_no_spend),
+    tradeoff_cc1_no_spend = ifelse(tradeoff_cc1_no_spend < 0, NA, tradeoff_cc1_no_spend),
     
     tradeoff_ge_tax = as.numeric(tradeoff_ge_tax),
+    tradeoff_ge_tax = ifelse(tradeoff_ge_tax < 0, NA, tradeoff_ge_tax),
     tradeoff_ge_cut = as.numeric(tradeoff_ge_cut),
+    tradeoff_ge_cut = ifelse(tradeoff_ge_cut < 0, NA, tradeoff_ge_cut),
     tradeoff_ge_debt = as.numeric(tradeoff_ge_debt),
+    tradeoff_ge_debt = ifelse(tradeoff_ge_debt < 0, NA, tradeoff_ge_debt),
     tradeoff_ge_no_spend = as.numeric(tradeoff_ge_no_spend),
+    tradeoff_ge_no_spend = ifelse(tradeoff_ge_no_spend < 0, NA, tradeoff_ge_no_spend),
     
     tradeoff_tax_less_services = as.numeric(tradeoff_tax_less_services),
+    tradeoff_tax_less_services = ifelse(tradeoff_tax_less_services < 0, NA, tradeoff_tax_less_services),
     tradeoff_tax_sales_tax = as.numeric(tradeoff_tax_sales_tax),
+    tradeoff_tax_sales_tax = ifelse(tradeoff_tax_sales_tax < 0, NA, tradeoff_tax_sales_tax),
     tradeoff_tax_inc_tax = as.numeric(tradeoff_tax_inc_tax),
+    tradeoff_tax_inc_tax = ifelse(tradeoff_tax_inc_tax < 0, NA, tradeoff_tax_inc_tax),
     tradeoff_tax_wealth_tax = as.numeric(tradeoff_tax_wealth_tax),
+    tradeoff_tax_wealth_tax = ifelse(tradeoff_tax_wealth_tax < 0, NA, tradeoff_tax_wealth_tax),
     
     tradeoff_hc_all = as.numeric(tradeoff_hc_all),
+    tradeoff_hc_all = ifelse(tradeoff_hc_all < 0, NA, tradeoff_hc_all),
     tradeoff_hc_spend = as.numeric(tradeoff_hc_spend),
+    tradeoff_hc_spend = ifelse(tradeoff_hc_spend < 0, NA, tradeoff_hc_spend),
     tradeoff_hc_pensions = as.numeric(tradeoff_hc_pensions),
+    tradeoff_hc_pensions = ifelse(tradeoff_hc_pensions < 0, NA, tradeoff_hc_pensions),
     
     tradeoff_cc2_all = as.numeric(tradeoff_cc2_all),
+    tradeoff_cc2_all = ifelse(tradeoff_cc2_all < 0, NA, tradeoff_cc2_all),
     tradeoff_cc2_low_inc = as.numeric(tradeoff_cc2_low_inc),
+    tradeoff_cc2_low_inc = ifelse(tradeoff_cc2_low_inc < 0, NA, tradeoff_cc2_low_inc),
     tradeoff_cc2_educ_all = as.numeric(tradeoff_cc2_educ_all),
-    tradeoff_cc2_educ_low_inc = as.numeric(tradeoff_cc2_educ_low_inc)
+    tradeoff_cc2_educ_all = ifelse(tradeoff_cc2_educ_all < 0, NA, tradeoff_cc2_educ_all),
+    tradeoff_cc2_educ_low_inc = as.numeric(tradeoff_cc2_educ_low_inc),
+    tradeoff_cc2_educ_low_inc = ifelse(tradeoff_cc2_educ_low_inc < 0, NA, tradeoff_cc2_educ_low_inc)
   )
 
 # ============================================================
@@ -1122,8 +1142,6 @@ DataClean <- DataClean %>%
 # VÉRIFICATION
 # ============================================================
 
-cat("DEUX TYPES DE VARIABLES CRÉÉES:\n\n")
-
 cat("1. Variables '_pref' (préférence):\n")
 cat("   - 1 = C'est le choix avec le PLUS de points pour ce répondant\n")
 cat("   - 0 = Ce n'est PAS le choix avec le plus de points\n\n")
@@ -1132,17 +1150,14 @@ cat("2. Variables '_intense' (intensité):\n")
 cat("   - 1 = Le répondant a mis PLUS de 50 points sur ce choix\n")
 cat("   - 0 = Le répondant a mis 50 points ou MOINS sur ce choix\n\n")
 
-
-
 cat("Exemple pour CC1:\n")
 cat("Préférences:\n")
 print(table(DataClean$tradeoff_cc1_tax_pref, useNA = "ifany"))
-table(DataClean$tradeoff_cc1_cut_pref)
-
+print(table(DataClean$tradeoff_cc1_cut_pref, useNA = "ifany"))
 
 cat("\nIntensités:\n")
 print(table(DataClean$tradeoff_cc1_tax_intense, useNA = "ifany"))
-table(DataClean$tradeoff_cc1_cut_intense)
+print(table(DataClean$tradeoff_cc1_cut_intense, useNA = "ifany"))
 
 #-----------------------------------------------------------------------------------------
 
@@ -1603,5 +1618,7 @@ table(DataClean$trust_inst_media_bin, useNA = "ifany")
 
 # ============================================================
 
-write.csv(DataClean, "data/clean_df_full.csv")
+write.csv(DataClean, "data/clean_df_valid.csv")
+
+#write.csv(DataClean, "data/clean_df_full.csv")
 
