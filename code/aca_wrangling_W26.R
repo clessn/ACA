@@ -898,15 +898,23 @@ table(DataClean$budget_imp_debt_bin, useNA = "always")
 
 # 100 points questions: For each question, you have 100 points to allocate...
 #-----------------------------------------------------------------------------------------
-
 ##budget prio
 
-# Ajouter les colonnes de clean à DataClean avec les nouveaux noms
+# Ajouter les colonnes de clean à DataClean avec les nouveaux noms et valeurs négatives en NA
 DataClean$budget_prio_health <- as.numeric(clean$budget_spend_prio_6)
+DataClean$budget_prio_health <- ifelse(DataClean$budget_prio_health < 0, NA, DataClean$budget_prio_health)
+
 DataClean$budget_prio_seniors <- as.numeric(clean$budget_spend_prio_7)
+DataClean$budget_prio_seniors <- ifelse(DataClean$budget_prio_seniors < 0, NA, DataClean$budget_prio_seniors)
+
 DataClean$budget_prio_cc <- as.numeric(clean$budget_spend_prio_8)
+DataClean$budget_prio_cc <- ifelse(DataClean$budget_prio_cc < 0, NA, DataClean$budget_prio_cc)
+
 DataClean$budget_prio_ecn <- as.numeric(clean$budget_spend_prio_9)
+DataClean$budget_prio_ecn <- ifelse(DataClean$budget_prio_ecn < 0, NA, DataClean$budget_prio_ecn)
+
 DataClean$budget_prio_clim <- as.numeric(clean$budget_spend_prio_10)
+DataClean$budget_prio_clim <- ifelse(DataClean$budget_prio_clim < 0, NA, DataClean$budget_prio_clim)
 
 # Créer les deux types de binaires
 DataClean <- DataClean %>%
@@ -934,7 +942,6 @@ DataClean <- DataClean %>%
   select(-max_budget)
 
 # Vérification
-
 cat("Exemple - Health:\n")
 cat("Préférence:\n")
 print(table(DataClean$budget_prio_health_pref, useNA = "ifany"))
@@ -942,7 +949,7 @@ cat("\nIntensité:\n")
 print(table(DataClean$budget_prio_health_intense, useNA = "ifany"))
 
 
-##----------------------------------------------------------------------------------------
+##---------------------------------------------------------------------------------------
 ##Tradeoff
 
 # ============================================================
@@ -1158,6 +1165,7 @@ print(table(DataClean$tradeoff_cc1_cut_pref, useNA = "ifany"))
 cat("\nIntensités:\n")
 print(table(DataClean$tradeoff_cc1_tax_intense, useNA = "ifany"))
 print(table(DataClean$tradeoff_cc1_cut_intense, useNA = "ifany"))
+
 
 #-----------------------------------------------------------------------------------------
 
@@ -1393,7 +1401,6 @@ table(DataClean$trust_inst_media_num, useNA = "ifany")
 
 cat("\ntrust_inst_media - Variable binaire:\n")
 table(DataClean$trust_inst_media_bin, useNA = "ifany")
-
 
 
 #------------------------------------------------------------------------------------------
