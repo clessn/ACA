@@ -8,7 +8,7 @@
 library(tidyverse)
 library(tidyr)
 library(dplyr)
-df
+
 # -----------------------
 # Load wrangled and clean data (from aca_wrangling_W26.csv, now data/clean_df_valid.csv)
 # -----------------------
@@ -18,7 +18,7 @@ df <- read.csv("data/clean_df_valid.csv")
 # -------------------------------------------------------------------
 # VISUALIZATION: Proportion Selecting Each Policy as Top Priority (intensity)
 # -------------------------------------------------------------------
-# Uses binary variables
+# Uses binary tradeoff intensity variables
 # -------------------------------------------------------------------
 
 # Intense allocation across all tradeoff questions
@@ -103,3 +103,34 @@ ggplot(all_counts, aes(x = policy, y = pct_intense, fill = policy)) +
   theme(
     axis.text.x = element_text(angle = 45, hjust = 1) # rotate x labels
   )
+
+
+# -------------------------------------------------------------------
+# Five budget priority variables
+
+budget_vars <- c(
+  "budget_prio_health",
+  "budget_prio_seniors",
+  "budget_prio_cc",
+  "budget_prio_ecn",
+  "budget_prio_clim"
+)
+
+# Reshape to long format
+budget_long <- df %>%
+  select(all_of(budget_vars)) %>%
+  pivot_longer(
+    cols = everything(),
+    names_to = "policy",
+    values_to = "points"
+  )
+
+# Plot density
+ggplot(budget_long %>% filter(!is.na(points)), aes(x = points, fill = policy, color = policy)) +
+  geom_density(alpha = 0.3) +
+  labs(
+    title = "Distribution of Points Across Budget Priorities",
+    x = "Points",
+    y = "Density"
+  ) +
+  theme_minimal(base_size = 14)
