@@ -951,106 +951,67 @@ print(table(DataClean$budget_prio_health_intense, useNA = "ifany"))
 
 ##---------------------------------------------------------------------------------------
 ##Tradeoff
+# TRADEOFF CC1
+DataClean$tradeoff_cc1_tax <- as.numeric(clean$budget_tradeoff_cc1_17)
+DataClean$tradeoff_cc1_tax <- ifelse(DataClean$tradeoff_cc1_tax < 0, NA, DataClean$tradeoff_cc1_tax)
+DataClean$tradeoff_cc1_cut <- as.numeric(clean$budget_tradeoff_cc1_18)
+DataClean$tradeoff_cc1_cut <- ifelse(DataClean$tradeoff_cc1_cut < 0, NA, DataClean$tradeoff_cc1_cut)
+DataClean$tradeoff_cc1_debt <- as.numeric(clean$budget_tradeoff_cc1_19)
+DataClean$tradeoff_cc1_debt <- ifelse(DataClean$tradeoff_cc1_debt < 0, NA, DataClean$tradeoff_cc1_debt)
+DataClean$tradeoff_cc1_no_spend <- as.numeric(clean$budget_tradeoff_cc1_20)
+DataClean$tradeoff_cc1_no_spend <- ifelse(DataClean$tradeoff_cc1_no_spend < 0, NA, DataClean$tradeoff_cc1_no_spend)
+
+# TRADEOFF GE
+DataClean$tradeoff_ge_tax <- as.numeric(clean$budget_tradeoff_ge_6)
+DataClean$tradeoff_ge_tax <- ifelse(DataClean$tradeoff_ge_tax < 0, NA, DataClean$tradeoff_ge_tax)
+DataClean$tradeoff_ge_cut <- as.numeric(clean$budget_tradeoff_ge_7)
+DataClean$tradeoff_ge_cut <- ifelse(DataClean$tradeoff_ge_cut < 0, NA, DataClean$tradeoff_ge_cut)
+DataClean$tradeoff_ge_debt <- as.numeric(clean$budget_tradeoff_ge_8)
+DataClean$tradeoff_ge_debt <- ifelse(DataClean$tradeoff_ge_debt < 0, NA, DataClean$tradeoff_ge_debt)
+DataClean$tradeoff_ge_no_spend <- as.numeric(clean$budget_tradeoff_ge_9)
+DataClean$tradeoff_ge_no_spend <- ifelse(DataClean$tradeoff_ge_no_spend < 0, NA, DataClean$tradeoff_ge_no_spend)
+
+# TRADEOFF TAX
+DataClean$tradeoff_tax_less_services <- as.numeric(clean$budget_tradeoff_tax_6)
+DataClean$tradeoff_tax_less_services <- ifelse(DataClean$tradeoff_tax_less_services < 0, NA, DataClean$tradeoff_tax_less_services)
+DataClean$tradeoff_tax_sales_tax <- as.numeric(clean$budget_tradeoff_tax_7)
+DataClean$tradeoff_tax_sales_tax <- ifelse(DataClean$tradeoff_tax_sales_tax < 0, NA, DataClean$tradeoff_tax_sales_tax)
+DataClean$tradeoff_tax_inc_tax <- as.numeric(clean$budget_tradeoff_tax_8)
+DataClean$tradeoff_tax_inc_tax <- ifelse(DataClean$tradeoff_tax_inc_tax < 0, NA, DataClean$tradeoff_tax_inc_tax)
+DataClean$tradeoff_tax_wealth_tax <- as.numeric(clean$budget_tradeoff_tax_9)
+DataClean$tradeoff_tax_wealth_tax <- ifelse(DataClean$tradeoff_tax_wealth_tax < 0, NA, DataClean$tradeoff_tax_wealth_tax)
+
+# TRADEOFF HC
+DataClean$tradeoff_hc_all <- as.numeric(clean$budget_tradeoff_hc_21)
+DataClean$tradeoff_hc_all <- ifelse(DataClean$tradeoff_hc_all < 0, NA, DataClean$tradeoff_hc_all)
+DataClean$tradeoff_hc_spend <- as.numeric(clean$budget_tradeoff_hc_22)
+DataClean$tradeoff_hc_spend <- ifelse(DataClean$tradeoff_hc_spend < 0, NA, DataClean$tradeoff_hc_spend)
+DataClean$tradeoff_hc_pensions <- as.numeric(clean$budget_tradeoff_hc_23)
+DataClean$tradeoff_hc_pensions <- ifelse(DataClean$tradeoff_hc_pensions < 0, NA, DataClean$tradeoff_hc_pensions)
+
+# TRADEOFF CC2
+DataClean$tradeoff_cc2_all <- as.numeric(clean$budget_tradeoff_cc2_21)
+DataClean$tradeoff_cc2_all <- ifelse(DataClean$tradeoff_cc2_all < 0, NA, DataClean$tradeoff_cc2_all)
+DataClean$tradeoff_cc2_low_inc <- as.numeric(clean$budget_tradeoff_cc2_22)
+DataClean$tradeoff_cc2_low_inc <- ifelse(DataClean$tradeoff_cc2_low_inc < 0, NA, DataClean$tradeoff_cc2_low_inc)
+DataClean$tradeoff_cc2_educ_all <- as.numeric(clean$budget_tradeoff_cc2_23)
+DataClean$tradeoff_cc2_educ_all <- ifelse(DataClean$tradeoff_cc2_educ_all < 0, NA, DataClean$tradeoff_cc2_educ_all)
+DataClean$tradeoff_cc2_educ_low_inc <- as.numeric(clean$budget_tradeoff_cc2_24)
+DataClean$tradeoff_cc2_educ_low_inc <- ifelse(DataClean$tradeoff_cc2_educ_low_inc < 0, NA, DataClean$tradeoff_cc2_educ_low_inc)
 
 # ============================================================
-# ÉTAPE 1: RENOMMER ET CONVERTIR EN NUMÉRIQUE
-# ============================================================
-
-DataClean <- clean %>%
-  rename(
-    # budget_tradeoff_cc1
-    tradeoff_cc1_tax = budget_tradeoff_cc1_17,
-    tradeoff_cc1_cut = budget_tradeoff_cc1_18,
-    tradeoff_cc1_debt = budget_tradeoff_cc1_19,
-    tradeoff_cc1_no_spend = budget_tradeoff_cc1_20,
-    
-    # budget_tradeoff_ge
-    tradeoff_ge_tax = budget_tradeoff_ge_6,
-    tradeoff_ge_cut = budget_tradeoff_ge_7,
-    tradeoff_ge_debt = budget_tradeoff_ge_8,
-    tradeoff_ge_no_spend = budget_tradeoff_ge_9,
-    
-    # budget_tradeoff_tax
-    tradeoff_tax_less_services = budget_tradeoff_tax_6,
-    tradeoff_tax_sales_tax = budget_tradeoff_tax_7,
-    tradeoff_tax_inc_tax = budget_tradeoff_tax_8,
-    tradeoff_tax_wealth_tax = budget_tradeoff_tax_9,
-    
-    # budget_tradeoff_hc
-    tradeoff_hc_all = budget_tradeoff_hc_21,
-    tradeoff_hc_spend = budget_tradeoff_hc_22,
-    tradeoff_hc_pensions = budget_tradeoff_hc_23,
-    
-    # budget_tradeoff_cc2
-    tradeoff_cc2_all = budget_tradeoff_cc2_21,
-    tradeoff_cc2_low_inc = budget_tradeoff_cc2_22,
-    tradeoff_cc2_educ_all = budget_tradeoff_cc2_23,
-    tradeoff_cc2_educ_low_inc = budget_tradeoff_cc2_24
-  ) %>%
-  mutate(
-    # Convertir en numérique et remplacer valeurs négatives par NA
-    tradeoff_cc1_tax = as.numeric(tradeoff_cc1_tax),
-    tradeoff_cc1_tax = ifelse(tradeoff_cc1_tax < 0, NA, tradeoff_cc1_tax),
-    tradeoff_cc1_cut = as.numeric(tradeoff_cc1_cut),
-    tradeoff_cc1_cut = ifelse(tradeoff_cc1_cut < 0, NA, tradeoff_cc1_cut),
-    tradeoff_cc1_debt = as.numeric(tradeoff_cc1_debt),
-    tradeoff_cc1_debt = ifelse(tradeoff_cc1_debt < 0, NA, tradeoff_cc1_debt),
-    tradeoff_cc1_no_spend = as.numeric(tradeoff_cc1_no_spend),
-    tradeoff_cc1_no_spend = ifelse(tradeoff_cc1_no_spend < 0, NA, tradeoff_cc1_no_spend),
-    
-    tradeoff_ge_tax = as.numeric(tradeoff_ge_tax),
-    tradeoff_ge_tax = ifelse(tradeoff_ge_tax < 0, NA, tradeoff_ge_tax),
-    tradeoff_ge_cut = as.numeric(tradeoff_ge_cut),
-    tradeoff_ge_cut = ifelse(tradeoff_ge_cut < 0, NA, tradeoff_ge_cut),
-    tradeoff_ge_debt = as.numeric(tradeoff_ge_debt),
-    tradeoff_ge_debt = ifelse(tradeoff_ge_debt < 0, NA, tradeoff_ge_debt),
-    tradeoff_ge_no_spend = as.numeric(tradeoff_ge_no_spend),
-    tradeoff_ge_no_spend = ifelse(tradeoff_ge_no_spend < 0, NA, tradeoff_ge_no_spend),
-    
-    tradeoff_tax_less_services = as.numeric(tradeoff_tax_less_services),
-    tradeoff_tax_less_services = ifelse(tradeoff_tax_less_services < 0, NA, tradeoff_tax_less_services),
-    tradeoff_tax_sales_tax = as.numeric(tradeoff_tax_sales_tax),
-    tradeoff_tax_sales_tax = ifelse(tradeoff_tax_sales_tax < 0, NA, tradeoff_tax_sales_tax),
-    tradeoff_tax_inc_tax = as.numeric(tradeoff_tax_inc_tax),
-    tradeoff_tax_inc_tax = ifelse(tradeoff_tax_inc_tax < 0, NA, tradeoff_tax_inc_tax),
-    tradeoff_tax_wealth_tax = as.numeric(tradeoff_tax_wealth_tax),
-    tradeoff_tax_wealth_tax = ifelse(tradeoff_tax_wealth_tax < 0, NA, tradeoff_tax_wealth_tax),
-    
-    tradeoff_hc_all = as.numeric(tradeoff_hc_all),
-    tradeoff_hc_all = ifelse(tradeoff_hc_all < 0, NA, tradeoff_hc_all),
-    tradeoff_hc_spend = as.numeric(tradeoff_hc_spend),
-    tradeoff_hc_spend = ifelse(tradeoff_hc_spend < 0, NA, tradeoff_hc_spend),
-    tradeoff_hc_pensions = as.numeric(tradeoff_hc_pensions),
-    tradeoff_hc_pensions = ifelse(tradeoff_hc_pensions < 0, NA, tradeoff_hc_pensions),
-    
-    tradeoff_cc2_all = as.numeric(tradeoff_cc2_all),
-    tradeoff_cc2_all = ifelse(tradeoff_cc2_all < 0, NA, tradeoff_cc2_all),
-    tradeoff_cc2_low_inc = as.numeric(tradeoff_cc2_low_inc),
-    tradeoff_cc2_low_inc = ifelse(tradeoff_cc2_low_inc < 0, NA, tradeoff_cc2_low_inc),
-    tradeoff_cc2_educ_all = as.numeric(tradeoff_cc2_educ_all),
-    tradeoff_cc2_educ_all = ifelse(tradeoff_cc2_educ_all < 0, NA, tradeoff_cc2_educ_all),
-    tradeoff_cc2_educ_low_inc = as.numeric(tradeoff_cc2_educ_low_inc),
-    tradeoff_cc2_educ_low_inc = ifelse(tradeoff_cc2_educ_low_inc < 0, NA, tradeoff_cc2_educ_low_inc)
-  )
-
-# ============================================================
-# ÉTAPE 2: CRÉER LES DEUX TYPES DE BINAIRES
+# CRÉER LES DEUX TYPES DE BINAIRES
 # ============================================================
 
 DataClean <- DataClean %>%
   rowwise() %>%
   mutate(
-    # CC1 - Trouver le max
     max_cc1 = suppressWarnings(max(c(tradeoff_cc1_tax, tradeoff_cc1_cut, tradeoff_cc1_debt, tradeoff_cc1_no_spend), na.rm = TRUE)),
     max_cc1 = ifelse(is.infinite(max_cc1), NA, max_cc1),
-    
-    # TYPE 1: Binaire basé sur la préférence (celui qui a le plus de points)
     tradeoff_cc1_tax_pref = as.integer(tradeoff_cc1_tax == max_cc1 & !is.na(max_cc1)),
     tradeoff_cc1_cut_pref = as.integer(tradeoff_cc1_cut == max_cc1 & !is.na(max_cc1)),
     tradeoff_cc1_debt_pref = as.integer(tradeoff_cc1_debt == max_cc1 & !is.na(max_cc1)),
     tradeoff_cc1_no_spend_pref = as.integer(tradeoff_cc1_no_spend == max_cc1 & !is.na(max_cc1)),
-    
-    # TYPE 2: Binaire basé sur l'intensité (plus de 50 points)
     tradeoff_cc1_tax_intense = as.integer(tradeoff_cc1_tax > 50),
     tradeoff_cc1_cut_intense = as.integer(tradeoff_cc1_cut > 50),
     tradeoff_cc1_debt_intense = as.integer(tradeoff_cc1_debt > 50),
@@ -1062,17 +1023,12 @@ DataClean <- DataClean %>%
 DataClean <- DataClean %>%
   rowwise() %>%
   mutate(
-    # GE - Trouver le max
     max_ge = suppressWarnings(max(c(tradeoff_ge_tax, tradeoff_ge_cut, tradeoff_ge_debt, tradeoff_ge_no_spend), na.rm = TRUE)),
     max_ge = ifelse(is.infinite(max_ge), NA, max_ge),
-    
-    # TYPE 1: Préférence
     tradeoff_ge_tax_pref = as.integer(tradeoff_ge_tax == max_ge & !is.na(max_ge)),
     tradeoff_ge_cut_pref = as.integer(tradeoff_ge_cut == max_ge & !is.na(max_ge)),
     tradeoff_ge_debt_pref = as.integer(tradeoff_ge_debt == max_ge & !is.na(max_ge)),
     tradeoff_ge_no_spend_pref = as.integer(tradeoff_ge_no_spend == max_ge & !is.na(max_ge)),
-    
-    # TYPE 2: Intensité
     tradeoff_ge_tax_intense = as.integer(tradeoff_ge_tax > 50),
     tradeoff_ge_cut_intense = as.integer(tradeoff_ge_cut > 50),
     tradeoff_ge_debt_intense = as.integer(tradeoff_ge_debt > 50),
@@ -1084,17 +1040,12 @@ DataClean <- DataClean %>%
 DataClean <- DataClean %>%
   rowwise() %>%
   mutate(
-    # TAX - Trouver le max
     max_tax = suppressWarnings(max(c(tradeoff_tax_less_services, tradeoff_tax_sales_tax, tradeoff_tax_inc_tax, tradeoff_tax_wealth_tax), na.rm = TRUE)),
     max_tax = ifelse(is.infinite(max_tax), NA, max_tax),
-    
-    # TYPE 1: Préférence
     tradeoff_tax_less_services_pref = as.integer(tradeoff_tax_less_services == max_tax & !is.na(max_tax)),
     tradeoff_tax_sales_tax_pref = as.integer(tradeoff_tax_sales_tax == max_tax & !is.na(max_tax)),
     tradeoff_tax_inc_tax_pref = as.integer(tradeoff_tax_inc_tax == max_tax & !is.na(max_tax)),
     tradeoff_tax_wealth_tax_pref = as.integer(tradeoff_tax_wealth_tax == max_tax & !is.na(max_tax)),
-    
-    # TYPE 2: Intensité
     tradeoff_tax_less_services_intense = as.integer(tradeoff_tax_less_services > 50),
     tradeoff_tax_sales_tax_intense = as.integer(tradeoff_tax_sales_tax > 50),
     tradeoff_tax_inc_tax_intense = as.integer(tradeoff_tax_inc_tax > 50),
@@ -1106,16 +1057,11 @@ DataClean <- DataClean %>%
 DataClean <- DataClean %>%
   rowwise() %>%
   mutate(
-    # HC - Trouver le max
     max_hc = suppressWarnings(max(c(tradeoff_hc_all, tradeoff_hc_spend, tradeoff_hc_pensions), na.rm = TRUE)),
     max_hc = ifelse(is.infinite(max_hc), NA, max_hc),
-    
-    # TYPE 1: Préférence
     tradeoff_hc_all_pref = as.integer(tradeoff_hc_all == max_hc & !is.na(max_hc)),
     tradeoff_hc_spend_pref = as.integer(tradeoff_hc_spend == max_hc & !is.na(max_hc)),
     tradeoff_hc_pensions_pref = as.integer(tradeoff_hc_pensions == max_hc & !is.na(max_hc)),
-    
-    # TYPE 2: Intensité
     tradeoff_hc_all_intense = as.integer(tradeoff_hc_all > 50),
     tradeoff_hc_spend_intense = as.integer(tradeoff_hc_spend > 50),
     tradeoff_hc_pensions_intense = as.integer(tradeoff_hc_pensions > 50)
@@ -1126,17 +1072,12 @@ DataClean <- DataClean %>%
 DataClean <- DataClean %>%
   rowwise() %>%
   mutate(
-    # CC2 - Trouver le max
     max_cc2 = suppressWarnings(max(c(tradeoff_cc2_all, tradeoff_cc2_low_inc, tradeoff_cc2_educ_all, tradeoff_cc2_educ_low_inc), na.rm = TRUE)),
     max_cc2 = ifelse(is.infinite(max_cc2), NA, max_cc2),
-    
-    # TYPE 1: Préférence
     tradeoff_cc2_all_pref = as.integer(tradeoff_cc2_all == max_cc2 & !is.na(max_cc2)),
     tradeoff_cc2_low_inc_pref = as.integer(tradeoff_cc2_low_inc == max_cc2 & !is.na(max_cc2)),
     tradeoff_cc2_educ_all_pref = as.integer(tradeoff_cc2_educ_all == max_cc2 & !is.na(max_cc2)),
     tradeoff_cc2_educ_low_inc_pref = as.integer(tradeoff_cc2_educ_low_inc == max_cc2 & !is.na(max_cc2)),
-    
-    # TYPE 2: Intensité
     tradeoff_cc2_all_intense = as.integer(tradeoff_cc2_all > 50),
     tradeoff_cc2_low_inc_intense = as.integer(tradeoff_cc2_low_inc > 50),
     tradeoff_cc2_educ_all_intense = as.integer(tradeoff_cc2_educ_all > 50),
@@ -1149,23 +1090,14 @@ DataClean <- DataClean %>%
 # VÉRIFICATION
 # ============================================================
 
-cat("1. Variables '_pref' (préférence):\n")
-cat("   - 1 = C'est le choix avec le PLUS de points pour ce répondant\n")
-cat("   - 0 = Ce n'est PAS le choix avec le plus de points\n\n")
-
-cat("2. Variables '_intense' (intensité):\n")
-cat("   - 1 = Le répondant a mis PLUS de 50 points sur ce choix\n")
-cat("   - 0 = Le répondant a mis 50 points ou MOINS sur ce choix\n\n")
-
+cat("✅ Valeurs négatives remplacées par NA!\n\n")
 cat("Exemple pour CC1:\n")
 cat("Préférences:\n")
 print(table(DataClean$tradeoff_cc1_tax_pref, useNA = "ifany"))
 print(table(DataClean$tradeoff_cc1_cut_pref, useNA = "ifany"))
-
 cat("\nIntensités:\n")
 print(table(DataClean$tradeoff_cc1_tax_intense, useNA = "ifany"))
 print(table(DataClean$tradeoff_cc1_cut_intense, useNA = "ifany"))
-
 
 #-----------------------------------------------------------------------------------------
 
@@ -1610,7 +1542,7 @@ table(DataClean$trust_inst_media_bin, useNA = "ifany")
 #
 ##Please imagine that the government wants to improve certain social benefits. However, it can only do so by cutting back on other social benefits. To what extent do you find the following cutbacks acceptable in comparison to the improvement they allow? The government increases home care for low-income seniors at a cost of increasing the price of home care for middle and upper-class seniors.
 #table(clean$tradeoff_spend_hc_2)
-#
+
 #DataClean$tradeoff_senior_income_num <- NA_real_
 #DataClean$tradeoff_senior_income_num[clean$tradeoff_spend_hc_2 == "Strongly agree"] <- 1
 #DataClean$tradeoff_senior_income_num[clean$tradeoff_spend_hc_2 == "Somewhat agree"] <- 0.66
@@ -1628,4 +1560,9 @@ table(DataClean$trust_inst_media_bin, useNA = "ifany")
 write.csv(DataClean, "data/clean_df_valid.csv")
 
 #write.csv(DataClean, "data/clean_df_full.csv")
+
+
+# Option 1: Voir juste les noms de colonnes
+df_valid <- read.csv("data/clean_df_valid.csv")
+names(df_valid)
 
