@@ -134,3 +134,131 @@ ggplot(budget_long %>% filter(!is.na(points)), aes(x = points, fill = policy, co
     y = "Density"
   ) +
   theme_minimal(base_size = 14)
+
+# -------------------------------------------------------------------
+# VISUALIZATION: Redistribution
+# -------------------------------------------------------------------
+# Binary variables
+
+df_bin_long <- df %>%
+  select(
+    redis_effort_bin,
+    redis_intelligence_bin,
+    redis_no_cheat_system_bin,
+    redis_opportunity_bin,
+    redis_reasons_poor_bin,
+    redis_reasons_rich_bin,
+    redis_social_benefits_bin,
+    redis_welfare_bin
+  ) %>%
+  pivot_longer(
+    cols = everything(),
+    names_to = "question",
+    values_to = "response"
+  )
+
+ggplot(df_bin_long, aes(x = factor(response))) +
+  geom_bar(aes(y = after_stat(prop), group = question)) +
+  facet_wrap(~ question, ncol = 4) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(
+    x = "Response (0 / 1)",
+    y = "Proportion",
+    title = "Distribution of Binary Redistribution Attitudes"
+  ) +
+  theme_minimal()
+
+# Numeric variables
+df_num_long <- df %>%
+  select(
+    redis_effort_num,
+    redis_intelligence_num,
+    redis_no_cheat_system_num,
+    redis_opportunity_num,
+    redis_reasons_poor_num,
+    redis_reasons_rich_num,
+    redis_social_benefits_num,
+    redis_welfare_num
+  ) %>%
+  pivot_longer(
+    cols = everything(),
+    names_to = "question",
+    values_to = "response"
+  )
+
+ggplot(df_num_long, aes(x = response)) +
+  geom_density() +
+  facet_wrap(~ question, scales = "free_x", ncol = 4) +
+  labs(
+    x = "Response value",
+    y = "Density",
+    title = "Distribution of Numeric Redistribution Attitudes"
+  ) +
+  theme_minimal()
+
+# Correlation tests for similar questions
+rich_poor <- df[, c("redis_reasons_poor_num", "redis_reasons_rich_num")]
+
+free_ride <- df[, c(
+  "redis_social_benefits_num",
+  "redis_welfare_num",
+  "redis_no_cheat_system_num"
+)]
+
+opportunity <- df[, c(
+  "redis_effort_num",
+  "redis_intelligence_num",
+  "redis_opportunity_num"
+)]
+
+cor(
+  rich_poor,
+  use = "pairwise.complete.obs",
+  method = "pearson"
+)
+
+cor.test(
+  rich_poor$redis_reasons_poor_num,
+  rich_poor$redis_reasons_rich_num
+)
+
+cor(
+  free_ride,
+  use = "pairwise.complete.obs",
+  method = "pearson"
+)
+
+# Robustness check
+cor(
+  free_ride,
+  use = "pairwise.complete.obs",
+  method = "spearman"
+)
+
+cor(
+  opportunity,
+  use = "pairwise.complete.obs",
+  method = "pearson"
+)
+
+# Robustness check
+cor(
+  opportunity,
+  use = "pairwise.complete.obs",
+  method = "spearman"
+)
+
+pairwise_n <- function(x) {
+  outer(
+    colnames(x),
+    colnames(x),
+    Vectorize(function(i, j)
+      sum(complete.cases(x[, c(i, j)])))
+  )
+}
+
+pairwise_n(rich_poor)
+pairwise_n(free_ride)
+pairwise_n(opportunity)
+
+# All moderate correlations between 0.19 and 0.33 -- performed a quick factor analysis and not worth persuing (between grooups and all)
