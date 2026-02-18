@@ -200,7 +200,7 @@ table(clean$ses_year_born., useNA = "ifany")
 
 # 2) Calculer l'âge 
 DataClean$ses_age <- NA
-DataClean$ses_age <- 2025 - as.numeric(clean$ses_year_born)
+DataClean$ses_age <- 2026 - as.numeric(clean$ses_year_born.)
 
 # 3) Vérifier l'âge
 table(DataClean$ses_age, useNA = "ifany")
@@ -320,11 +320,18 @@ DataClean$educ_group[clean$ses_education %in% c(
 table(DataClean$educ_group)
 
 # Variables binaires pour chaque groupe d'éducation
-DataClean$educBHS <- ifelse(DataClean$educ_group == "educBHS", 1, 0)
-DataClean$educHS  <- ifelse(DataClean$educ_group == "educHS", 1, 0)
+DataClean$educBHS <- ifelse(
+  is.na(DataClean$educ_group), NA,
+  ifelse(DataClean$educ_group == "educBHS", 1, 0)
+)
+DataClean$educHS <- ifelse(
+  is.na(DataClean$educ_group), NA,
+  ifelse(DataClean$educ_group == "educHS", 1, 0)
+)
 #educUniv_bin comme référence
 
 table(DataClean$educHS)
+table(DataClean$educBHS)
 
 #Approximately, which of the following categories does your-----------------------------------------------------------------------------------------
 table(clean$ses_income)
@@ -393,7 +400,6 @@ table(DataClean$incomeHigh_bin, useNA = "always")
 #table(DataClean$ses_postalCode)
 
 # Do you live...----------------------------------------------------------------------
-attributes(clean$ses_children.)
 table(clean$ses_children)
 
 # Nettoyage de la variable enfants
@@ -406,9 +412,11 @@ DataClean$ses_children_char[clean$ses_children == "In couple without children"] 
 table(DataClean$ses_children_char)
 
 # Variable binaire : 1 = avec enfants, 0 = sans enfants
-DataClean$children_bin <- ifelse(DataClean$ses_children_char %in% c(
-  "alone_with_children", "in_couple_with_children"
-), 1, 0)
+DataClean$children_bin <- ifelse(
+  is.na(DataClean$ses_children_char), NA,
+  ifelse(DataClean$ses_children_char %in% c("alone_with_children", "in_couple_with_children"), 1, 0)
+)
+
 table(DataClean$children_bin)
 
 #Were you born in Canada?-----------------------------------------------------------------------------------------
@@ -1112,11 +1120,13 @@ DataClean$redis_intelligence_num[clean$redis_fei_can1 == "Most of the time"] <- 
 DataClean$redis_intelligence_num[clean$redis_fei_can1 == "Sometimes"] <- 0.66
 DataClean$redis_intelligence_num[clean$redis_fei_can1 == "Rarely"] <- 0.33
 DataClean$redis_intelligence_num[clean$redis_fei_can1 == "Never"] <- 0
-table(DataClean$redis_intelligence_num)
+table(DataClean$redis_intelligence_num, useNA = "ifany")  
 
 DataClean$redis_intelligence_bin <- ifelse(
-  DataClean$redis_intelligence_num %in% c(0.66, 1), 1, 0
+  is.na(DataClean$redis_intelligence_num), NA, 
+  ifelse(DataClean$redis_intelligence_num %in% c(0.66, 1), 1, 0)
 )
+table(DataClean$redis_intelligence_bin)
 
 # redis_fei_can2.: most = 1, never = 0 
 table(clean$redis_fei_can2.)
@@ -1126,11 +1136,14 @@ DataClean$redis_opportunity_num[clean$redis_fei_can2. == "Most of the time"] <- 
 DataClean$redis_opportunity_num[clean$redis_fei_can2. == "Sometimes"] <- 0.66
 DataClean$redis_opportunity_num[clean$redis_fei_can2. == "Rarely"] <- 0.33
 DataClean$redis_opportunity_num[clean$redis_fei_can2. == "Never"] <- 0
-table(DataClean$redis_opportunity_num)
+table(DataClean$redis_opportunity_num, useNA = "ifany")
 
 DataClean$redis_opportunity_bin <- ifelse(
-  DataClean$redis_opportunity_num %in% c(0.66, 1), 1, 0
+  is.na(DataClean$redis_opportunity_num), NA,  
+  ifelse(DataClean$redis_opportunity_num %in% c(0.66, 1), 1, 0)
 )
+
+table(DataClean$redis_opportunity_bin, useNA = "ifany") 
 
 # redis_pnvo_rich: most = 0, never = 1 ⚠ INVERSÉ
 table(clean$redis_pnvo_rich)
@@ -1140,11 +1153,15 @@ DataClean$redis_reasons_rich_num[clean$redis_pnvo_rich == "Most of the time"] <-
 DataClean$redis_reasons_rich_num[clean$redis_pnvo_rich == "Sometimes"] <- 0.33      # CHANGÉ de 0.66 à 0.33
 DataClean$redis_reasons_rich_num[clean$redis_pnvo_rich == "Rarely"] <- 0.66         # CHANGÉ de 0.33 à 0.66
 DataClean$redis_reasons_rich_num[clean$redis_pnvo_rich == "Never"] <- 1             # CHANGÉ de 0 à 1
-table(DataClean$redis_reasons_rich_num)
+
+table(DataClean$redis_reasons_rich_num, useNA = "ifany")
 
 DataClean$redis_reasons_rich_bin <- ifelse(
-  DataClean$redis_reasons_rich_num %in% c(0.66, 1), 1, 0
+  is.na(DataClean$redis_reasons_rich_num), NA,
+  ifelse(DataClean$redis_reasons_rich_num %in% c(0.66, 1), 1, 0)
 )
+
+table(DataClean$redis_reasons_rich_bin, useNA = "ifany")
 
 # redis_pnvo_poor.: most = 0, never = 1 ⚠ INVERSÉ
 table(clean$redis_pnvo_poor.)
@@ -1154,11 +1171,15 @@ DataClean$redis_reasons_poor_num[clean$redis_pnvo_poor. == "Most of the time"] <
 DataClean$redis_reasons_poor_num[clean$redis_pnvo_poor. == "Sometimes"] <- 0.33      # CHANGÉ de 0.66 à 0.33
 DataClean$redis_reasons_poor_num[clean$redis_pnvo_poor. == "Rarely"] <- 0.66         # CHANGÉ de 0.33 à 0.66
 DataClean$redis_reasons_poor_num[clean$redis_pnvo_poor. == "Never"] <- 1             # CHANGÉ de 0 à 1
-table(DataClean$redis_reasons_poor_num)
+
+table(DataClean$redis_reasons_poor_num, useNA = "ifany")
 
 DataClean$redis_reasons_poor_bin <- ifelse(
-  DataClean$redis_reasons_poor_num %in% c(0.66, 1), 1, 0
+  is.na(DataClean$redis_reasons_poor_num), NA,
+  ifelse(DataClean$redis_reasons_poor_num %in% c(0.66, 1), 1, 0)
 )
+
+table(DataClean$redis_reasons_poor_bin, useNA = "ifany")
 
 # redis_fid_can: most = 1, never = 0 
 table(clean$redis_fid_can)
@@ -1168,11 +1189,15 @@ DataClean$redis_effort_num[clean$redis_fid_can == "Most of the time"] <- 1
 DataClean$redis_effort_num[clean$redis_fid_can == "Sometimes"] <- 0.66
 DataClean$redis_effort_num[clean$redis_fid_can == "Rarely"] <- 0.33
 DataClean$redis_effort_num[clean$redis_fid_can == "Never"] <- 0
-table(DataClean$redis_effort_num)
+
+table(DataClean$redis_effort_num, useNA = "ifany")
 
 DataClean$redis_effort_bin <- ifelse(
-  DataClean$redis_effort_num %in% c(0.66, 1), 1, 0
+  is.na(DataClean$redis_effort_num), NA,
+  ifelse(DataClean$redis_effort_num %in% c(0.66, 1), 1, 0)
 )
+
+table(DataClean$redis_effort_bin, useNA = "ifany")
 
 # redis_prev_freerider: most = 1, never = 0 
 table(clean$redis_prev_freerider)
@@ -1182,11 +1207,15 @@ DataClean$redis_social_benefits_num[clean$redis_prev_freerider == "Most of the t
 DataClean$redis_social_benefits_num[clean$redis_prev_freerider == "Sometimes"] <- 0.66
 DataClean$redis_social_benefits_num[clean$redis_prev_freerider == "Rarely"] <- 0.33
 DataClean$redis_social_benefits_num[clean$redis_prev_freerider == "Never"] <- 0
-table(DataClean$redis_social_benefits_num)
+
+table(DataClean$redis_social_benefits_num, useNA = "ifany")
 
 DataClean$redis_social_benefits_bin <- ifelse(
-  DataClean$redis_social_benefits_num %in% c(0.66, 1), 1, 0
+  is.na(DataClean$redis_social_benefits_num), NA,
+  ifelse(DataClean$redis_social_benefits_num %in% c(0.66, 1), 1, 0)
 )
+
+table(DataClean$redis_social_benefits_bin, useNA = "ifany")
 
 # redis_iden_freerider: most = 0, never = 1 ⚠ INVERSÉ
 table(clean$redis_iden_freerider)
@@ -1196,11 +1225,15 @@ DataClean$redis_welfare_num[clean$redis_iden_freerider == "Most of the time"] <-
 DataClean$redis_welfare_num[clean$redis_iden_freerider == "Sometimes"] <- 0.33       # CHANGÉ de 0.66 à 0.33
 DataClean$redis_welfare_num[clean$redis_iden_freerider == "Rarely"] <- 0.66          # CHANGÉ de 0.33 à 0.66
 DataClean$redis_welfare_num[clean$redis_iden_freerider == "Never"] <- 1              # CHANGÉ de 0 à 1
-table(DataClean$redis_welfare_num)
+
+table(DataClean$redis_welfare_num, useNA = "ifany")
 
 DataClean$redis_welfare_bin <- ifelse(
-  DataClean$redis_welfare_num %in% c(0.66, 1), 1, 0
+  is.na(DataClean$redis_welfare_num), NA,
+  ifelse(DataClean$redis_welfare_num %in% c(0.66, 1), 1, 0)
 )
+
+table(DataClean$redis_welfare_bin, useNA = "ifany")
 
 # redis_human_nature.: most = 1, never = 0 
 table(clean$redis_human_nature.)
@@ -1210,18 +1243,22 @@ DataClean$redis_no_cheat_system_num[clean$redis_human_nature. == "Most of the ti
 DataClean$redis_no_cheat_system_num[clean$redis_human_nature. == "Sometimes"] <- 0.66
 DataClean$redis_no_cheat_system_num[clean$redis_human_nature. == "Rarely"] <- 0.33
 DataClean$redis_no_cheat_system_num[clean$redis_human_nature. == "Never"] <- 0
-table(DataClean$redis_no_cheat_system_num)
+
+table(DataClean$redis_no_cheat_system_num, useNA = "ifany")
 
 DataClean$redis_no_cheat_system_bin <- ifelse(
-  DataClean$redis_no_cheat_system_num %in% c(0.66, 1), 1, 0
+  is.na(DataClean$redis_no_cheat_system_num), NA,
+  ifelse(DataClean$redis_no_cheat_system_num %in% c(0.66, 1), 1, 0)
 )
+
+table(DataClean$redis_no_cheat_system_bin, useNA = "ifany")
 
 
 #------------------------------------------------------------------------------------
 #ideo_vote_fed_clean
 #1deo_vote_prov_clean
 
-#--------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------
 #trust
 
 # Generally speaking would you say that most people can be trusted, or, that you need to be very careful when dealing with people? 
@@ -1565,4 +1602,7 @@ write.csv(DataClean, "data/clean_df_valid.csv")
 # Option 1: Voir juste les noms de colonnes
 df_valid <- read.csv("data/clean_df_valid.csv")
 names(df_valid)
+
+
+
 
