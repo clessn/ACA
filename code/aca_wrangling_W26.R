@@ -18,10 +18,11 @@ read_rds("data/codebook_clean.rds")
 # Preliminary cleaning by Shannon to collapse prov var
 # -----------------------
 
- clean <- read.csv("data/aca_ethics_W26.csv")
-range(clean$budget_tradeoff_cc1_17)
-ggplot(clean, aes(x = budget_tradeoff_cc1_17)) + 
+clean <- read.csv("data/aca_ethics_W26.csv")
+
+ggplot(clean, aes(x = redis_fei_can1)) + 
   geom_histogram()
+
 # Collapse language, ideo_vote/define and trust_ variables (varied according to province/ter)
 # Collapse language
 clean <- clean %>%

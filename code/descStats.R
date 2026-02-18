@@ -116,6 +116,8 @@ budget_vars <- c(
   "budget_prio_clim"
 )
 
+df$budget
+
 # Reshape to long format
 budget_long <- df %>%
   select(all_of(budget_vars)) %>%
@@ -262,3 +264,5 @@ pairwise_n(free_ride)
 pairwise_n(opportunity)
 
 # All moderate correlations between 0.19 and 0.33 -- performed a quick factor analysis and not worth persuing (between grooups and all)
+
+

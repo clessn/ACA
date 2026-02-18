@@ -14,7 +14,7 @@ library(purrr)
 
 # -- 2. Load data 
 df <- read.csv("data/clean_df_valid.csv")
-
+table(df$ses_income3Cat)
 # === 1. Setup ===
 # Dependent variables
 dvs <- c(
@@ -30,14 +30,14 @@ dvs <- c(
 
 # Labels for plotting
 dv_labels <- c(
-  redis_intelligence_num = "Rewarded for \n intelligence and skill",
-  redis_opportunity_num = "Equal opportunity \n to get ahead",               
-  redis_reasons_rich_num = "Non-violating outcomes \n Rich",               
-  redis_reasons_poor_num = "Non-violating outcomes \n Poor",                 
-  redis_effort_num = "Fairness of the \n income distribution",                  
-  redis_social_benefits_num = "Social benefits \n not a choice",            
-  redis_welfare_num = "Welfare doesn't go to \n the underserving",             
-  redis_no_cheat_system_num = "Trust not to cheat \n system"  
+#  redis_intelligence_num = "Rewarded for \n intelligence and skill",
+#  redis_opportunity_num = "Equal opportunity \n to get ahead",               
+#  redis_reasons_rich_num = "Non-violating outcomes \n Rich",               
+#  redis_reasons_poor_num = "Non-violating outcomes \n Poor",                 
+  redis_effort_num = "Fairness of the \n income distribution" #,                  
+#  redis_social_benefits_num = "Social benefits \n not a choice",            
+#  redis_welfare_num = "Welfare doesn't go to \n the underserving",             
+#  redis_no_cheat_system_num = "Trust not to cheat \n system"  
 )
 
 # Independent variables (covariates)
@@ -51,7 +51,7 @@ ivs <- c(
 #  "ideo_right_num",         # Right ideology
 #  "trust_social_bin",       # Trust in society
   # "ses_region_cat",         # Regions 
-  "ses_income3Cat" # Quebec region
+  "ses_income3Cat" # Income
 )
 df$ses_income3Cat
 # === 2. Fit models ===
@@ -144,87 +144,63 @@ ggsave(
 )
 
 ###########################
-###########################
+# Marginal means
 #########################
+# Income
 
-
-# --- 1. Variables ---
-dvs <- names(dv_labels)
-
-ivs <- c("ses_income3Cat")  # 3-category income factor
-
-# Ensure the income variable is a factor
-# Ensure ses_income3Cat is a factor and has all levels you want
+# Make sure a factor
 df$ses_income3Cat <- factor(df$ses_income3Cat,
                             levels = c("Low", "Medium", "High"))
-
-# Remove rows where DV or IV is NA for the current DV
-# AFTER: capture full levels first, then clean, then restore levels
-get_income_predictions <- function(dv, data, income_var = "ses_income3Cat") {
-  
-  # Capture the full set of levels BEFORE dropping NAs
-  full_levels <- levels(data[[income_var]])
-  
-  data_clean <- data %>%
-    select(all_of(c(dv, income_var))) %>%
-    drop_na() %>%
-    mutate(!!income_var := factor(.data[[income_var]], levels = full_levels))  # restore all levels
-  
-  formula <- as.formula(paste(dv, "~", income_var))
-  model <- lm(formula, data = data_clean)
-  
-  newdata <- setNames(
-    data.frame(factor(full_levels, levels = full_levels)),
-    income_var
-  )
-  
-  preds <- predict(model, newdata = newdata, se.fit = TRUE)
-  
-  tibble(
-    dv = dv_labels[dv],
-    income = newdata[[income_var]],
-    estimate = preds$fit,
-    conf.low = preds$fit - 1.96 * preds$se.fit,
-    conf.high = preds$fit + 1.96 * preds$se.fit
-  )
-}
-
-pred_all <- map_dfr(dvs, ~ get_income_predictions(.x, df))
-
-# Make dv a factor for faceting
-pred_all$dv <- factor(pred_all$dv, levels = dv_labels)
-
-# Plot
-ggplot(pred_all, aes(x = income, y = estimate, color = income)) +
-  geom_point(size = 3) +
-  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.2) +
-  facet_wrap(~ dv, scales = "free_y") +
-  labs(
-    x = "Income Category",
-    y = "Predicted Support (0–1 scale)",
-    title = "Predicted Redistribution Support by Income Category",
-    caption = "OLS models with income as predictor; 95% confidence intervals shown"
-  ) +
-  theme_minimal(base_size = 13) +
-  theme(
-    legend.position = "none",
-    strip.text = element_text(size = 12)
-  )
-
-
-
-
-
-# Check observation counts for each DV × income category combination
-library(purrr)
-
-walk(dvs, function(dv) {
-  cat("\n---", dv, "---\n")
-  df %>%
-    select(all_of(c(dv, "ses_income3Cat"))) %>%
-    drop_na() %>%
-    count(ses_income3Cat, .drop = FALSE) %>%
-    print()
+table(df$ses_income3Cat)
+# Model
+ols_models_cov <- map(dvs, function(dv) {
+  frm <- as.formula(paste(dv, "~ ses_income3Cat"))
+  lm(frm, data = df)
 })
 
-table(df$ses_income3Cat)
+names(ols_models_cov) <- dv_labels
+
+# Marginal effects
+get_predictions_income <- function(models) {
+  map2_dfr(models, names(models), function(model, label) {
+    predictions(
+      model,
+      by = "ses_income3Cat"
+    ) %>%
+      transmute(
+        treatment = label,
+        income = ses_income3Cat,
+        estimate = estimate,
+        conf.low = conf.low,
+        conf.high = conf.high
+      )
+  })
+}
+
+pred_income <- get_predictions_income(ols_models_cov)
+
+ggplot(pred_income,
+       aes(x = income, y = estimate, group = treatment)) +
+  geom_point(size = 3) +
+  geom_errorbar(
+    aes(ymin = conf.low, ymax = conf.high),
+    width = 0.1
+  ) +
+  facet_wrap(~ treatment) +
+  scale_y_continuous(limits = c(0, 1)) +
+  labs(
+    x = "Income category",
+    y = "Predicted support (0–1)",
+    title = "Predicted support for redistribution based on effort by income"
+  ) +
+  theme_minimal(base_size = 13)
+
+# -- 8. Save the coefficient plot
+ggsave(
+  filename = "graphs/margEffects_.png",
+  plot     = plot,
+  width    = 10,
+  height   = 8,
+  dpi      = 300
+)
+
