@@ -9,6 +9,12 @@
 #           AMEs reported for the highest response category
 # ============================================================
 
+#You're welcome! You've got a solid, consistent analytical framework across both scripts now. A few things worth keeping in mind as you move forward:
+# When you run the redis script, the one thing most likely to need adjustment is the DV conversion in Section 1. If your items don't all share the same category spacing (e.g. some are 3-point, others 4-point), the ordered factor conversion handles that automatically — but double-check the desc_redis_distributions.png output first to confirm the categories look right before running the regressions.
+# For publication, the two main methodological points to be ready to defend are the LPM vs logit choice in the budgetary script (the side-by-side robustness plot in Section 7.6 is your answer to that) and the OLS-for-visualization note in the redis script's ideology × Quebec plots.
+# If a reviewer raises the compositional data issue on the budget_prio_X raw scores, the comment in Section 8 of the budgetary script already flags Dirichlet regression as the rigorous alternative — worth keeping that in your back pocket.
+
+
 # 0.1. Packages
 library(tidyverse)
 library(ggplot2)

@@ -6,6 +6,19 @@ library(tidyverse)
 library(marginaleffects)
 
 df <- read.csv("data/clean_df_valid.csv")
+df$ses_income3Cat
+
+tab <- table(
+  redis_intelligence = df$redis_intelligence_num,
+  income_category   = df$ses_income3Cat
+)
+tab
+
+tab <- table(
+  redis_intelligence = df$redis_effort_num,
+  income_category   = df$ses_income3Cat
+)
+tab
 
 # ── 1. DVs ───────────────────────────────────────────────────
 dvs <- c(
