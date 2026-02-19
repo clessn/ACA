@@ -20,9 +20,6 @@ read_rds("data/codebook_clean.rds")
 
 clean <- read.csv("data/aca_ethics_W26.csv")
 
-ggplot(clean, aes(x = redis_fei_can1)) + 
-  geom_histogram()
-
 # Collapse language, ideo_vote/define and trust_ variables (varied according to province/ter)
 # Collapse language
 clean <- clean %>%
@@ -1257,7 +1254,78 @@ table(DataClean$redis_no_cheat_system_bin, useNA = "ifany")
 
 #------------------------------------------------------------------------------------
 #ideo_vote_fed_clean
+DataClean$ideo_vote_fed_left <- NA_real_
+DataClean$ideo_vote_fed_left[clean$ideo_vote_fed_clean == "New Democratic Party"] <- 1
+DataClean$ideo_vote_fed_left[clean$ideo_vote_fed_clean == "Green Party of Canada"] <- 0.8
+DataClean$ideo_vote_fed_left[clean$ideo_vote_fed_clean == "Liberal Party of Canada"] <- 0.6
+DataClean$ideo_vote_fed_left[clean$ideo_vote_fed_clean == "Bloc Québécois"] <- 0.4
+DataClean$ideo_vote_fed_left[clean$ideo_vote_fed_clean == "Conservative Party of Canada"] <- 0.2
+DataClean$ideo_vote_fed_left[clean$ideo_vote_fed_clean %in% c("Another party", "Did not vote")] <- 0
+
+table(DataClean$ideo_vote_fed_left)
+
+# Binary indicators for votes
+DataClean$vote_NDP_bin <- as.integer(clean$ideo_vote_fed_clean == "New Democratic Party")
+DataClean$vote_PLC_bin <- as.integer(clean$ideo_vote_fed_clean == "Liberal Party of Canada")
+DataClean$vote_PCC_bin <- as.integer(clean$ideo_vote_fed_clean == "Conservative Party of Canada")
+
+table(DataClean$vote_NDP_bin)
+table(DataClean$vote_PLC_bin)
+table(DataClean$vote_PCC_bin)
+
 #1deo_vote_prov_clean
+DataClean$ideo_vote_prov_left <- NA_real_
+
+# Left-leaning parties
+DataClean$ideo_vote_prov_left[clean$ideo_vote_prov_clean %in% c(
+  "Québec solidaire",
+  "Ontario New Democratic Party",
+  "New Democratic Party",
+  "Nova Scotia New Democratic Party",
+  "Newfoundland and Labrador New Democratic Party",
+  "New Democratic Party of Prince Edward Island",
+  "Green Party of Ontario",
+  "Green Party of Prince Edward Island",
+  "Green Party of New Brunswick"
+)] <- 1
+
+# Center-left / Liberal parties
+DataClean$ideo_vote_prov_left[clean$ideo_vote_prov_clean %in% c(
+  "Ontario Liberal Party",
+  "Quebec Liberal Party",
+  "Liberal Party of New Brunswick",
+  "Nova Scotia Liberal Party",
+  "Liberal Party of Newfoundland and Labrador",
+  "Liberal Party off Prince Edward Island"
+)] <- 0.6
+
+# Center-right / Parti québécois
+DataClean$ideo_vote_prov_left[clean$ideo_vote_prov_clean %in% c(
+  "Parti québécois"
+)] <- 0.4
+
+# Right-leaning / Conservative parties
+DataClean$ideo_vote_prov_left[clean$ideo_vote_prov_clean %in% c(
+  "Progressive Conservative Party of Ontario",
+  "Conservative Party of Quebec",
+  "Coalition Avenir Québec",
+  "United Conservative Party of Alberta",
+  "Progressive Conservative Association of Nova Scotia",
+  "Progressive Conservative Party of Newfoundland and Labrador",
+  "Progressive Conservative Party of New Brunswick",
+  "Progressive Conservative Party of Prince Edward Island"
+)] <- 0
+
+# Did not vote / other parties
+DataClean$ideo_vote_prov_left[clean$ideo_vote_prov_clean %in% c(
+  "Did not vote",
+  "Another party (specify)"
+)] <- 0
+
+table(DataClean$ideo_vote_prov_left)
+
+# Binary indicator for Parti québécois vote
+DataClean$vote_PQ_bin <- as.integer(clean$ideo_vote_prov_clean == "Parti québécois")
 
 #-------------------------------------------------------------------------------------
 #trust
@@ -1604,6 +1672,9 @@ write.csv(DataClean, "data/clean_df_valid.csv")
 df_valid <- read.csv("data/clean_df_valid.csv")
 names(df_valid)
 
+###################################
+# L-R Political parties
+pol <- read.csv("data/clean_df_valid.csv")
 
-
+pol$
 
