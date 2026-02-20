@@ -1,5 +1,4 @@
-
-# ============================================================
+# ==============
 # Budgetary Preferences - Descriptives + Regressions
 # Four-region Canadian survey: Alberta, Ontario, Quebec, Eastern Canada
 #
