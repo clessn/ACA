@@ -1,96 +1,96 @@
-"battery","dv","model_type","r_squared","adj_r_sq","n","pseudo_r2"
-"cc1","Raise taxes","OLS",0.077,0.069,1977,NA
-"cc1","Cut other spending","OLS",0.035,0.027,1979,NA
-"cc1","Increase debt","OLS",0.086,0.079,1978,NA
-"cc1","Don't spend more","OLS",0.133,0.126,1979,NA
-"cc1","Raise taxes","LPM_pref",0.046,0.038,2002,NA
-"cc1","Cut other spending","LPM_pref",0.035,0.027,2004,NA
-"cc1","Increase debt","LPM_pref",0.05,0.043,2003,NA
-"cc1","Don't spend more","LPM_pref",0.08,0.072,2004,NA
-"cc1","Raise taxes","LPM_intense",0.016,0.008,1977,NA
-"cc1","Cut other spending","LPM_intense",0.022,0.014,1979,NA
-"cc1","Increase debt","LPM_intense",0.021,0.013,1978,NA
-"cc1","Don't spend more","LPM_intense",0.115,0.108,1979,NA
-"cc1","Raise taxes","Logit_pref",NA,NA,0,0.042
-"cc1","Cut other spending","Logit_pref",NA,NA,0,0.027
-"cc1","Increase debt","Logit_pref",NA,NA,0,0.043
-"cc1","Don't spend more","Logit_pref",NA,NA,0,0.06
-"cc1","Raise taxes","Logit_intense",NA,NA,0,0.055
-"cc1","Cut other spending","Logit_intense",NA,NA,0,0.035
-"cc1","Increase debt","Logit_intense",NA,NA,0,0.046
-"cc1","Don't spend more","Logit_intense",NA,NA,0,0.1
-"ge","Raise taxes","OLS",0.123,0.116,1974,NA
-"ge","Cut other spending","OLS",0.063,0.056,1974,NA
-"ge","Increase debt","OLS",0.12,0.113,1974,NA
-"ge","Don't spend more","OLS",0.191,0.184,1975,NA
-"ge","Raise taxes","LPM_pref",0.053,0.046,2004,NA
-"ge","Cut other spending","LPM_pref",0.053,0.045,2004,NA
-"ge","Increase debt","LPM_pref",0.058,0.05,2004,NA
-"ge","Don't spend more","LPM_pref",0.143,0.136,2005,NA
-"ge","Raise taxes","LPM_intense",0.024,0.016,1974,NA
-"ge","Cut other spending","LPM_intense",0.011,0.003,1974,NA
-"ge","Increase debt","LPM_intense",0.024,0.016,1974,NA
-"ge","Don't spend more","LPM_intense",0.184,0.177,1975,NA
-"ge","Raise taxes","Logit_pref",NA,NA,0,0.051
-"ge","Cut other spending","Logit_pref",NA,NA,0,0.043
-"ge","Increase debt","Logit_pref",NA,NA,0,0.05
-"ge","Don't spend more","Logit_pref",NA,NA,0,0.111
-"ge","Raise taxes","Logit_intense",NA,NA,0,0.096
-"ge","Cut other spending","Logit_intense",NA,NA,0,0.022
-"ge","Increase debt","Logit_intense",NA,NA,0,0.069
-"ge","Don't spend more","Logit_intense",NA,NA,0,0.149
-"tax","No increase, even if fewer services","OLS",0.132,0.125,1975,NA
-"tax","Sales tax increase","OLS",0.053,0.045,1974,NA
-"tax","Income tax increase","OLS",0.086,0.079,1975,NA
-"tax","Wealth tax","OLS",0.051,0.043,1975,NA
-"tax","No increase, even if fewer services","LPM_pref",0.094,0.087,2005,NA
-"tax","Sales tax increase","LPM_pref",0.049,0.041,2004,NA
-"tax","Income tax increase","LPM_pref",0.059,0.052,2005,NA
-"tax","Wealth tax","LPM_pref",0.02,0.013,2005,NA
-"tax","No increase, even if fewer services","LPM_intense",0.105,0.097,1975,NA
-"tax","Sales tax increase","LPM_intense",0.019,0.011,1974,NA
-"tax","Income tax increase","LPM_intense",0.025,0.017,1975,NA
-"tax","Wealth tax","LPM_intense",0.014,0.006,1975,NA
-"tax","No increase, even if fewer services","Logit_pref",NA,NA,0,0.079
-"tax","Sales tax increase","Logit_pref",NA,NA,0,0.063
-"tax","Income tax increase","Logit_pref",NA,NA,0,0.044
-"tax","Wealth tax","Logit_pref",NA,NA,0,0.015
-"tax","No increase, even if fewer services","Logit_intense",NA,NA,0,0.128
-"tax","Sales tax increase","Logit_intense",NA,NA,0,0.135
-"tax","Income tax increase","Logit_intense",NA,NA,0,0.032
-"tax","Wealth tax","Logit_intense",NA,NA,0,0.022
-"hc","Increase home care for all, reduce max old-age pension","OLS",0.025,0.017,1977,NA
-"hc","Target low-income seniors, home care","OLS",0.035,0.027,1977,NA
-"hc","Target low-income seniors, pensions","OLS",0.017,0.009,1977,NA
-"hc","Increase home care for all, reduce max old-age pension","LPM_pref",0.014,0.006,2004,NA
-"hc","Target low-income seniors, home care","LPM_pref",0.024,0.016,2004,NA
-"hc","Target low-income seniors, pensions","LPM_pref",0.01,0.003,2004,NA
-"hc","Increase home care for all, reduce max old-age pension","LPM_intense",0.022,0.014,1977,NA
-"hc","Target low-income seniors, home care","LPM_intense",0.031,0.023,1977,NA
-"hc","Target low-income seniors, pensions","LPM_intense",0.013,0.005,1977,NA
-"hc","Increase home care for all, reduce max old-age pension","Logit_pref",NA,NA,0,0.011
-"hc","Target low-income seniors, home care","Logit_pref",NA,NA,0,0.017
-"hc","Target low-income seniors, pensions","Logit_pref",NA,NA,0,0.008
-"hc","Increase home care for all, reduce max old-age pension","Logit_intense",NA,NA,0,0.03
-"hc","Target low-income seniors, home care","Logit_intense",NA,NA,0,0.031
-"hc","Target low-income seniors, pensions","Logit_intense",NA,NA,0,0.019
-"cc2","Increase child care for all, reduce other family benefits","OLS",0.027,0.019,1975,NA
-"cc2","Target low-income families, childcare","OLS",0.034,0.026,1975,NA
-"cc2","Target education quality for all, reduce other family benefits","OLS",0.023,0.015,1977,NA
-"cc2","Target education quality for low-income","OLS",0.023,0.015,1977,NA
-"cc2","Increase child care for all, reduce other family benefits","LPM_pref",0.021,0.013,2003,NA
-"cc2","Target low-income families, childcare","LPM_pref",0.018,0.01,2003,NA
-"cc2","Target education quality for all, reduce other family benefits","LPM_pref",0.021,0.013,2005,NA
-"cc2","Target education quality for low-income","LPM_pref",0.015,0.007,2005,NA
-"cc2","Increase child care for all, reduce other family benefits","LPM_intense",0.024,0.016,1975,NA
-"cc2","Target low-income families, childcare","LPM_intense",0.014,0.006,1975,NA
-"cc2","Target education quality for all, reduce other family benefits","LPM_intense",0.018,0.01,1977,NA
-"cc2","Target education quality for low-income","LPM_intense",0.008,0,1977,NA
-"cc2","Increase child care for all, reduce other family benefits","Logit_pref",NA,NA,0,0.015
-"cc2","Target low-income families, childcare","Logit_pref",NA,NA,0,0.013
-"cc2","Target education quality for all, reduce other family benefits","Logit_pref",NA,NA,0,0.015
-"cc2","Target education quality for low-income","Logit_pref",NA,NA,0,0.011
-"cc2","Increase child care for all, reduce other family benefits","Logit_intense",NA,NA,0,0.042
-"cc2","Target low-income families, childcare","Logit_intense",NA,NA,0,0.03
-"cc2","Target education quality for all, reduce other family benefits","Logit_intense",NA,NA,0,0.033
-"cc2","Target education quality for low-income","Logit_intense",NA,NA,0,0.023
+"dv","model_type","r_squared","adj_r_sq","n","battery","pseudo_r2"
+"Raise taxes","OLS_raw",0.077,0.069,1977,"cc1",NA
+"Cut other spending","OLS_raw",0.035,0.027,1979,"cc1",NA
+"Increase debt","OLS_raw",0.086,0.079,1978,"cc1",NA
+"Don't spend more","OLS_raw",0.133,0.126,1979,"cc1",NA
+"Raise taxes","Logit_pref",NA,NA,0,"cc1",0.042
+"Cut other spending","Logit_pref",NA,NA,0,"cc1",0.027
+"Increase debt","Logit_pref",NA,NA,0,"cc1",0.043
+"Don't spend more","Logit_pref",NA,NA,0,"cc1",0.06
+"Raise taxes","Logit_intense",NA,NA,0,"cc1",0.055
+"Cut other spending","Logit_intense",NA,NA,0,"cc1",0.035
+"Increase debt","Logit_intense",NA,NA,0,"cc1",0.046
+"Don't spend more","Logit_intense",NA,NA,0,"cc1",0.1
+"Raise taxes","LPM_pref",0.046,0.038,2002,"cc1",NA
+"Cut other spending","LPM_pref",0.035,0.027,2004,"cc1",NA
+"Increase debt","LPM_pref",0.05,0.043,2003,"cc1",NA
+"Don't spend more","LPM_pref",0.08,0.072,2004,"cc1",NA
+"Raise taxes","LPM_intense",0.016,0.008,1977,"cc1",NA
+"Cut other spending","LPM_intense",0.022,0.014,1979,"cc1",NA
+"Increase debt","LPM_intense",0.021,0.013,1978,"cc1",NA
+"Don't spend more","LPM_intense",0.115,0.108,1979,"cc1",NA
+"Raise taxes","OLS_raw",0.123,0.116,1974,"ge",NA
+"Cut other spending","OLS_raw",0.063,0.056,1974,"ge",NA
+"Increase debt","OLS_raw",0.12,0.113,1974,"ge",NA
+"Don't spend more","OLS_raw",0.191,0.184,1975,"ge",NA
+"Raise taxes","Logit_pref",NA,NA,0,"ge",0.051
+"Cut other spending","Logit_pref",NA,NA,0,"ge",0.043
+"Increase debt","Logit_pref",NA,NA,0,"ge",0.05
+"Don't spend more","Logit_pref",NA,NA,0,"ge",0.111
+"Raise taxes","Logit_intense",NA,NA,0,"ge",0.096
+"Cut other spending","Logit_intense",NA,NA,0,"ge",0.022
+"Increase debt","Logit_intense",NA,NA,0,"ge",0.069
+"Don't spend more","Logit_intense",NA,NA,0,"ge",0.149
+"Raise taxes","LPM_pref",0.053,0.046,2004,"ge",NA
+"Cut other spending","LPM_pref",0.053,0.045,2004,"ge",NA
+"Increase debt","LPM_pref",0.058,0.05,2004,"ge",NA
+"Don't spend more","LPM_pref",0.143,0.136,2005,"ge",NA
+"Raise taxes","LPM_intense",0.024,0.016,1974,"ge",NA
+"Cut other spending","LPM_intense",0.011,0.003,1974,"ge",NA
+"Increase debt","LPM_intense",0.024,0.016,1974,"ge",NA
+"Don't spend more","LPM_intense",0.184,0.177,1975,"ge",NA
+"No increase, even if fewer services","OLS_raw",0.132,0.125,1975,"tax",NA
+"Sales tax increase","OLS_raw",0.053,0.045,1974,"tax",NA
+"Income tax increase","OLS_raw",0.086,0.079,1975,"tax",NA
+"Wealth tax","OLS_raw",0.051,0.043,1975,"tax",NA
+"No increase, even if fewer services","Logit_pref",NA,NA,0,"tax",0.079
+"Sales tax increase","Logit_pref",NA,NA,0,"tax",0.063
+"Income tax increase","Logit_pref",NA,NA,0,"tax",0.044
+"Wealth tax","Logit_pref",NA,NA,0,"tax",0.015
+"No increase, even if fewer services","Logit_intense",NA,NA,0,"tax",0.128
+"Sales tax increase","Logit_intense",NA,NA,0,"tax",0.135
+"Income tax increase","Logit_intense",NA,NA,0,"tax",0.032
+"Wealth tax","Logit_intense",NA,NA,0,"tax",0.022
+"No increase, even if fewer services","LPM_pref",0.094,0.087,2005,"tax",NA
+"Sales tax increase","LPM_pref",0.049,0.041,2004,"tax",NA
+"Income tax increase","LPM_pref",0.059,0.052,2005,"tax",NA
+"Wealth tax","LPM_pref",0.02,0.013,2005,"tax",NA
+"No increase, even if fewer services","LPM_intense",0.105,0.097,1975,"tax",NA
+"Sales tax increase","LPM_intense",0.019,0.011,1974,"tax",NA
+"Income tax increase","LPM_intense",0.025,0.017,1975,"tax",NA
+"Wealth tax","LPM_intense",0.014,0.006,1975,"tax",NA
+"Increase home care for all, reduce max old-age pension","OLS_raw",0.025,0.017,1977,"hc",NA
+"Target low-income seniors, home care","OLS_raw",0.035,0.027,1977,"hc",NA
+"Target low-income seniors, pensions","OLS_raw",0.017,0.009,1977,"hc",NA
+"Increase home care for all, reduce max old-age pension","Logit_pref",NA,NA,0,"hc",0.011
+"Target low-income seniors, home care","Logit_pref",NA,NA,0,"hc",0.017
+"Target low-income seniors, pensions","Logit_pref",NA,NA,0,"hc",0.008
+"Increase home care for all, reduce max old-age pension","Logit_intense",NA,NA,0,"hc",0.03
+"Target low-income seniors, home care","Logit_intense",NA,NA,0,"hc",0.031
+"Target low-income seniors, pensions","Logit_intense",NA,NA,0,"hc",0.019
+"Increase home care for all, reduce max old-age pension","LPM_pref",0.014,0.006,2004,"hc",NA
+"Target low-income seniors, home care","LPM_pref",0.024,0.016,2004,"hc",NA
+"Target low-income seniors, pensions","LPM_pref",0.01,0.003,2004,"hc",NA
+"Increase home care for all, reduce max old-age pension","LPM_intense",0.022,0.014,1977,"hc",NA
+"Target low-income seniors, home care","LPM_intense",0.031,0.023,1977,"hc",NA
+"Target low-income seniors, pensions","LPM_intense",0.013,0.005,1977,"hc",NA
+"Increase child care for all, reduce other family benefits","OLS_raw",0.027,0.019,1975,"cc2",NA
+"Target low-income families, childcare","OLS_raw",0.034,0.026,1975,"cc2",NA
+"Target education quality for all, reduce other family benefits","OLS_raw",0.023,0.015,1977,"cc2",NA
+"Target education quality for low-income","OLS_raw",0.023,0.015,1977,"cc2",NA
+"Increase child care for all, reduce other family benefits","Logit_pref",NA,NA,0,"cc2",0.015
+"Target low-income families, childcare","Logit_pref",NA,NA,0,"cc2",0.013
+"Target education quality for all, reduce other family benefits","Logit_pref",NA,NA,0,"cc2",0.015
+"Target education quality for low-income","Logit_pref",NA,NA,0,"cc2",0.011
+"Increase child care for all, reduce other family benefits","Logit_intense",NA,NA,0,"cc2",0.042
+"Target low-income families, childcare","Logit_intense",NA,NA,0,"cc2",0.03
+"Target education quality for all, reduce other family benefits","Logit_intense",NA,NA,0,"cc2",0.033
+"Target education quality for low-income","Logit_intense",NA,NA,0,"cc2",0.023
+"Increase child care for all, reduce other family benefits","LPM_pref",0.021,0.013,2003,"cc2",NA
+"Target low-income families, childcare","LPM_pref",0.018,0.01,2003,"cc2",NA
+"Target education quality for all, reduce other family benefits","LPM_pref",0.021,0.013,2005,"cc2",NA
+"Target education quality for low-income","LPM_pref",0.015,0.007,2005,"cc2",NA
+"Increase child care for all, reduce other family benefits","LPM_intense",0.024,0.016,1975,"cc2",NA
+"Target low-income families, childcare","LPM_intense",0.014,0.006,1975,"cc2",NA
+"Target education quality for all, reduce other family benefits","LPM_intense",0.018,0.01,1977,"cc2",NA
+"Target education quality for low-income","LPM_intense",0.008,0,1977,"cc2",NA

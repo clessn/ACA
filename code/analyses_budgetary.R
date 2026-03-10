@@ -1412,39 +1412,50 @@ batteries <- list(
   )
 )
 
-
 #*************************************************************************#
 #########   T2. FIT MODELS FOR EACH BATTERY                      #########
 #*************************************************************************#
 
 tradeoff_models <- map(batteries, function(bat) {
+  
+  # OLS on raw scores (continuous 0-100 allocation)
   lm_raw <- bat$raw |> set_names(bat$labels[bat$raw]) |>
     map(function(dv) {
       model_data <- df |> dplyr::select(all_of(c(dv, all.vars(as.formula(paste("~", rhs)))))) |> drop_na()
       lm(as.formula(paste(dv, "~", rhs)), data = model_data)
     })
+  
+  # LPM -- first choice (robustness check)
   lpm_pref <- bat$pref |> set_names(bat$labels[bat$pref]) |>
     map(function(dv) {
       model_data <- df |> dplyr::select(all_of(c(dv, all.vars(as.formula(paste("~", rhs)))))) |> drop_na()
       lm(as.formula(paste(dv, "~", rhs)), data = model_data)
     })
+  
+  # Logit -- first choice (primary)
   logit_pref <- bat$pref |> set_names(bat$labels[bat$pref]) |>
     map(function(dv) {
       model_data <- df |> dplyr::select(all_of(c(dv, all.vars(as.formula(paste("~", rhs)))))) |> drop_na()
       glm(as.formula(paste(dv, "~", rhs)), data = model_data, family = binomial(link = "logit"))
     })
+  
+  # LPM -- intense preference (robustness check)
   lpm_intense <- bat$intense |> set_names(bat$labels[bat$intense]) |>
     map(function(dv) {
       model_data <- df |> dplyr::select(all_of(c(dv, all.vars(as.formula(paste("~", rhs)))))) |> drop_na()
       lm(as.formula(paste(dv, "~", rhs)), data = model_data)
     })
+  
+  # Logit -- intense preference (primary)
   logit_intense <- bat$intense |> set_names(bat$labels[bat$intense]) |>
     map(function(dv) {
       model_data <- df |> dplyr::select(all_of(c(dv, all.vars(as.formula(paste("~", rhs)))))) |> drop_na()
       glm(as.formula(paste(dv, "~", rhs)), data = model_data, family = binomial(link = "logit"))
     })
-  list(lm_raw = lm_raw, lpm_pref = lpm_pref, logit_pref = logit_pref,
-       lpm_intense = lpm_intense, logit_intense = logit_intense)
+  
+  list(lm_raw       = lm_raw,
+       lpm_pref     = lpm_pref,     logit_pref    = logit_pref,
+       lpm_intense  = lpm_intense,  logit_intense = logit_intense)
 })
 
 
@@ -1452,19 +1463,31 @@ tradeoff_models <- map(batteries, function(bat) {
 #########   T3. AVERAGE MARGINAL EFFECTS                         #########
 #*************************************************************************#
 
-ame_logit_tradeoff <- function(model_list, question_tag) {
+# Helper: AME from logit with HC1 robust SEs
+ame_logit_battery <- function(model_list, question_tag) {
   map2_dfr(model_list, names(model_list), function(model, dv_label) {
     fml        <- formula(model)
     model_vars <- all.vars(fml)
     model_data <- df |> dplyr::select(all_of(model_vars)) |> drop_na()
     vm         <- robust_vcov(model)
-    avg_slopes(model, vcov = vm, newdata = model_data) |> as_tibble() |>
+    avg_slopes(model, vcov = vm, newdata = model_data) |>
+      as_tibble() |>
       transmute(
-        question = question_tag, dv = dv_label, term,
-        estimate  = round(estimate, 3), conf.low = round(conf.low, 3),
-        conf.high = round(conf.high, 3), p.value  = round(p.value, 3),
-        sig = case_when(p.value<0.001~"***",p.value<0.01~"**",p.value<0.05~"*",p.value<0.10~".",TRUE~""),
-        direction = case_when(conf.low>0~"Positive",conf.high<0~"Negative",TRUE~"No clear effect")
+        question  = question_tag, dv = dv_label, term,
+        estimate  = round(estimate, 3),
+        conf.low  = round(conf.low,  3),
+        conf.high = round(conf.high, 3),
+        p.value   = round(p.value,   3),
+        sig = case_when(
+          p.value < 0.001 ~ "***", p.value < 0.01 ~ "**",
+          p.value < 0.05  ~ "*",   p.value < 0.10 ~ ".",
+          TRUE ~ ""
+        ),
+        direction = case_when(
+          conf.low  > 0 ~ "Positive",
+          conf.high < 0 ~ "Negative",
+          TRUE          ~ "No clear effect"
+        )
       )
   })
 }
@@ -1472,12 +1495,21 @@ ame_logit_tradeoff <- function(model_list, question_tag) {
 coef_tradeoff <- map_dfr(names(batteries), function(bat_name) {
   bat    <- batteries[[bat_name]]
   models <- tradeoff_models[[bat_name]]
-  ame_raw         <- map2_dfr(models$lm_raw,     names(models$lm_raw),     tidy_avg_slopes, question = paste0(bat_name, "_raw"))
-  ame_lpm_pref    <- map2_dfr(models$lpm_pref,   names(models$lpm_pref),   tidy_avg_slopes, question = paste0(bat_name, "_pref"))
-  ame_lpm_intense <- map2_dfr(models$lpm_intense, names(models$lpm_intense), tidy_avg_slopes, question = paste0(bat_name, "_intense"))
-  ame_logit_pref    <- ame_logit_tradeoff(models$logit_pref,    paste0(bat_name, "_pref_logit"))
-  ame_logit_intense <- ame_logit_tradeoff(models$logit_intense, paste0(bat_name, "_intense_logit"))
-  bind_rows(ame_raw, ame_lpm_pref, ame_lpm_intense, ame_logit_pref, ame_logit_intense) |>
+  
+  # Primary: Logit AME
+  ame_logit_pref    <- ame_logit_battery(models$logit_pref,    paste0(bat_name, "_pref_logit"))
+  ame_logit_intense <- ame_logit_battery(models$logit_intense, paste0(bat_name, "_intense_logit"))
+  
+  # Robustness: LPM
+  ame_lpm_pref    <- map2_dfr(models$lpm_pref,    names(models$lpm_pref),    tidy_avg_slopes, question = paste0(bat_name, "_pref_lpm"))
+  ame_lpm_intense <- map2_dfr(models$lpm_intense, names(models$lpm_intense), tidy_avg_slopes, question = paste0(bat_name, "_intense_lpm"))
+  
+  # Raw OLS (kept for reference)
+  ame_raw <- map2_dfr(models$lm_raw, names(models$lm_raw), tidy_avg_slopes, question = paste0(bat_name, "_raw"))
+  
+  bind_rows(ame_logit_pref, ame_logit_intense,
+            ame_lpm_pref,   ame_lpm_intense,
+            ame_raw) |>
     mutate(battery = bat_name, battery_title = bat$title)
 })
 
@@ -1490,32 +1522,52 @@ write.csv(coef_tradeoff, "graphs/regressions/AME_tradeoff_all.csv", row.names = 
 
 fit_tradeoff <- map_dfr(names(batteries), function(bat_name) {
   models <- tradeoff_models[[bat_name]]
+  
+  # OLS raw
   fit_raw <- map2_dfr(models$lm_raw, names(models$lm_raw), function(model, dv_label) {
     s <- summary(model)
-    tibble(battery = bat_name, dv = dv_label, model_type = "OLS",
-           r_squared = round(s$r.squared, 3), adj_r_sq = round(s$adj.r.squared, 3), n = length(s$residuals))
+    tibble(battery    = bat_name, dv = dv_label, model_type = "OLS_raw",
+           r_squared  = round(s$r.squared, 3),
+           adj_r_sq   = round(s$adj.r.squared, 3),
+           n          = length(s$residuals))
   })
-  fit_lpm_pref <- map2_dfr(models$lpm_pref, names(models$lpm_pref), function(model, dv_label) {
-    s <- summary(model)
-    tibble(battery = bat_name, dv = dv_label, model_type = "LPM_pref",
-           r_squared = round(s$r.squared, 3), adj_r_sq = round(s$adj.r.squared, 3), n = length(s$residuals))
-  })
-  fit_lpm_intense <- map2_dfr(models$lpm_intense, names(models$lpm_intense), function(model, dv_label) {
-    s <- summary(model)
-    tibble(battery = bat_name, dv = dv_label, model_type = "LPM_intense",
-           r_squared = round(s$r.squared, 3), adj_r_sq = round(s$adj.r.squared, 3), n = length(s$residuals))
-  })
+  
+  # Logit _pref (primary)
   fit_logit_pref <- map2_dfr(models$logit_pref, names(models$logit_pref), function(model, dv_label) {
     s <- summary.glm(model)
-    tibble(battery = bat_name, dv = dv_label, model_type = "Logit_pref",
-           pseudo_r2 = round(1 - (s$deviance / s$null.deviance), 3), n = length(s$residuals))
+    tibble(battery   = bat_name, dv = dv_label, model_type = "Logit_pref",
+           pseudo_r2 = round(1 - (s$deviance / s$null.deviance), 3),
+           n         = length(s$residuals))
   })
+  
+  # Logit _intense (primary)
   fit_logit_intense <- map2_dfr(models$logit_intense, names(models$logit_intense), function(model, dv_label) {
     s <- summary.glm(model)
-    tibble(battery = bat_name, dv = dv_label, model_type = "Logit_intense",
-           pseudo_r2 = round(1 - (s$deviance / s$null.deviance), 3), n = length(s$residuals))
+    tibble(battery   = bat_name, dv = dv_label, model_type = "Logit_intense",
+           pseudo_r2 = round(1 - (s$deviance / s$null.deviance), 3),
+           n         = length(s$residuals))
   })
-  bind_rows(fit_raw, fit_lpm_pref, fit_lpm_intense, fit_logit_pref, fit_logit_intense)
+  
+  # LPM _pref (robustness)
+  fit_lpm_pref <- map2_dfr(models$lpm_pref, names(models$lpm_pref), function(model, dv_label) {
+    s <- summary(model)
+    tibble(battery   = bat_name, dv = dv_label, model_type = "LPM_pref",
+           r_squared = round(s$r.squared, 3),
+           adj_r_sq  = round(s$adj.r.squared, 3),
+           n         = length(s$residuals))
+  })
+  
+  # LPM _intense (robustness)
+  fit_lpm_intense <- map2_dfr(models$lpm_intense, names(models$lpm_intense), function(model, dv_label) {
+    s <- summary(model)
+    tibble(battery   = bat_name, dv = dv_label, model_type = "LPM_intense",
+           r_squared = round(s$r.squared, 3),
+           adj_r_sq  = round(s$adj.r.squared, 3),
+           n         = length(s$residuals))
+  })
+  
+  bind_rows(fit_raw, fit_logit_pref, fit_logit_intense,
+            fit_lpm_pref, fit_lpm_intense)
 })
 
 print(fit_tradeoff)
@@ -1529,21 +1581,52 @@ write.csv(fit_tradeoff, "graphs/regressions/fit_tradeoff_all.csv", row.names = F
 walk(names(batteries), function(bat_name) {
   models <- tradeoff_models[[bat_name]]
   bat    <- batteries[[bat_name]]
-  modelsummary(models$lpm_pref,
-               estimate = "{estimate}{stars}", statistic = "({std.error})",
-               coef_map = term_labels, gof_map = c("nobs", "r.squared"),
-               output = paste0("graphs/regressions/regtable_tradeoff_", bat_name, "_pref_lpm.txt"),
-               notes  = paste0(bat$title, " — LPM. HC1-robust SEs. * p<0.05, ** p<0.01, *** p<0.001"))
-  modelsummary(models$lpm_intense,
-               estimate = "{estimate}{stars}", statistic = "({std.error})",
-               coef_map = term_labels, gof_map = c("nobs", "r.squared"),
-               output = paste0("graphs/regressions/regtable_tradeoff_", bat_name, "_intense_lpm.txt"),
-               notes  = paste0(bat$title, " — LPM. HC1-robust SEs. * p<0.05, ** p<0.01, *** p<0.001"))
-  modelsummary(models$lm_raw,
-               estimate = "{estimate}{stars}", statistic = "({std.error})",
-               coef_map = term_labels, gof_map = c("nobs", "r.squared"),
-               output = paste0("graphs/regressions/regtable_tradeoff_", bat_name, "_raw_ols.txt"),
-               notes  = paste0(bat$title, " — OLS (0-100 allocation). HC1-robust SEs. * p<0.05, ** p<0.01, *** p<0.001"))
+  
+  # Primary: Logit AME tables
+  modelsummary(
+    map(models$logit_pref, ~avg_slopes(.x, vcov = robust_vcov(.x))),
+    estimate  = "{estimate}{stars}", statistic = "({std.error})",
+    coef_map  = term_labels, gof_map = c("nobs"),
+    output    = paste0("graphs/regressions/regtable_tradeoff_", bat_name, "_pref_logit_AME.txt"),
+    notes     = paste0(bat$title, " — Logit AME. HC1 robust SEs. * p<0.05, ** p<0.01, *** p<0.001")
+  )
+  
+  modelsummary(
+    map(models$logit_intense, ~avg_slopes(.x, vcov = robust_vcov(.x))),
+    estimate  = "{estimate}{stars}", statistic = "({std.error})",
+    coef_map  = term_labels, gof_map = c("nobs"),
+    output    = paste0("graphs/regressions/regtable_tradeoff_", bat_name, "_intense_logit_AME.txt"),
+    notes     = paste0(bat$title, " — Logit AME. HC1 robust SEs. * p<0.05, ** p<0.01, *** p<0.001")
+  )
+  
+  # Robustness: LPM tables
+  modelsummary(
+    models$lpm_pref,
+    estimate  = "{estimate}{stars}", statistic = "({std.error})",
+    vcov      = map(models$lpm_pref, robust_vcov),
+    coef_map  = term_labels, gof_map = c("nobs", "r.squared"),
+    output    = paste0("graphs/regressions/regtable_tradeoff_", bat_name, "_pref_lpm.txt"),
+    notes     = paste0(bat$title, " — LPM robustness check. HC1 robust SEs. * p<0.05, ** p<0.01, *** p<0.001")
+  )
+  
+  modelsummary(
+    models$lpm_intense,
+    estimate  = "{estimate}{stars}", statistic = "({std.error})",
+    vcov      = map(models$lpm_intense, robust_vcov),
+    coef_map  = term_labels, gof_map = c("nobs", "r.squared"),
+    output    = paste0("graphs/regressions/regtable_tradeoff_", bat_name, "_intense_lpm.txt"),
+    notes     = paste0(bat$title, " — LPM robustness check. HC1 robust SEs. * p<0.05, ** p<0.01, *** p<0.001")
+  )
+  
+  # Raw OLS table (kept for reference)
+  modelsummary(
+    models$lm_raw,
+    estimate  = "{estimate}{stars}", statistic = "({std.error})",
+    vcov      = map(models$lm_raw, robust_vcov),
+    coef_map  = term_labels, gof_map = c("nobs", "r.squared"),
+    output    = paste0("graphs/regressions/regtable_tradeoff_", bat_name, "_raw_ols.txt"),
+    notes     = paste0(bat$title, " — OLS (0-100 allocation). HC1 robust SEs. * p<0.05, ** p<0.01, *** p<0.001")
+  )
 })
 
 
@@ -1554,57 +1637,99 @@ walk(names(batteries), function(bat_name) {
 walk(names(batteries), function(bat_name) {
   bat <- batteries[[bat_name]]
   
-  coef_pref <- coef_tradeoff |> dplyr::filter(battery == bat_name, question == paste0(bat_name, "_pref"))
-  if (nrow(coef_pref) > 0) {
-    coef_pref |> mutate(term = recode(term, !!!term_labels)) |>
+  # ── Primary: Logit AME plots ────────────────────────────────────────────
+  
+  coef_logit_pref <- coef_tradeoff |>
+    dplyr::filter(battery == bat_name, question == paste0(bat_name, "_pref_logit"))
+  
+  if (nrow(coef_logit_pref) > 0) {
+    coef_logit_pref |>
+      mutate(term = recode(term, !!!term_labels)) |>
       ggplot(aes(x = estimate, y = reorder(term, estimate), color = direction)) +
       geom_vline(xintercept = 0, linetype = "dashed", color = "grey50") +
       geom_point(size = 2.5) +
       geom_errorbarh(aes(xmin = conf.low, xmax = conf.high), height = 0.2) +
       scale_color_manual(values = c("Positive"="#2166ac","Negative"="#d6604d","No clear effect"="grey60")) +
-      facet_wrap(~ dv, ncol = 2, scales = "free_x") +
-      labs(x = "Coefficient (HC1 robust SEs)", y = NULL, color = NULL,
-           title   = paste0(bat$title, " — LPM (first choice)"),
-           caption = "LPM. HC1 robust SEs. 95% CI.") +
+      facet_wrap(~dv, ncol = 2, scales = "free_x") +
+      labs(x = "Average marginal effect (HC1 robust SEs)", y = NULL, color = NULL,
+           title   = paste0(bat$title, " — Logit AME (first choice)"),
+           caption = "Logit AME. HC1 robust SEs. 95% CI.") +
       theme_minimal(base_size = 12) +
       theme(legend.position = "bottom", strip.text = element_text(face = "bold"))
-    ggsave(paste0("graphs/regressions/coef_tradeoff_", bat_name, "_pref_lpm.png"),
+    ggsave(paste0("graphs/regressions/coef_tradeoff_", bat_name, "_pref_logit_AME.png"),
            width = 14, height = 10, dpi = 300)
   }
   
-  coef_int <- coef_tradeoff |> dplyr::filter(battery == bat_name, question == paste0(bat_name, "_intense"))
-  if (nrow(coef_int) > 0) {
-    coef_int |> mutate(term = recode(term, !!!term_labels)) |>
+  coef_logit_intense <- coef_tradeoff |>
+    dplyr::filter(battery == bat_name, question == paste0(bat_name, "_intense_logit"))
+  
+  if (nrow(coef_logit_intense) > 0) {
+    coef_logit_intense |>
+      mutate(term = recode(term, !!!term_labels)) |>
       ggplot(aes(x = estimate, y = reorder(term, estimate), color = direction)) +
       geom_vline(xintercept = 0, linetype = "dashed", color = "grey50") +
       geom_point(size = 2.5) +
       geom_errorbarh(aes(xmin = conf.low, xmax = conf.high), height = 0.2) +
       scale_color_manual(values = c("Positive"="#2166ac","Negative"="#d6604d","No clear effect"="grey60")) +
-      facet_wrap(~ dv, ncol = 2, scales = "free_x") +
-      labs(x = "Coefficient (HC1 robust SEs)", y = NULL, color = NULL,
-           title   = paste0(bat$title, " — LPM (intense preference)"),
-           caption = "LPM. HC1 robust SEs. 95% CI.") +
+      facet_wrap(~dv, ncol = 2, scales = "free_x") +
+      labs(x = "Average marginal effect (HC1 robust SEs)", y = NULL, color = NULL,
+           title   = paste0(bat$title, " — Logit AME (intense preference)"),
+           caption = "Logit AME. HC1 robust SEs. 95% CI.") +
       theme_minimal(base_size = 12) +
       theme(legend.position = "bottom", strip.text = element_text(face = "bold"))
-    ggsave(paste0("graphs/regressions/coef_tradeoff_", bat_name, "_intense_lpm.png"),
+    ggsave(paste0("graphs/regressions/coef_tradeoff_", bat_name, "_intense_logit_AME.png"),
            width = 14, height = 10, dpi = 300)
   }
   
-  coef_raw <- coef_tradeoff |> dplyr::filter(battery == bat_name, question == paste0(bat_name, "_raw"))
-  if (nrow(coef_raw) > 0) {
-    coef_raw |> mutate(term = recode(term, !!!term_labels)) |>
-      ggplot(aes(x = estimate, y = reorder(term, estimate), color = direction)) +
+  # ── Robustness: LPM vs Logit AME side by side ───────────────────────────
+  
+  rob_pref <- bind_rows(
+    coef_tradeoff |> dplyr::filter(battery == bat_name, question == paste0(bat_name, "_pref_logit")) |> mutate(model = "Logit AME"),
+    coef_tradeoff |> dplyr::filter(battery == bat_name, question == paste0(bat_name, "_pref_lpm"))   |> mutate(model = "LPM")
+  )
+  
+  if (nrow(rob_pref) > 0) {
+    rob_pref |>
+      mutate(term = recode(term, !!!term_labels)) |>
+      ggplot(aes(x = estimate, y = reorder(term, estimate),
+                 color = model, shape = model)) +
       geom_vline(xintercept = 0, linetype = "dashed", color = "grey50") +
-      geom_point(size = 2.5) +
-      geom_errorbarh(aes(xmin = conf.low, xmax = conf.high), height = 0.2) +
-      scale_color_manual(values = c("Positive"="#2166ac","Negative"="#d6604d","No clear effect"="grey60")) +
-      facet_wrap(~ dv, ncol = 2, scales = "free_x") +
-      labs(x = "Coefficient (HC1 robust SEs)", y = NULL, color = NULL,
-           title   = paste0(bat$title, " — OLS (0-100 allocation)"),
-           caption = "OLS. HC1 robust SEs. 95% CI.") +
-      theme_minimal(base_size = 12) +
+      geom_point(size = 2.2, position = position_dodge(width = 0.5)) +
+      geom_errorbarh(aes(xmin = conf.low, xmax = conf.high),
+                     height = 0.2, position = position_dodge(width = 0.5)) +
+      scale_color_manual(values = c("Logit AME" = "#d6604d", "LPM" = "#2166ac")) +
+      facet_wrap(~dv, ncol = 2) +
+      labs(x = "Estimated effect", y = NULL, color = NULL, shape = NULL,
+           title   = paste0(bat$title, " — Logit AME vs. LPM (first choice, robustness)"),
+           caption = "HC1 robust SEs. 95% CI.") +
+      theme_minimal(base_size = 11) +
       theme(legend.position = "bottom", strip.text = element_text(face = "bold"))
-    ggsave(paste0("graphs/regressions/coef_tradeoff_", bat_name, "_raw_ols.png"),
+    ggsave(paste0("graphs/regressions/coef_tradeoff_", bat_name, "_pref_logit_vs_lpm.png"),
+           width = 14, height = 10, dpi = 300)
+  }
+  
+  rob_intense <- bind_rows(
+    coef_tradeoff |> dplyr::filter(battery == bat_name, question == paste0(bat_name, "_intense_logit")) |> mutate(model = "Logit AME"),
+    coef_tradeoff |> dplyr::filter(battery == bat_name, question == paste0(bat_name, "_intense_lpm"))   |> mutate(model = "LPM")
+  )
+  
+  if (nrow(rob_intense) > 0) {
+    rob_intense |>
+      mutate(term = recode(term, !!!term_labels)) |>
+      ggplot(aes(x = estimate, y = reorder(term, estimate),
+                 color = model, shape = model)) +
+      geom_vline(xintercept = 0, linetype = "dashed", color = "grey50") +
+      geom_point(size = 2.2, position = position_dodge(width = 0.5)) +
+      geom_errorbarh(aes(xmin = conf.low, xmax = conf.high),
+                     height = 0.2, position = position_dodge(width = 0.5)) +
+      scale_color_manual(values = c("Logit AME" = "#d6604d", "LPM" = "#2166ac")) +
+      facet_wrap(~dv, ncol = 2) +
+      labs(x = "Estimated effect", y = NULL, color = NULL, shape = NULL,
+           title   = paste0(bat$title, " — Logit AME vs. LPM (intense preference, robustness)"),
+           caption = "HC1 robust SEs. 95% CI.") +
+      theme_minimal(base_size = 11) +
+      theme(legend.position = "bottom", strip.text = element_text(face = "bold"))
+    ggsave(paste0("graphs/regressions/coef_tradeoff_", bat_name, "_intense_logit_vs_lpm.png"),
            width = 14, height = 10, dpi = 300)
   }
 })
@@ -1616,14 +1741,31 @@ walk(names(batteries), function(bat_name) {
 
 walk(names(batteries), function(bat_name) {
   bat <- batteries[[bat_name]]
-  fit_tradeoff |> dplyr::filter(battery == bat_name, model_type == "OLS") |>
-    plot_r2(title_str = paste0(bat$title, " — OLS R² (raw allocation)"),
-            file_path = paste0("graphs/regressions/r2_tradeoff_", bat_name, "_raw_ols.png"))
-  fit_tradeoff |> dplyr::filter(battery == bat_name, model_type == "LPM_pref") |>
-    plot_r2(title_str = paste0(bat$title, " — LPM R² (first choice)"),
+  
+  # Primary: Logit pseudo-R2
+  fit_tradeoff |>
+    dplyr::filter(battery == bat_name, model_type == "Logit_pref") |>
+    plot_r2(r2_col    = "pseudo_r2",
+            title_str = paste0(bat$title, " — Logit pseudo-R2 (first choice)"),
+            file_path = paste0("graphs/regressions/r2_tradeoff_", bat_name, "_pref_logit.png"))
+  
+  fit_tradeoff |>
+    dplyr::filter(battery == bat_name, model_type == "Logit_intense") |>
+    plot_r2(r2_col    = "pseudo_r2",
+            title_str = paste0(bat$title, " — Logit pseudo-R2 (intense preference)"),
+            file_path = paste0("graphs/regressions/r2_tradeoff_", bat_name, "_intense_logit.png"))
+  
+  # Robustness: LPM adjusted R2
+  fit_tradeoff |>
+    dplyr::filter(battery == bat_name, model_type == "LPM_pref") |>
+    plot_r2(r2_col    = "adj_r_sq",
+            title_str = paste0(bat$title, " — LPM adjusted R2 (first choice, robustness)"),
             file_path = paste0("graphs/regressions/r2_tradeoff_", bat_name, "_pref_lpm.png"))
-  fit_tradeoff |> dplyr::filter(battery == bat_name, model_type == "LPM_intense") |>
-    plot_r2(title_str = paste0(bat$title, " — LPM R² (intense preference)"),
+  
+  fit_tradeoff |>
+    dplyr::filter(battery == bat_name, model_type == "LPM_intense") |>
+    plot_r2(r2_col    = "adj_r_sq",
+            title_str = paste0(bat$title, " — LPM adjusted R2 (intense preference, robustness)"),
             file_path = paste0("graphs/regressions/r2_tradeoff_", bat_name, "_intense_lpm.png"))
 })
 
@@ -1633,14 +1775,590 @@ walk(names(batteries), function(bat_name) {
 #*************************************************************************#
 
 cat("\n========== TRADEOFF MODEL FIT SUMMARY ==========\n")
-print(fit_tradeoff, n = 50)
+print(fit_tradeoff, n = 60)
 
-cat("\n========== Most consistently significant predictors (LPM _pref) ==========\n")
+cat("\n========== Most consistently significant predictors (Logit AME _pref) ==========\n")
 coef_tradeoff |>
-  dplyr::filter(grepl("_pref$", question), sig %in% c("*","**","***")) |>
+  dplyr::filter(grepl("_pref_logit$", question), sig %in% c("*", "**", "***")) |>
   count(term, sort = TRUE) |>
   mutate(term = recode(term, !!!term_labels)) |>
   print(n = 20)
 
+cat("\n========== Most consistently significant predictors (Logit AME _intense) ==========\n")
+coef_tradeoff |>
+  dplyr::filter(grepl("_intense_logit$", question), sig %in% c("*", "**", "***")) |>
+  count(term, sort = TRUE) |>
+  mutate(term = recode(term, !!!term_labels)) |>
+  print(n = 20)
+
+cat("\n========== LPM vs Logit direction agreement -- _pref ==========\n")
+bind_rows(
+  coef_tradeoff |> dplyr::filter(grepl("_pref_logit$", question)) |> mutate(model = "Logit"),
+  coef_tradeoff |> dplyr::filter(grepl("_pref_lpm$",   question)) |> mutate(model = "LPM")
+) |>
+  dplyr::filter(sig %in% c("*", "**", "***")) |>
+  dplyr::select(battery, dv, term, model, direction) |>
+  pivot_wider(names_from = model, values_from = direction) |>
+  dplyr::filter(LPM != Logit) |>
+  print()
+
+cat("\n========== LPM vs Logit direction agreement -- _intense ==========\n")
+bind_rows(
+  coef_tradeoff |> dplyr::filter(grepl("_intense_logit$", question)) |> mutate(model = "Logit"),
+  coef_tradeoff |> dplyr::filter(grepl("_intense_lpm$",   question)) |> mutate(model = "LPM")
+) |>
+  dplyr::filter(sig %in% c("*", "**", "***")) |>
+  dplyr::select(battery, dv, term, model, direction) |>
+  pivot_wider(names_from = model, values_from = direction) |>
+  dplyr::filter(LPM != Logit) |>
+  print()
+
 cat("\n========== AMEs saved to: graphs/regressions/AME_tradeoff_all.csv ==========\n")
 cat("Model fit saved to: graphs/regressions/fit_tradeoff_all.csv\n")
+# Quick count and % for all _intense variables
+intense_vars <- df |> dplyr::select(matches("_intense$")) |> names()
+
+check <- map_dfr(intense_vars, ~tibble(
+  variable = .x,
+  n        = sum(df[[.x]] == 1, na.rm = TRUE),
+  pct      = round(mean(df[[.x]] == 1, na.rm = TRUE) * 100, 1),
+  n_na     = sum(is.na(df[[.x]]))
+)) |>
+  arrange(pct)
+
+#*************************************************************************#
+#########   INT. REGRESSIONS -- INTENSE PREFERENCE (LOGIT + LPM) #########
+#*************************************************************************#
+
+# ── Define the 13 intense DVs ─────────────────────────────────────────────
+
+intense_dvs <- c(
+  "tradeoff_tax_wealth_tax_intense",
+  "tradeoff_hc_pensions_intense",
+  "soc_pol_intense",
+  "cc_target_intense",
+  "tradeoff_hc_all_intense",
+  "hc_univ_intense",
+  "tradeoff_tax_inc_tax_intense",
+  "tradeoff_tax_less_services_intense",
+  "cc_univ_intense",
+  "tradeoff_hc_spend_intense",
+  "tradeoff_cc1_no_spend_intense",
+  "hc_target_intense",
+  "tradeoff_ge_no_spend_intense"
+)
+
+intense_labels <- c(
+  "tradeoff_tax_wealth_tax_intense"    = "Wealth tax (intense)",
+  "tradeoff_hc_pensions_intense"       = "Target low-income seniors, pensions (intense)",
+  "soc_pol_intense"                    = "Social policy composite (intense)",
+  "cc_target_intense"                  = "Childcare: targeted (intense)",
+  "tradeoff_hc_all_intense"            = "Home care for all seniors (intense)",
+  "hc_univ_intense"                    = "Home care: universal (intense)",
+  "tradeoff_tax_inc_tax_intense"       = "Income tax increase (intense)",
+  "tradeoff_tax_less_services_intense" = "No tax increase, fewer services (intense)",
+  "cc_univ_intense"                    = "Childcare: universal (intense)",
+  "tradeoff_hc_spend_intense"          = "Target low-income seniors, home care (intense)",
+  "tradeoff_cc1_no_spend_intense"      = "Don't spend more on childcare (intense)",
+  "hc_target_intense"                  = "Home care: targeted (intense)",
+  "tradeoff_ge_no_spend_intense"       = "Don't spend more on green economy (intense)"
+)
+
+# ── Fit LPM and Logit for all 13 DVs ─────────────────────────────────────
+
+lpm_intense <- intense_dvs |>
+  set_names(intense_labels[intense_dvs]) |>
+  map(~lm(as.formula(paste(.x, "~", rhs)), data = df))
+
+logit_intense <- intense_dvs |>
+  set_names(intense_labels[intense_dvs]) |>
+  map(~glm(as.formula(paste(.x, "~", rhs)), data = df,
+           family = binomial(link = "logit")))
+
+# ── Average marginal effects ──────────────────────────────────────────────
+
+coef_lpm_intense <- map2_dfr(
+  lpm_intense, intense_labels[intense_dvs],
+  tidy_avg_slopes, question = "intense"
+)
+
+coef_logit_intense <- map2_dfr(
+  logit_intense, intense_labels[intense_dvs],
+  function(model, dv_label) {
+    fml        <- formula(model)
+    model_vars <- all.vars(fml)
+    model_data <- df |> dplyr::select(all_of(model_vars)) |> drop_na()
+    vm         <- robust_vcov(model)
+    avg_slopes(model, vcov = vm, newdata = model_data) |>
+      as_tibble() |>
+      transmute(
+        question  = "intense", dv = dv_label, term,
+        estimate  = round(estimate, 3),
+        conf.low  = round(conf.low,  3),
+        conf.high = round(conf.high, 3),
+        p.value   = round(p.value,   3),
+        sig = case_when(
+          p.value < 0.001 ~ "***", p.value < 0.01 ~ "**",
+          p.value < 0.05  ~ "*",   p.value < 0.10 ~ ".",
+          TRUE ~ ""
+        ),
+        direction = case_when(
+          conf.low  > 0 ~ "Positive",
+          conf.high < 0 ~ "Negative",
+          TRUE          ~ "No clear effect"
+        )
+      )
+  }
+)
+
+# ── Model fit ─────────────────────────────────────────────────────────────
+
+fit_lpm_intense <- map2_dfr(
+  lpm_intense, intense_labels[intense_dvs],
+  function(model, dv_label) {
+    s <- summary(model)
+    tibble(dv = dv_label, model = "LPM",
+           r_squared = round(s$r.squared,     3),
+           adj_r_sq  = round(s$adj.r.squared, 3),
+           n         = length(s$residuals))
+  }
+)
+
+fit_logit_intense <- map2_dfr(
+  logit_intense, intense_labels[intense_dvs],
+  function(model, dv_label) {
+    s <- summary.glm(model)
+    tibble(dv = dv_label, model = "Logit",
+           pseudo_r2 = round(1 - (s$deviance / s$null.deviance), 3),
+           n         = length(s$residuals))
+  }
+)
+
+# ── Regression tables ─────────────────────────────────────────────────────
+
+modelsummary(
+  lpm_intense,
+  estimate  = "{estimate}{stars}", statistic = "({std.error})",
+  vcov      = map(lpm_intense, robust_vcov),
+  coef_map  = term_labels,
+  gof_map   = c("nobs", "r.squared", "adj.r.squared"),
+  output    = "graphs/regressions/regtable_intense_LPM.txt",
+  notes     = "LPM (OLS). HC1 robust SEs in parentheses. * p<0.05, ** p<0.01, *** p<0.001"
+)
+
+modelsummary(
+  logit_intense,
+  estimate  = "{estimate}{stars}", statistic = "({std.error})",
+  vcov      = map(logit_intense, robust_vcov),
+  coef_map  = term_labels,
+  gof_map   = c("nobs", "logLik", "AIC"),
+  output    = "graphs/regressions/regtable_intense_logit_coefs.txt",
+  notes     = "Logit coefficients (log-odds). HC1 robust SEs. Interpret via AME table."
+)
+
+modelsummary(
+  map(logit_intense, ~avg_slopes(.x, vcov = robust_vcov(.x))),
+  estimate  = "{estimate}{stars}", statistic = "({std.error})",
+  coef_map  = term_labels,
+  gof_map   = c("nobs"),
+  output    = "graphs/regressions/regtable_intense_logit_AME.txt",
+  notes     = "Average marginal effects from logit. HC1 robust SEs. * p<0.05, ** p<0.01, *** p<0.001"
+)
+
+# ── Coefficient plots ─────────────────────────────────────────────────────
+
+plot_coefs(
+  coef_lpm_intense,
+  "Intense preference -- LPM coefficients",
+  "graphs/regressions/coef_intense_LPM.png"
+)
+
+plot_coefs(
+  coef_logit_intense,
+  "Intense preference -- Logit average marginal effects",
+  "graphs/regressions/coef_intense_logit_AME.png"
+)
+
+# ── Robustness check: LPM vs Logit AME side by side ──────────────────────
+
+bind_rows(
+  coef_lpm_intense    |> mutate(model = "LPM"),
+  coef_logit_intense  |> mutate(model = "Logit AME")
+) |>
+  mutate(term = recode(term, !!!term_labels)) |>
+  ggplot(aes(x = estimate, y = reorder(term, estimate),
+             color = model, shape = model)) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "grey50") +
+  geom_point(size = 2.2, position = position_dodge(width = 0.5)) +
+  geom_errorbarh(aes(xmin = conf.low, xmax = conf.high),
+                 height = 0.2, position = position_dodge(width = 0.5)) +
+  scale_color_manual(values = c("LPM" = "#2166ac", "Logit AME" = "#d6604d")) +
+  facet_wrap(~dv, ncol = 3) +
+  labs(x = "Estimated effect", y = NULL, color = NULL, shape = NULL,
+       title   = "Intense preference -- LPM vs. Logit AME (robustness check)",
+       caption = "HC1 robust SEs. 95% CI.") +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "bottom",
+        strip.text = element_text(face = "bold"))
+
+ggsave("graphs/regressions/coef_intense_LPM_vs_logit.png",
+       width = 16, height = 14, dpi = 300)
+
+# ── R-squared summary plots ───────────────────────────────────────────────
+
+plot_r2(
+  fit_lpm_intense,
+  r2_col    = "adj_r_sq",
+  title_str = "Model fit -- Intense preference (LPM)",
+  file_path = "graphs/regressions/r2_intense_LPM.png"
+)
+
+plot_r2(
+  fit_logit_intense,
+  r2_col    = "pseudo_r2",
+  title_str = "Model fit -- Intense preference (Logit pseudo-R2)",
+  file_path = "graphs/regressions/r2_intense_logit.png"
+)
+
+# ── Direction agreement check ─────────────────────────────────────────────
+
+cat("\n========== LPM vs Logit direction agreement -- intense preference ==========\n")
+bind_rows(
+  coef_lpm_intense   |> mutate(model = "LPM"),
+  coef_logit_intense |> mutate(model = "Logit")
+) |>
+  filter(sig %in% c("*", "**", "***")) |>
+  dplyr::select(dv, term, model, direction) |>
+  pivot_wider(names_from = model, values_from = direction) |>
+  filter(LPM != Logit) |>
+  print()
+
+# ── Save AMEs to CSV ──────────────────────────────────────────────────────
+
+bind_rows(
+  coef_lpm_intense   |> mutate(model = "LPM"),
+  coef_logit_intense |> mutate(model = "Logit AME")
+) |>
+  write.csv("graphs/regressions/AME_intense_all.csv", row.names = FALSE)
+
+
+#*************************************************************************#
+#########   UC. LOGIT REGRESSIONS -- HC & CC2 UNIVERSAL/TARGETED #########
+#*************************************************************************#
+
+# ── Define DVs ────────────────────────────────────────────────────────────
+
+uc_dvs <- list(
+  bin = c(
+    "hc_univ_bin"    = "Home care: universal (first choice)",
+    "hc_target_bin"  = "Home care: targeted (first choice)",
+    "cc_univ_bin"    = "Childcare: universal (first choice)",
+    "cc_target_bin"  = "Childcare: targeted (first choice)"
+  ),
+  intense = c(
+    "hc_univ_intense"    = "Home care: universal (intense)",
+    "hc_target_intense"  = "Home care: targeted (intense)",
+    "cc_univ_intense"    = "Childcare: universal (intense)",
+    "cc_target_intense"  = "Childcare: targeted (intense)"
+  )
+)
+
+# ── Fit models ────────────────────────────────────────────────────────────
+
+# Logit -- primary
+logit_uc_bin <- names(uc_dvs$bin) |>
+  set_names(uc_dvs$bin) |>
+  map(function(dv) {
+    model_data <- df |>
+      dplyr::select(all_of(c(dv, all.vars(as.formula(paste("~", rhs)))))) |>
+      drop_na()
+    glm(as.formula(paste(dv, "~", rhs)), data = model_data,
+        family = binomial(link = "logit"))
+  })
+
+logit_uc_intense <- names(uc_dvs$intense) |>
+  set_names(uc_dvs$intense) |>
+  map(function(dv) {
+    model_data <- df |>
+      dplyr::select(all_of(c(dv, all.vars(as.formula(paste("~", rhs)))))) |>
+      drop_na()
+    glm(as.formula(paste(dv, "~", rhs)), data = model_data,
+        family = binomial(link = "logit"))
+  })
+
+# LPM -- robustness
+lpm_uc_bin <- names(uc_dvs$bin) |>
+  set_names(uc_dvs$bin) |>
+  map(function(dv) {
+    model_data <- df |>
+      dplyr::select(all_of(c(dv, all.vars(as.formula(paste("~", rhs)))))) |>
+      drop_na()
+    lm(as.formula(paste(dv, "~", rhs)), data = model_data)
+  })
+
+lpm_uc_intense <- names(uc_dvs$intense) |>
+  set_names(uc_dvs$intense) |>
+  map(function(dv) {
+    model_data <- df |>
+      dplyr::select(all_of(c(dv, all.vars(as.formula(paste("~", rhs)))))) |>
+      drop_na()
+    lm(as.formula(paste(dv, "~", rhs)), data = model_data)
+  })
+
+# ── Average marginal effects ──────────────────────────────────────────────
+
+coef_logit_uc_bin <- map2_dfr(
+  logit_uc_bin, uc_dvs$bin,
+  function(model, dv_label) {
+    fml        <- formula(model)
+    model_vars <- all.vars(fml)
+    model_data <- df |> dplyr::select(all_of(model_vars)) |> drop_na()
+    vm         <- robust_vcov(model)
+    avg_slopes(model, vcov = vm, newdata = model_data) |>
+      as_tibble() |>
+      transmute(
+        question  = "uc_bin", dv = dv_label, term,
+        estimate  = round(estimate, 3),
+        conf.low  = round(conf.low,  3),
+        conf.high = round(conf.high, 3),
+        p.value   = round(p.value,   3),
+        sig = case_when(
+          p.value < 0.001 ~ "***", p.value < 0.01 ~ "**",
+          p.value < 0.05  ~ "*",   p.value < 0.10 ~ ".",
+          TRUE ~ ""
+        ),
+        direction = case_when(
+          conf.low  > 0 ~ "Positive",
+          conf.high < 0 ~ "Negative",
+          TRUE          ~ "No clear effect"
+        )
+      )
+  }
+)
+
+coef_logit_uc_intense <- map2_dfr(
+  logit_uc_intense, uc_dvs$intense,
+  function(model, dv_label) {
+    fml        <- formula(model)
+    model_vars <- all.vars(fml)
+    model_data <- df |> dplyr::select(all_of(model_vars)) |> drop_na()
+    vm         <- robust_vcov(model)
+    avg_slopes(model, vcov = vm, newdata = model_data) |>
+      as_tibble() |>
+      transmute(
+        question  = "uc_intense", dv = dv_label, term,
+        estimate  = round(estimate, 3),
+        conf.low  = round(conf.low,  3),
+        conf.high = round(conf.high, 3),
+        p.value   = round(p.value,   3),
+        sig = case_when(
+          p.value < 0.001 ~ "***", p.value < 0.01 ~ "**",
+          p.value < 0.05  ~ "*",   p.value < 0.10 ~ ".",
+          TRUE ~ ""
+        ),
+        direction = case_when(
+          conf.low  > 0 ~ "Positive",
+          conf.high < 0 ~ "Negative",
+          TRUE          ~ "No clear effect"
+        )
+      )
+  }
+)
+
+coef_lpm_uc_bin <- map2_dfr(
+  lpm_uc_bin, uc_dvs$bin,
+  tidy_avg_slopes, question = "uc_bin_lpm"
+)
+
+coef_lpm_uc_intense <- map2_dfr(
+  lpm_uc_intense, uc_dvs$intense,
+  tidy_avg_slopes, question = "uc_intense_lpm"
+)
+
+# ── Model fit ─────────────────────────────────────────────────────────────
+
+fit_logit_uc_bin <- map2_dfr(
+  logit_uc_bin, uc_dvs$bin,
+  function(model, dv_label) {
+    s <- summary.glm(model)
+    tibble(dv        = dv_label, model_type = "Logit_bin",
+           pseudo_r2 = round(1 - (s$deviance / s$null.deviance), 3),
+           n         = length(s$residuals))
+  }
+)
+
+fit_logit_uc_intense <- map2_dfr(
+  logit_uc_intense, uc_dvs$intense,
+  function(model, dv_label) {
+    s <- summary.glm(model)
+    tibble(dv        = dv_label, model_type = "Logit_intense",
+           pseudo_r2 = round(1 - (s$deviance / s$null.deviance), 3),
+           n         = length(s$residuals))
+  }
+)
+
+fit_lpm_uc_bin <- map2_dfr(
+  lpm_uc_bin, uc_dvs$bin,
+  function(model, dv_label) {
+    s <- summary(model)
+    tibble(dv        = dv_label, model_type = "LPM_bin",
+           adj_r_sq  = round(s$adj.r.squared, 3),
+           n         = length(s$residuals))
+  }
+)
+
+fit_lpm_uc_intense <- map2_dfr(
+  lpm_uc_intense, uc_dvs$intense,
+  function(model, dv_label) {
+    s <- summary(model)
+    tibble(dv        = dv_label, model_type = "LPM_intense",
+           adj_r_sq  = round(s$adj.r.squared, 3),
+           n         = length(s$residuals))
+  }
+)
+
+# ── Regression tables ─────────────────────────────────────────────────────
+
+modelsummary(
+  map(logit_uc_bin, ~avg_slopes(.x, vcov = robust_vcov(.x))),
+  estimate  = "{estimate}{stars}", statistic = "({std.error})",
+  coef_map  = term_labels, gof_map = c("nobs"),
+  output    = "graphs/regressions/regtable_uc_bin_logit_AME.txt",
+  notes     = "HC & CC2 universal/targeted — Logit AME (first choice). HC1 robust SEs. * p<0.05, ** p<0.01, *** p<0.001"
+)
+
+modelsummary(
+  map(logit_uc_intense, ~avg_slopes(.x, vcov = robust_vcov(.x))),
+  estimate  = "{estimate}{stars}", statistic = "({std.error})",
+  coef_map  = term_labels, gof_map = c("nobs"),
+  output    = "graphs/regressions/regtable_uc_intense_logit_AME.txt",
+  notes     = "HC & CC2 universal/targeted — Logit AME (intense preference). HC1 robust SEs. * p<0.05, ** p<0.01, *** p<0.001"
+)
+
+modelsummary(
+  lpm_uc_bin,
+  estimate  = "{estimate}{stars}", statistic = "({std.error})",
+  vcov      = map(lpm_uc_bin, robust_vcov),
+  coef_map  = term_labels, gof_map = c("nobs", "r.squared"),
+  output    = "graphs/regressions/regtable_uc_bin_lpm.txt",
+  notes     = "HC & CC2 universal/targeted — LPM robustness check (first choice). HC1 robust SEs."
+)
+
+modelsummary(
+  lpm_uc_intense,
+  estimate  = "{estimate}{stars}", statistic = "({std.error})",
+  vcov      = map(lpm_uc_intense, robust_vcov),
+  coef_map  = term_labels, gof_map = c("nobs", "r.squared"),
+  output    = "graphs/regressions/regtable_uc_intense_lpm.txt",
+  notes     = "HC & CC2 universal/targeted — LPM robustness check (intense preference). HC1 robust SEs."
+)
+
+# ── Coefficient plots -- primary (Logit AME) ──────────────────────────────
+
+plot_coefs(
+  coef_logit_uc_bin,
+  "HC & CC2 universal/targeted — Logit AME (first choice)",
+  "graphs/regressions/coef_uc_bin_logit_AME.png"
+)
+
+plot_coefs(
+  coef_logit_uc_intense,
+  "HC & CC2 universal/targeted — Logit AME (intense preference)",
+  "graphs/regressions/coef_uc_intense_logit_AME.png"
+)
+
+# ── Robustness check: LPM vs Logit AME ───────────────────────────────────
+
+bind_rows(
+  coef_logit_uc_bin |> mutate(model = "Logit AME"),
+  coef_lpm_uc_bin   |> mutate(model = "LPM")
+) |>
+  mutate(term = recode(term, !!!term_labels)) |>
+  ggplot(aes(x = estimate, y = reorder(term, estimate),
+             color = model, shape = model)) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "grey50") +
+  geom_point(size = 2.2, position = position_dodge(width = 0.5)) +
+  geom_errorbarh(aes(xmin = conf.low, xmax = conf.high),
+                 height = 0.2, position = position_dodge(width = 0.5)) +
+  scale_color_manual(values = c("Logit AME" = "#d6604d", "LPM" = "#2166ac")) +
+  facet_wrap(~dv, ncol = 2) +
+  labs(x = "Estimated effect", y = NULL, color = NULL, shape = NULL,
+       title   = "HC & CC2 universal/targeted — Logit AME vs. LPM (first choice, robustness)",
+       caption = "HC1 robust SEs. 95% CI.") +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "bottom", strip.text = element_text(face = "bold"))
+
+ggsave("graphs/regressions/coef_uc_bin_logit_vs_lpm.png",
+       width = 14, height = 10, dpi = 300)
+
+bind_rows(
+  coef_logit_uc_intense |> mutate(model = "Logit AME"),
+  coef_lpm_uc_intense   |> mutate(model = "LPM")
+) |>
+  mutate(term = recode(term, !!!term_labels)) |>
+  ggplot(aes(x = estimate, y = reorder(term, estimate),
+             color = model, shape = model)) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "grey50") +
+  geom_point(size = 2.2, position = position_dodge(width = 0.5)) +
+  geom_errorbarh(aes(xmin = conf.low, xmax = conf.high),
+                 height = 0.2, position = position_dodge(width = 0.5)) +
+  scale_color_manual(values = c("Logit AME" = "#d6604d", "LPM" = "#2166ac")) +
+  facet_wrap(~dv, ncol = 2) +
+  labs(x = "Estimated effect", y = NULL, color = NULL, shape = NULL,
+       title   = "HC & CC2 universal/targeted — Logit AME vs. LPM (intense preference, robustness)",
+       caption = "HC1 robust SEs. 95% CI.") +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "bottom", strip.text = element_text(face = "bold"))
+
+ggsave("graphs/regressions/coef_uc_intense_logit_vs_lpm.png",
+       width = 14, height = 10, dpi = 300)
+
+# ── R-squared summary plots ───────────────────────────────────────────────
+
+plot_r2(
+  fit_logit_uc_bin,
+  r2_col    = "pseudo_r2",
+  title_str = "Model fit — HC & CC2 universal/targeted, Logit pseudo-R2 (first choice)",
+  file_path = "graphs/regressions/r2_uc_bin_logit.png"
+)
+
+plot_r2(
+  fit_logit_uc_intense,
+  r2_col    = "pseudo_r2",
+  title_str = "Model fit — HC & CC2 universal/targeted, Logit pseudo-R2 (intense preference)",
+  file_path = "graphs/regressions/r2_uc_intense_logit.png"
+)
+
+# ── Direction agreement check ─────────────────────────────────────────────
+
+cat("\n========== LPM vs Logit direction agreement -- UC bin ==========\n")
+bind_rows(
+  coef_logit_uc_bin |> mutate(model = "Logit"),
+  coef_lpm_uc_bin   |> mutate(model = "LPM")
+) |>
+  dplyr::filter(sig %in% c("*", "**", "***")) |>
+  dplyr::select(dv, term, model, direction) |>
+  pivot_wider(names_from = model, values_from = direction) |>
+  dplyr::filter(LPM != Logit) |>
+  print()
+
+cat("\n========== LPM vs Logit direction agreement -- UC intense ==========\n")
+bind_rows(
+  coef_logit_uc_intense |> mutate(model = "Logit"),
+  coef_lpm_uc_intense   |> mutate(model = "LPM")
+) |>
+  dplyr::filter(sig %in% c("*", "**", "***")) |>
+  dplyr::select(dv, term, model, direction) |>
+  pivot_wider(names_from = model, values_from = direction) |>
+  dplyr::filter(LPM != Logit) |>
+  print()
+
+# ── Save AMEs to CSV ──────────────────────────────────────────────────────
+
+bind_rows(
+  coef_logit_uc_bin     |> mutate(model = "Logit AME"),
+  coef_logit_uc_intense |> mutate(model = "Logit AME"),
+  coef_lpm_uc_bin       |> mutate(model = "LPM"),
+  coef_lpm_uc_intense   |> mutate(model = "LPM")
+) |>
+  write.csv("graphs/regressions/AME_uc_all.csv", row.names = FALSE)
