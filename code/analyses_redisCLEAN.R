@@ -11,7 +11,7 @@
 #   5.  Bivariate marginal means & contrast tables
 #   6.  Ordered logit — fit models
 #   7.  Ordered logit — average marginal effects (AME)
-#   8.  OLS / LPM models (robustness check)
+#   8.  OLS models (robustness check)
 #   9.  Regression tables
 #  10.  Coefficient plots
 #  11.  Interaction plots: Ideology × Quebec
@@ -197,7 +197,7 @@ plot_marginal <- function(dv, dv_label, iv, data) {
   model_data <- data |> dplyr::select(all_of(c(dv, iv$var))) |> drop_na()
   model      <- lm(as.formula(paste(dv, "~", iv$var)), data = model_data)
   vm         <- robust_vcov(model)
-
+  
   plot_data <- if (iv$type == "numeric") {
     nd <- data.frame(x = c(iv$low, iv$high)); names(nd) <- iv$var
     predictions(model, newdata = nd, vcov = vm) |>
@@ -214,7 +214,7 @@ plot_marginal <- function(dv, dv_label, iv, data) {
     predictions(model, by = iv$var, vcov = vm) |>
       mutate(x_label = .data[[iv$var]])
   }
-
+  
   p <- ggplot(plot_data, aes(x = x_label, y = estimate)) +
     geom_point(size = 3, color = "#2166ac") +
     geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = 0.12, color = "#2166ac") +
@@ -222,7 +222,7 @@ plot_marginal <- function(dv, dv_label, iv, data) {
     labs(x = iv$label, y = "Predicted value (0–1 scale)", title = dv_label,
          caption = "OLS prediction. HC1 robust SEs. Error bars = 95% CI.") +
     theme_minimal(base_size = 13)
-
+  
   ggsave(file.path(params$out_desc, paste0("marginal_", iv$var, "_", dv, ".png")),
          plot = p, width = 6, height = 4, dpi = params$dpi)
   invisible(p)
@@ -236,13 +236,13 @@ interpret_contrast <- function(dv, dv_label, iv, data) {
   iv_var  <- iv$var
   iv_low  <- as.character(iv$low)
   iv_high <- as.character(iv$high)
-
+  
   model_data    <- data |> dplyr::select(all_of(c(dv, iv_var))) |> drop_na()
   model         <- lm(as.formula(paste(dv, "~", iv_var)), data = model_data)
   vm            <- robust_vcov(model)
   contrast_spec <- list(c(iv$low, iv$high))
   names(contrast_spec) <- iv_var
-
+  
   tryCatch({
     avg_comparisons(model, variables = contrast_spec, vcov = vm, newdata = model_data) |>
       as_tibble() |>
@@ -283,7 +283,7 @@ tidy_polr_slopes <- function(model, dv_label, question = NULL, data = df) {
   model_vars  <- all.vars(fml)
   model_data  <- data |> dplyr::select(all_of(model_vars)) |> drop_na()
   model_clean <- MASS::polr(fml, data = model_data, Hess = TRUE)
-
+  
   slopes_all <- avg_slopes(model_clean, vcov = "HC1", newdata = model_data) |>
     as_tibble() |>
     mutate(
@@ -297,9 +297,9 @@ tidy_polr_slopes <- function(model, dv_label, question = NULL, data = df) {
         TRUE ~ term
       )
     )
-
+  
   top_level  <- slopes_all |> pull(group) |> as.character() |> unique() |> sort() |> tail(1)
-
+  
   slopes_top <- slopes_all |>
     dplyr::filter(as.character(group) == top_level) |>
     transmute(
@@ -319,19 +319,21 @@ tidy_polr_slopes <- function(model, dv_label, question = NULL, data = df) {
         TRUE          ~ "No clear effect"
       )
     )
-
+  
   list(top = slopes_top, full = slopes_all)
 }
 
 
-# ── 3.5  OLS / LPM AME extractor ─────────────────────────────
-#   Fits LPM on complete cases and extracts HC1 avg_slopes().
-extract_ame_lpm <- function(dv, dv_label, rhs, data = df) {
+# ── 3.5  OLS AME extractor ────────────────────────────────────
+#   Fits OLS on complete cases and extracts HC1 avg_slopes().
+#   Note: DVs are 1–4 ordinal scales; OLS is used as a robustness
+#   check alongside the primary ordered logit, not as an LPM.
+extract_ame_ols <- function(dv, dv_label, rhs, data = df) {
   model_vars <- c(dv, all.vars(as.formula(paste("~", rhs))))
   model_data <- data |> dplyr::select(all_of(model_vars)) |> drop_na()
   model      <- lm(as.formula(paste(dv, "~", rhs)), data = model_data)
   vm         <- robust_vcov(model)
-
+  
   avg_slopes(model, vcov = vm, newdata = model_data) |>
     as_tibble() |>
     transmute(
@@ -381,14 +383,14 @@ plot_coefs <- function(coef_df, title_str, file_path, ncol_facet = 2,
 }
 
 
-# ── 3.7  Robustness plot: polr AME vs LPM ────────────────────
+# ── 3.7  Robustness plot: polr AME vs OLS ────────────────────
 plot_robustness <- function(coef_polr, coef_lpm, title_str, file_path,
                             ncol = 2,
                             width = params$plot_width,
                             height = params$plot_height) {
   bind_rows(
     coef_polr |> mutate(model = "Ordered logit AME"),
-    coef_lpm  |> mutate(model = "LPM")
+    coef_lpm  |> mutate(model = "OLS")
   ) |>
     mutate(
       term = recode(term, !!!term_labels),
@@ -400,7 +402,7 @@ plot_robustness <- function(coef_polr, coef_lpm, title_str, file_path,
     geom_point(size = 2.2, position = position_dodge(width = 0.5)) +
     geom_errorbarh(aes(xmin = conf.low, xmax = conf.high),
                    height = 0.2, position = position_dodge(width = 0.5)) +
-    scale_color_manual(values = c("Ordered logit AME" = "#d6604d", "LPM" = "#2166ac")) +
+    scale_color_manual(values = c("Ordered logit AME" = "#d6604d", "OLS" = "#2166ac")) +
     facet_wrap(~ dv, ncol = ncol) +
     labs(x = "Estimated effect", y = NULL, color = NULL, shape = NULL,
          title = title_str, caption = "HC1 robust SEs. 95% CI.") +
@@ -446,15 +448,15 @@ plot_r2 <- function(fit_df, r2_col = "pseudo_r2", title_str, file_path,
 
 # ── 3.9  Direction agreement diagnostic ──────────────────────
 check_direction_agreement <- function(coef_polr, coef_lpm, label = "") {
-  cat("\n========== Ordered logit vs LPM direction agreement", label, "==========\n")
+  cat("\n========== Ordered logit vs OLS direction agreement", label, "==========\n")
   bind_rows(
     coef_polr |> mutate(model = "Polr"),
-    coef_lpm  |> mutate(model = "LPM")
+    coef_lpm  |> mutate(model = "OLS")
   ) |>
     dplyr::filter(sig %in% c("*", "**", "***")) |>
     dplyr::select(dv, term, model, direction) |>
     pivot_wider(names_from = model, values_from = direction) |>
-    dplyr::filter(LPM != Polr) |>
+    dplyr::filter(OLS != Polr) |>
     print()
 }
 
@@ -479,8 +481,8 @@ desc_redis_NA |>
   scale_fill_brewer(palette = "Blues") +
   scale_y_continuous(labels = scales::label_number(suffix = "%"),
                      expand = expansion(mult = c(0, 0.12))) +
-  facet_wrap(~ dv, ncol = 2, scales = "free_x") +
-  labs(x = "Response category (0 = low, 1 = high)", y = "% of respondents",
+  facet_wrap(~ dv, ncol = 2) +
+  labs(x = "Response category (1 = low, 4 = high)", y = "% of respondents",
        title = "Distribution of redistribution attitude items (incl. NAs)") +
   theme_minimal(base_size = 12) +
   theme(strip.text = element_text(face = "bold"), panel.grid.major.x = element_blank())
@@ -505,8 +507,8 @@ desc_redis |>
   scale_fill_brewer(palette = "Blues") +
   scale_y_continuous(labels = scales::label_number(suffix = "%"),
                      expand = expansion(mult = c(0, 0.12))) +
-  facet_wrap(~ dv, ncol = 2, scales = "free_x") +
-  labs(x = "Response category (0 = low, 1 = high)", y = "% of respondents",
+  facet_wrap(~ dv, ncol = 2) +
+  labs(x = "Response category (1 = low, 4 = high)", y = "% of respondents",
        title = "Distribution of redistribution attitude items") +
   theme_minimal(base_size = 12) +
   theme(strip.text = element_text(face = "bold"), panel.grid.major.x = element_blank())
@@ -532,11 +534,11 @@ ggplot(desc_redis_region, aes(x = value, y = pct, fill = ses_region_cat)) +
   geom_col(position = position_dodge(width = 0.8), width = 0.7) +
   geom_text(aes(label = sprintf("%.1f%%", pct)),
             position = position_dodge(width = 0.8), vjust = -0.3, size = 3) +
-  facet_wrap(~ dv, ncol = 2, scales = "free_x") +
+  facet_wrap(~ dv, ncol = 2) +
   scale_fill_brewer(palette = "Set1") +
   scale_y_continuous(labels = scales::label_number(suffix = "%"),
                      expand = expansion(mult = c(0, 0.12))) +
-  labs(x = "Response category (0 = low, 1 = high)", y = "% of respondents",
+  labs(x = "Response category (1 = low, 4 = high)", y = "% of respondents",
        fill = "Region", title = "Redistribution attitude items by region") +
   theme_minimal(base_size = 12) +
   theme(strip.text = element_text(face = "bold"), panel.grid.major.x = element_blank(),
@@ -563,11 +565,11 @@ ggplot(desc_redis_region2, aes(x = value, y = pct, fill = region_group)) +
   geom_col(position = position_dodge(width = 0.8), width = 0.7) +
   geom_text(aes(label = sprintf("%.1f%%", pct)),
             position = position_dodge(width = 0.8), vjust = -0.3, size = 3) +
-  facet_wrap(~ dv, ncol = 2, scales = "free_x") +
+  facet_wrap(~ dv, ncol = 2) +
   scale_fill_manual(values = c("Other regions" = "#2166ac", "Quebec" = "#d6604d")) +
   scale_y_continuous(labels = scales::label_number(suffix = "%"),
                      expand = expansion(mult = c(0, 0.12))) +
-  labs(x = "Response category (0 = low, 1 = high)", y = "% of respondents (within region)",
+  labs(x = "Response category (1 = low, 4 = high)", y = "% of respondents (within region)",
        fill = "Region", title = "Redistribution attitudes: Quebec vs Other regions") +
   theme_minimal(base_size = 12) +
   theme(strip.text = element_text(face = "bold"), panel.grid.major.x = element_blank(),
@@ -582,11 +584,11 @@ ggplot(desc_redis_region2,
        aes(x = value, y = pct, group = region_group, color = region_group)) +
   geom_line(linewidth = 1) +
   geom_point(size = 2) +
-  facet_wrap(~ dv, ncol = 2, scales = "free_x") +
+  facet_wrap(~ dv, ncol = 2) +
   scale_color_manual(values = c("Other regions" = "#2166ac", "Quebec" = "#d6604d")) +
   scale_y_continuous(labels = scales::label_number(suffix = "%"),
                      expand = expansion(mult = c(0, 0.12))) +
-  labs(x = "Response category (0 = low, 1 = high)", y = "% of respondents (within region)",
+  labs(x = "Response category (1 = low, 4 = high)", y = "% of respondents (within region)",
        color = "Region", title = "Redistribution attitudes: Quebec vs Other regions") +
   theme_minimal(base_size = 12) +
   theme(strip.text = element_text(face = "bold"), panel.grid.major.x = element_blank(),
@@ -663,10 +665,10 @@ write.csv(coef_redis_full,
 
 
 # ==============================================================
-# 8.  OLS / LPM MODELS (robustness check)
+# 8.  OLS MODELS (robustness check)
 # ==============================================================
 
-lpm_models <- dv_vars |>
+ols_models <- dv_vars |>
   set_names(dv_labels[dv_vars]) |>
   map(function(dv) {
     model_vars <- c(dv, all.vars(as.formula(paste("~", rhs))))
@@ -674,8 +676,8 @@ lpm_models <- dv_vars |>
     lm(as.formula(paste(dv, "~", rhs)), data = model_data)
   })
 
-coef_redis_lpm <- map2_dfr(lpm_models, names(lpm_models), function(model, dv_label) {
-  extract_ame_lpm(
+coef_redis_ols <- map2_dfr(ols_models, names(ols_models), function(model, dv_label) {
+  extract_ame_ols(
     dv       = all.vars(formula(model))[1],
     dv_label = dv_label,
     rhs      = rhs,
@@ -683,7 +685,7 @@ coef_redis_lpm <- map2_dfr(lpm_models, names(lpm_models), function(model, dv_lab
   )
 })
 
-fit_redis_lpm <- map2_dfr(lpm_models, names(lpm_models), function(model, dv_label) {
+fit_redis_ols <- map2_dfr(ols_models, names(ols_models), function(model, dv_label) {
   s <- summary(model)
   tibble(
     dv        = dv_label,
@@ -729,16 +731,17 @@ modelsummary(
                     "HC1 robust SEs. * p<0.05, ** p<0.01, *** p<0.001")
 )
 
-# ── 9.3  LPM — OLS coefficients ──────────────────────────────
+# ── 9.3  OLS coefficients (robustness check) ─────────────────
 modelsummary(
-  lpm_models,
+  ols_models,
   estimate  = "{estimate}{stars}",
   statistic = "({std.error})",
-  vcov      = map(lpm_models, robust_vcov),
+  vcov      = map(ols_models, robust_vcov),
   coef_map  = term_labels,
   gof_map   = c("nobs", "r.squared", "adj.r.squared"),
-  output    = file.path(params$out_reg, "regtable_redis_LPM.txt"),
-  notes     = paste("LPM (OLS). HC1 robust SEs in parentheses.",
+  output    = file.path(params$out_reg, "regtable_redis_OLS.txt"),
+  notes     = paste("OLS (robustness check). DVs are 1–4 ordinal scales.",
+                    "HC1 robust SEs in parentheses.",
                     "* p<0.05, ** p<0.01, *** p<0.001")
 )
 
@@ -754,19 +757,19 @@ plot_coefs(
   file_path = file.path(params$out_reg, "coef_redis_polr_top.png")
 )
 
-# ── 10.2  LPM coefficients ────────────────────────────────────
+# ── 10.2  OLS coefficients (robustness check) ────────────────
 plot_coefs(
-  coef_redis_lpm,
-  title_str = "Redistribution attitudes — LPM (OLS) coefficients",
-  file_path = file.path(params$out_reg, "coef_redis_LPM.png")
+  coef_redis_ols,
+  title_str = "Redistribution attitudes — OLS coefficients (robustness check)",
+  file_path = file.path(params$out_reg, "coef_redis_OLS.png")
 )
 
-# ── 10.3  Robustness: ordered logit AME vs LPM ───────────────
+# ── 10.3  Robustness: ordered logit AME vs OLS ───────────────
 plot_robustness(
   coef_polr = coef_redis_top,
-  coef_lpm  = coef_redis_lpm,
-  title_str = "Redistribution attitudes — Ordered logit AME vs LPM (robustness check)",
-  file_path = file.path(params$out_reg, "coef_redis_polr_vs_LPM.png")
+  coef_lpm  = coef_redis_ols,
+  title_str = "Redistribution attitudes — Ordered logit AME vs OLS (robustness check)",
+  file_path = file.path(params$out_reg, "coef_redis_polr_vs_OLS.png")
 )
 
 
@@ -778,9 +781,9 @@ walk2(dv_vars, dv_labels, function(dv, dv_label) {
   model_vars <- c(dv, all.vars(as.formula(paste("~", rhs))))
   model_data <- df |> dplyr::select(all_of(model_vars)) |> drop_na()
   model      <- lm(as.formula(paste(dv, "~", rhs)), data = model_data)
-
+  
   me <- ggpredict(model, terms = c("ideo_right_num [all]", "quebec_bin [0,1]"))
-
+  
   ggplot(me, aes(x = x, y = predicted,
                  colour = as.factor(group), fill = as.factor(group))) +
     geom_line(linewidth = 1) +
@@ -796,7 +799,7 @@ walk2(dv_vars, dv_labels, function(dv, dv_label) {
          caption = "OLS predictions for visual clarity. Shaded area = 95% CI.") +
     theme_minimal(base_size = 12) +
     theme(legend.position = "bottom")
-
+  
   ggsave(file.path(params$out_reg, paste0("me_ideo_", dv, ".png")),
          width = 8, height = 5, dpi = params$dpi)
 })
@@ -821,11 +824,11 @@ plot_r2(fit_redis_polr,
         title_str = "Model fit — Redistribution attitudes (ordered logit, McFadden pseudo-R2)",
         file_path = file.path(params$out_reg, "r2_redis_polr.png"))
 
-# ── 12.2  LPM — adjusted R2 ──────────────────────────────────
-plot_r2(fit_redis_lpm,
+# ── 12.2  OLS — adjusted R2 ──────────────────────────────────
+plot_r2(fit_redis_ols,
         r2_col    = "adj_r_sq",
-        title_str = "Model fit — Redistribution attitudes (LPM, adjusted R2)",
-        file_path = file.path(params$out_reg, "r2_redis_LPM.png"))
+        title_str = "Model fit — Redistribution attitudes (OLS, adjusted R2)",
+        file_path = file.path(params$out_reg, "r2_redis_OLS.png"))
 
 
 # ==============================================================
@@ -835,8 +838,8 @@ plot_r2(fit_redis_lpm,
 cat("\n========== ORDERED LOGIT: model fit ==========\n")
 print(fit_redis_polr)
 
-cat("\n========== LPM: model fit ==========\n")
-print(fit_redis_lpm)
+cat("\n========== OLS: model fit ==========\n")
+print(fit_redis_ols)
 
 cat("\n========== Most consistently significant predictors (ordered logit top-category AME) ==========\n")
 coef_redis_top |>
@@ -845,7 +848,7 @@ coef_redis_top |>
   mutate(term = recode(term, !!!term_labels)) |>
   print(n = 20)
 
-check_direction_agreement(coef_redis_top, coef_redis_lpm,
+check_direction_agreement(coef_redis_top, coef_redis_ols,
                           "— Redistribution attitudes")
 
 cat("\n========== OUTPUT FILES ==========\n")
@@ -853,5 +856,5 @@ cat("Bivariate contrasts:    ", file.path(params$out_reg, "bivar_contrasts_redis
 cat("AME all levels:         ", file.path(params$out_reg, "AME_all_levels_redis.csv"), "\n")
 cat("Reg table polr log-odds:", file.path(params$out_reg, "regtable_redis_polr_logodds.txt"), "\n")
 cat("Reg table polr AME:     ", file.path(params$out_reg, "regtable_redis_polr_AME.txt"), "\n")
-cat("Reg table LPM:          ", file.path(params$out_reg, "regtable_redis_LPM.txt"), "\n")
+cat("Reg table OLS:          ", file.path(params$out_reg, "regtable_redis_OLS.txt"), "\n")
 cat("\n========== PIPELINE COMPLETE ==========\n")
