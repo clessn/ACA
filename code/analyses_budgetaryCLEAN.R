@@ -32,6 +32,7 @@ source("code/source/06_regressions_prio.R")
 source("code/source/07_regressions_tradeoff.R")
 source("code/source/08_regressions_intense.R")
 source("code/source/09_regressions_uc.R")
+source("code/source/10_regional_spending_plot.R")
 
 cat("\n========== PIPELINE COMPLETE ==========\n")
 cat("All outputs saved to:", params$out_graphs, "\n")

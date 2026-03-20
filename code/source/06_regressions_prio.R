@@ -77,6 +77,21 @@ plot_coefs(
   file.path(params$out_reg, "coef_prio_pref_logit_AME.png")
 )
 
+# Typed version: all priority DVs are spending investments
+prio_type_map <- c(
+  "Healthcare access"                      = "Investment",
+  "Home care for seniors"                  = "Investment",
+  "Subsidized child care"                  = "Investment",
+  "Support businesses and economic growth" = "Investment",
+  "Fight against climate change"           = "Investment"
+)
+plot_coefs_typed(
+  coef_logit_prio_pref,
+  "Budget priority first choice — Logit AME (investment vs fiscal consolidation)",
+  file.path(params$out_reg, "coef_prio_pref_logit_AME_typed.png"),
+  type_map = prio_type_map
+)
+
 # Robustness
 plot_robustness(
   coef_logit = coef_logit_prio_pref,

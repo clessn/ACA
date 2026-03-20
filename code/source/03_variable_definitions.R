@@ -8,55 +8,94 @@
 # ── 1. IV LIST ────────────────────────────────────────────────
 
 ivs <- list(
+  # ── Region & identity ─────────────────────────────────────
+  list(type="binary",  var="ideo_define_QC_first_bin", low=0, high=1, label="Quebecker First (No=0 vs Yes=1)"),
   list(type="binary",  var="quebec_bin",               low=0, high=1, label="Quebec (No=0 vs Yes=1)"),
-  list(type="binary",  var="ideo_define_QC_first_bin",  low=0, high=1, label="Quebecker First (No=0 vs Yes=1)"),
   list(type="binary",  var="alberta_bin",              low=0, high=1, label="Alberta (No=0 vs Yes=1)"),
   list(type="binary",  var="ontario_bin",              low=0, high=1, label="Ontario (No=0 vs Yes=1)"),
   list(type="binary",  var="region_eastcoast_bin",     low=0, high=1, label="Eastern Canada (No=0 vs Yes=1)"),
+  list(type="binary",  var="ses_french_bin",           low=0, high=1, label="French-speaking (No=0 vs Yes=1)"),
+  # ── Socio-economic ────────────────────────────────────────
   list(type="binary",  var="incomeHigh_bin",           low=0, high=1, label="High Income (No=0 vs Yes=1)"),
   list(type="binary",  var="ses_male_bin",             low=0, high=1, label="Gender (Female=0 vs Male=1)"),
   list(type="binary",  var="age18_34_bin",             low=0, high=1, label="Age 18-34 (No=0 vs Yes=1)"),
   list(type="binary",  var="age55plus_bin",            low=0, high=1, label="Age 55+ (No=0 vs Yes=1)"),
   list(type="binary",  var="univ_educ_bin",            low=0, high=1, label="University Education (No=0 vs Yes=1)"),
-  list(type="binary",  var="ses_citizenYes_bin",       low=0, high=1, label="Citizen (No=0 vs Yes=1)"),
-  list(type="binary",  var="ses_french_bin",           low=0, high=1, label="French-speaking (No=0 vs Yes=1)"),
   list(type="binary",  var="employ_fulltime_bin",      low=0, high=1, label="Employed Full-Time (No=0 vs Yes=1)"),
+  list(type="binary",  var="children_bin",             low=0, high=1, label="Has children"),
+  # ── Institutional trust ───────────────────────────────────
+  list(type="binary",  var="trust_inst_fed_bin",       low=0, high=1, label="Trust: Federal government (Low=0 vs High=1)"),
+  list(type="binary",  var="trust_inst_prov_bin",      low=0, high=1, label="Trust: Provincial government (Low=0 vs High=1)"),
+  # ── Ideology & vote ───────────────────────────────────────
   list(type="numeric", var="ideo_right_num",           low=0, high=1, label="Ideology: Left (0) vs Right (1)"),
-  list(type="binary",  var="vote_PLC_bin",             low=0, high=1, label="Liberal voter (No=0 vs Yes=1)"),
-  list(type="binary",  var="vote_PCC_bin",             low=0, high=1, label="Conservative voter (No=0 vs Yes=1)"),
-  list(type="binary",  var="children_bin",             low=0, high=1, label="Has children")
+  list(type="binary",  var="vote_PLC_bin",             low=0, high=1, label="Liberal Party of Canada (No=0 vs Yes=1)"),
+  list(type="binary",  var="vote_PCC_bin",             low=0, high=1, label="Conservative Party of Canada (No=0 vs Yes=1)"),
+  list(type="binary",  var="ideo_vote_fed_left",       low=0, high=1, label="Federal vote: Left (Right=0 vs Left=1)"),
+  list(type="binary",  var="ideo_vote_prov_left",      low=0, high=1, label="Provincial vote: Left (Right=0 vs Left=1)")
 )
-
 
 # ── 2. RHS FORMULA ────────────────────────────────────────────
 # Ontario is the omitted region reference category
 
-rhs <- "quebec_bin + ideo_define_QC_first_bin + alberta_bin + region_eastcoast_bin +
+rhs <- "ideo_define_QC_first_bin + quebec_bin + alberta_bin + region_eastcoast_bin +
+        ses_french_bin +
         incomeHigh_bin + ses_male_bin + age18_34_bin + age55plus_bin +
-        univ_educ_bin + ses_citizenYes_bin + ses_french_bin +
-        employ_fulltime_bin + children_bin +
-        ideo_right_num + vote_PLC_bin + vote_PCC_bin"
+        univ_educ_bin + employ_fulltime_bin + children_bin +
+        trust_inst_fed_bin + trust_inst_prov_bin +
+        ideo_right_num + vote_PLC_bin + vote_PCC_bin +
+        ideo_vote_fed_left + ideo_vote_prov_left"
 
 
 # ── 3. TERM LABELS ────────────────────────────────────────────
 
 term_labels <- c(
-  "quebec_bin"               = "Quebec",
-  "ideo_define_QC_first_bin" = "Quebecker First",
-  "alberta_bin"              = "Alberta",
-  "region_eastcoast_bin"     = "Eastern Canada",
+  # Individual-level traits
   "incomeHigh_bin"           = "High Income",
   "ses_male_bin"             = "Male",
   "age18_34_bin"             = "Age 18-34",
   "age55plus_bin"            = "Age 55+",
   "univ_educ_bin"            = "University Education",
-  "ses_citizenYes_bin"       = "Citizen",
-  "ses_french_bin"           = "French-speaking",
-  "children_bin"             = "Has Children",
   "employ_fulltime_bin"      = "Employed Full-Time",
+  "children_bin"             = "Has Children",
+  # Political attitudes
   "ideo_right_num"           = "Ideology (Right)",
-  "vote_PLC_bin"             = "Liberal voter",
-  "vote_PCC_bin"             = "Conservative voter"
+  "vote_PLC_bin"             = "Liberal Party of Canada",
+  "vote_PCC_bin"             = "Conservative Party of Canada",
+  "ideo_vote_fed_left"       = "Federal vote (Left)",
+  "ideo_vote_prov_left"      = "Provincial vote (Left)",
+  # Regionalism
+  "ideo_define_QC_first_bin" = "Quebecker First",
+  "quebec_bin"               = "Quebec",
+  "alberta_bin"              = "Alberta",
+  "region_eastcoast_bin"     = "Eastern Canada",
+  "ses_french_bin"           = "French-speaking",
+  # Institutional trust
+  "trust_inst_fed_bin"       = "Trust: Federal government",
+  "trust_inst_prov_bin"      = "Trust: Provincial government"
+)
+
+# Canonical IV order for plots — listed top-to-bottom here,
+# which becomes bottom-to-top on the plot y-axis (ggplot default)
+iv_order <- c(
+  "High Income",
+  "Male",
+  "Age 18-34",
+  "Age 55+",
+  "University Education",
+  "Employed Full-Time",
+  "Has Children",
+  "Ideology (Right)",
+  "Federal vote (Left)",
+  "Provincial vote (Left)",
+  "Liberal Party of Canada",
+  "Conservative Party of Canada",
+  "Quebecker First",
+  "Quebec",
+  "Alberta",
+  "Eastern Canada",
+  "French-speaking",
+  "Trust: Federal government",
+  "Trust: Provincial government"
 )
 
 
@@ -110,13 +149,13 @@ tradeoff_labels <- list(
     "tradeoff_cc1_tax"      = "Raise taxes",
     "tradeoff_cc1_cut"      = "Cut other spending",
     "tradeoff_cc1_debt"     = "Increase debt",
-    "tradeoff_cc1_no_spend" = "Don't spend more"
+    "tradeoff_cc1_no_spend" = "No increase, regardless of implications for issue"
   ),
   ge = c(
     "tradeoff_ge_tax"      = "Raise taxes",
     "tradeoff_ge_cut"      = "Cut other spending",
     "tradeoff_ge_debt"     = "Increase debt",
-    "tradeoff_ge_no_spend" = "Don't spend more"
+    "tradeoff_ge_no_spend" = "No increase, regardless of implications for issue"
   ),
   tax = c(
     "tradeoff_tax_less_services" = "No increase, even if fewer services",
@@ -141,8 +180,8 @@ battery_titles <- c(
   cc1 = "Increase childcare spending, how to fund it",
   ge  = "Increase green economy spending, how to fund it",
   tax = "Raise revenue, tax preferences",
-  hc  = "Home care policy priorities, tradeoffs",
-  cc2 = "Childcare policy priorities, tradeoffs"
+  hc  = "Home care priorities, target group",
+  cc2 = "Childcare priorities, target group"
 )
 
 batteries <- list(
@@ -158,15 +197,15 @@ batteries <- list(
       tradeoff_cc1_tax              = "Raise taxes",
       tradeoff_cc1_cut              = "Cut other spending",
       tradeoff_cc1_debt             = "Increase debt",
-      tradeoff_cc1_no_spend         = "Don't spend more",
+      tradeoff_cc1_no_spend         = "No increase, regardless of implications for issue",
       tradeoff_cc1_tax_pref         = "Raise taxes",
       tradeoff_cc1_cut_pref         = "Cut other spending",
       tradeoff_cc1_debt_pref        = "Increase debt",
-      tradeoff_cc1_no_spend_pref    = "Don't spend more",
+      tradeoff_cc1_no_spend_pref    = "No increase, regardless of implications for issue",
       tradeoff_cc1_tax_intense      = "Raise taxes",
       tradeoff_cc1_cut_intense      = "Cut other spending",
       tradeoff_cc1_debt_intense     = "Increase debt",
-      tradeoff_cc1_no_spend_intense = "Don't spend more"
+      tradeoff_cc1_no_spend_intense = "No increase, regardless of implications for issue"
     )
   ),
   ge = list(
@@ -181,15 +220,15 @@ batteries <- list(
       tradeoff_ge_tax              = "Raise taxes",
       tradeoff_ge_cut              = "Cut other spending",
       tradeoff_ge_debt             = "Increase debt",
-      tradeoff_ge_no_spend         = "Don't spend more",
+      tradeoff_ge_no_spend         = "No increase, regardless of implications for issue",
       tradeoff_ge_tax_pref         = "Raise taxes",
       tradeoff_ge_cut_pref         = "Cut other spending",
       tradeoff_ge_debt_pref        = "Increase debt",
-      tradeoff_ge_no_spend_pref    = "Don't spend more",
+      tradeoff_ge_no_spend_pref    = "No increase, regardless of implications for issue",
       tradeoff_ge_tax_intense      = "Raise taxes",
       tradeoff_ge_cut_intense      = "Cut other spending",
       tradeoff_ge_debt_intense     = "Increase debt",
-      tradeoff_ge_no_spend_intense = "Don't spend more"
+      tradeoff_ge_no_spend_intense = "No increase, regardless of implications for issue"
     )
   ),
   tax = list(
@@ -280,15 +319,15 @@ intense_labels <- c(
   "tradeoff_tax_wealth_tax_intense"    = "Wealth tax (intense)",
   "tradeoff_hc_pensions_intense"       = "Target low-income seniors, pensions (intense)",
   "soc_pol_intense"                    = "Social policy composite (intense)",
-  "cc_target_intense"                  = "Childcare: targeted (intense)",
+  "cc_target_intense"                  = "Childcare: narrow beneficiaries (intense)",
   "tradeoff_hc_all_intense"            = "Home care for all seniors (intense)",
-  "hc_univ_intense"                    = "Home care: universal (intense)",
+  "hc_univ_intense"                    = "Home care: broad beneficiaries (intense)",
   "tradeoff_tax_inc_tax_intense"       = "Income tax increase (intense)",
   "tradeoff_tax_less_services_intense" = "No tax increase, fewer services (intense)",
-  "cc_univ_intense"                    = "Childcare: universal (intense)",
+  "cc_univ_intense"                    = "Childcare: broad beneficiaries (intense)",
   "tradeoff_hc_spend_intense"          = "Target low-income seniors, home care (intense)",
   "tradeoff_cc1_no_spend_intense"      = "Don't spend more on childcare (intense)",
-  "hc_target_intense"                  = "Home care: targeted (intense)",
+  "hc_target_intense"                  = "Home care: narrow beneficiaries (intense)",
   "tradeoff_ge_no_spend_intense"       = "Don't spend more on green economy (intense)"
 )
 
@@ -297,16 +336,16 @@ intense_labels <- c(
 
 uc_dvs <- list(
   bin = c(
-    "hc_univ_bin"   = "Home care: universal (first choice)",
-    "hc_target_bin" = "Home care: targeted (first choice)",
-    "cc_univ_bin"   = "Childcare: universal (first choice)",
-    "cc_target_bin" = "Childcare: targeted (first choice)"
+    "hc_univ_bin"   = "Home care: broad beneficiaries (first choice)",
+    "hc_target_bin" = "Home care: narrow beneficiaries (first choice)",
+    "cc_univ_bin"   = "Childcare: broad beneficiaries (first choice)",
+    "cc_target_bin" = "Childcare: narrow beneficiaries (first choice)"
   ),
   intense = c(
-    "hc_univ_intense"   = "Home care: universal (intense)",
-    "hc_target_intense" = "Home care: targeted (intense)",
-    "cc_univ_intense"   = "Childcare: universal (intense)",
-    "cc_target_intense" = "Childcare: targeted (intense)"
+    "hc_univ_intense"   = "Home care: broad beneficiaries (intense)",
+    "hc_target_intense" = "Home care: narrow beneficiaries (intense)",
+    "cc_univ_intense"   = "Childcare: broad beneficiaries (intense)",
+    "cc_target_intense" = "Childcare: narrow beneficiaries (intense)"
   )
 )
 
@@ -326,7 +365,7 @@ dv_order <- c(
   "Healthcare access", "Home care for seniors", "Subsidized child care",
   "Support businesses and economic growth", "Fight against climate change",
   # Tradeoff cc1
-  "Raise taxes", "Cut other spending", "Increase debt", "Don't spend more",
+  "Raise taxes", "Cut other spending", "Increase debt", "No increase, regardless of implications for issue",
   # Tradeoff tax
   "No increase, even if fewer services", "Sales tax increase",
   "Income tax increase", "Wealth tax",
@@ -340,8 +379,8 @@ dv_order <- c(
   "Target education quality for low-income",
   # Intense composites
   "Social policy composite (intense)",
-  "Home care: universal (intense)", "Home care: targeted (intense)",
-  "Childcare: universal (intense)", "Childcare: targeted (intense)",
+  "Home care: broad beneficiaries (intense)", "Home care: narrow beneficiaries (intense)",
+  "Childcare: broad beneficiaries (intense)", "Childcare: narrow beneficiaries (intense)",
   "Home care for all seniors (intense)",
   "Target low-income seniors, home care (intense)",
   "Target low-income seniors, pensions (intense)",
@@ -350,6 +389,6 @@ dv_order <- c(
   "Don't spend more on childcare (intense)",
   "Don't spend more on green economy (intense)",
   # UC composites
-  "Home care: universal (first choice)", "Home care: targeted (first choice)",
-  "Childcare: universal (first choice)", "Childcare: targeted (first choice)"
+  "Home care: broad beneficiaries (first choice)", "Home care: narrow beneficiaries (first choice)",
+  "Childcare: broad beneficiaries (first choice)", "Childcare: narrow beneficiaries (first choice)"
 )

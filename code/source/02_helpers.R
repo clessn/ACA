@@ -201,14 +201,14 @@ save_regtable <- function(models, file_path, notes,
 # ── 5. PLOTTING HELPERS ───────────────────────────────────────
 
 #' Coefficient plot: one panel per DV, coloured by direction
-plot_coefs <- function(coef_df, title_str, file_path,
+plot_coefs <- function(coef_df, title_str = NULL, file_path,
                        width = params$plot_width, height = params$plot_height) {
   coef_df |>
     mutate(
       term = recode(term, !!!term_labels),
       dv   = factor(dv, levels = intersect(dv_order, unique(dv)))
     ) |>
-    ggplot(aes(x = estimate, y = reorder(term, estimate), color = direction)) +
+    ggplot(aes(x = estimate, y = factor(term, levels = rev(iv_order)), color = direction)) +
     geom_vline(xintercept = 0, linetype = "dashed", color = "grey50") +
     geom_point(size = 2.5) +
     geom_errorbarh(aes(xmin = conf.low, xmax = conf.high), height = 0.2) +
@@ -218,14 +218,177 @@ plot_coefs <- function(coef_df, title_str, file_path,
     ) +
     facet_wrap(~dv, scales = "free_x") +
     labs(x = "Average marginal effect (HC1 robust SEs)",
-         y = NULL, color = NULL, title = title_str) +
+         y = NULL, color = NULL) +
     theme_minimal(base_size = 12) +
     theme(legend.position = "bottom", strip.text = element_text(face = "bold"))
   ggsave(file_path, width = width, height = height, dpi = params$dpi)
 }
 
+#' Coefficient plot with policy-type strip colouring (investment vs fiscal consolidation)
+#'
+#' Identical to plot_coefs() but shades facet strip backgrounds to distinguish
+#' spending/investment DVs from fiscal-consolidation DVs (tax/debt reduction).
+#'
+#' @param coef_df      AME data frame
+#' @param title_str    Plot title
+#' @param file_path    Output PNG path
+#' @param type_map     Named character vector: DV label → policy type string.
+#'                     E.g. c("Healthcare" = "Investment", "Tax reduction" = "Fiscal consolidation")
+#' @param type_colours Named colour vector keyed on type_map values
+plot_coefs_typed <- function(coef_df, title_str = NULL, file_path,
+                             type_map,
+                             type_colours = c(
+                               "Investment"            = "#2166ac",
+                               "Fiscal consolidation"  = "#b2182b"
+                             ),
+                             width  = params$plot_width,
+                             height = params$plot_height) {
+  plot_df <- coef_df |>
+    mutate(
+      term        = recode(term, !!!term_labels),
+      dv          = factor(dv, levels = intersect(dv_order, unique(dv))),
+      policy_type = recode(as.character(dv), !!!type_map, .default = "Other")
+    )
+
+  # Build a strip-colour lookup aligned to the factor levels actually present
+  dv_levels   <- levels(plot_df$dv)
+  strip_fills <- type_colours[recode(dv_levels, !!!type_map, .default = "Other")]
+  strip_fills[is.na(strip_fills)] <- "grey80"
+
+  p <- ggplot(plot_df,
+              aes(x = estimate, y = factor(term, levels = rev(iv_order)), color = direction)) +
+    geom_vline(xintercept = 0, linetype = "dashed", color = "grey50") +
+    geom_point(size = 2.5) +
+    geom_errorbarh(aes(xmin = conf.low, xmax = conf.high), height = 0.2) +
+    scale_color_manual(
+      values = c("Positive" = "#2166ac", "Negative" = "#d6604d",
+                 "No clear effect" = "grey60")
+    ) +
+    facet_wrap(~dv, scales = "free_x") +
+    labs(
+      x       = "Average marginal effect (HC1 robust SEs)",
+      y       = NULL,
+      color   = NULL,
+      caption = paste0(
+        "Strip colour: ",
+        paste(names(type_colours), collapse = " = shaded; "),
+        ". 95% CIs shown."
+      )
+    ) +
+    theme_minimal(base_size = 12) +
+    theme(legend.position = "bottom", strip.text = element_text(face = "bold"))
+
+  # Apply per-strip background colours using ggh4x or ggplot2 strip theming
+  # We use a rect annotation approach via strip.background per facet level
+  # by building a named theme override with ggh4x::facet_wrap2 if available,
+  # otherwise fall back to a legend-based annotation in the caption.
+  if (requireNamespace("ggh4x", quietly = TRUE)) {
+    strip_themes <- lapply(strip_fills, function(col) {
+      element_rect(fill = col, color = NA)
+    })
+    names(strip_themes) <- dv_levels
+    p <- p + ggh4x::facetted_pos_scales(
+      # ggh4x approach: use strip_themed
+    )
+    # Use strip_themed for coloured strips
+    p <- p +
+      ggh4x::facet_wrap2(
+        ~dv, scales = "free_x",
+        strip = ggh4x::strip_themed(
+          background_x = lapply(strip_fills, element_rect)
+        )
+      )
+  } else {
+    # Fallback: add a type legend via colour scale on the facet label
+    # by annotating with a policy_type fill guide
+    p <- p +
+      geom_rect(
+        data = plot_df |> distinct(dv, policy_type),
+        aes(fill = policy_type),
+        xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf, alpha = 0.08,
+        inherit.aes = FALSE
+      ) +
+      scale_fill_manual(
+        values = type_colours,
+        name   = "Policy type"
+      )
+  }
+
+  ggsave(file_path, plot = p, width = width, height = height, dpi = params$dpi)
+}
+
+
+#' Broad vs narrow scope plots: one plot per outcome type (pref / intense)
+#'
+#' Each plot has two facets (Broad / Narrow), with Home care and Childcare
+#' dodged within each facet — exactly matching plot_cross_battery_response.
+#'
+#' @param coef_df      AME data frame for one outcome type
+#' @param outcome_slug "pref" or "intense" — appended to filename
+#' @param file_prefix  Base output path (outcome_slug is appended automatically)
+#' @param dv_to_scope  Named vector: DV label → scope string
+#' @param dv_to_domain Named vector: DV label → domain string
+plot_uc_scope_by_scope <- function(coef_df, outcome_slug, file_prefix,
+                                   dv_to_scope, dv_to_domain,
+                                   width  = params$plot_width,
+                                   height = params$plot_height) {
+  scope_levels <- c("Broad beneficiaries", "Narrow beneficiaries")
+
+  coef_plot <- coef_df |>
+    mutate(
+      scope  = recode(dv, !!!dv_to_scope),
+      domain = recode(dv, !!!dv_to_domain),
+      term   = recode(term, !!!term_labels),
+      scope  = factor(scope, levels = scope_levels)
+    )
+
+  if (nrow(coef_plot) == 0) {
+    warning("No data for UC scope plot: ", outcome_slug)
+    return(invisible(NULL))
+  }
+
+  file_path <- paste0(file_prefix, "_", outcome_slug, ".png")
+
+  ggplot(coef_plot,
+         aes(x     = estimate,
+             y     = factor(term, levels = rev(iv_order)),
+             color = domain,
+             shape = domain)) +
+    geom_vline(xintercept = 0, linetype = "dashed", color = "grey50") +
+    geom_point(size = 2.5, position = position_dodge(width = 0.55)) +
+    geom_errorbarh(
+      aes(xmin = conf.low, xmax = conf.high),
+      height = 0.25,
+      position = position_dodge(width = 0.55)
+    ) +
+    scale_color_manual(
+      values = c("Home care" = "#2166ac", "Childcare" = "#d6604d"),
+      name   = "Policy domain"
+    ) +
+    scale_shape_manual(
+      values = c("Home care" = 16, "Childcare" = 17),
+      name   = "Policy domain"
+    ) +
+    facet_wrap(~scope, nrow = 1, scales = "free_x") +
+    labs(
+      x       = "Average marginal effect (Logit AME, HC1 robust SEs)",
+      y       = NULL,
+      caption = "95% CIs shown. Each facet = beneficiary scope, both policy domains overlaid."
+    ) +
+    theme_minimal(base_size = 12) +
+    theme(
+      legend.position = "bottom",
+      strip.text      = element_text(face = "bold"),
+      panel.spacing   = unit(1, "lines")
+    )
+
+  ggsave(file_path, width = width, height = height, dpi = params$dpi)
+  cat("Saved:", file_path, "\n")
+}
+
+
 #' Robustness plot: LPM vs Logit AME side by side, one panel per DV
-plot_robustness <- function(coef_logit, coef_lpm, title_str, file_path,
+plot_robustness <- function(coef_logit, coef_lpm, title_str = NULL, file_path,
                             ncol = 2,
                             width = params$plot_width,
                             height = params$plot_height) {
@@ -237,7 +400,7 @@ plot_robustness <- function(coef_logit, coef_lpm, title_str, file_path,
       term = recode(term, !!!term_labels),
       dv   = factor(dv, levels = intersect(dv_order, unique(dv)))
     ) |>
-    ggplot(aes(x = estimate, y = reorder(term, estimate),
+    ggplot(aes(x = estimate, y = factor(term, levels = rev(iv_order)),
                color = model, shape = model)) +
     geom_vline(xintercept = 0, linetype = "dashed", color = "grey50") +
     geom_point(size = 2.2, position = position_dodge(width = 0.5)) +
@@ -246,14 +409,14 @@ plot_robustness <- function(coef_logit, coef_lpm, title_str, file_path,
     scale_color_manual(values = c("Logit AME" = "#d6604d", "LPM" = "#2166ac")) +
     facet_wrap(~dv, ncol = ncol) +
     labs(x = "Estimated effect", y = NULL, color = NULL, shape = NULL,
-         title = title_str, caption = "HC1 robust SEs. 95% CI.") +
+         caption = "HC1 robust SEs. 95% CI.") +
     theme_minimal(base_size = 11) +
     theme(legend.position = "bottom", strip.text = element_text(face = "bold"))
   ggsave(file_path, width = width, height = height, dpi = params$dpi)
 }
 
 #' R-squared / pseudo-R2 bar chart
-plot_r2 <- function(fit_df, r2_col = "adj_r_sq", title_str, file_path,
+plot_r2 <- function(fit_df, r2_col = "adj_r_sq", title_str = NULL, file_path,
                     width = 8, height = 5) {
   fit_df |>
     mutate(
@@ -274,11 +437,13 @@ plot_r2 <- function(fit_df, r2_col = "adj_r_sq", title_str, file_path,
                  "Moderate (0.03-0.07)" = "#92c5de",
                  "Low (<0.03)"          = "#d6604d")
     ) +
-    scale_x_continuous(limits = c(0, 0.20),
-                       labels = scales::label_number(accuracy = 0.01)) +
+    scale_x_continuous(
+      limits = function(x) c(0, max(x[2], 0.05) * 1.25),
+      labels = scales::label_number(accuracy = 0.01)
+    ) +
     labs(
       x     = ifelse(r2_col == "pseudo_r2", "McFadden pseudo-R2", "Adjusted R2"),
-      y     = NULL, fill = "Model fit", title = title_str
+      y     = NULL, fill = "Model fit"
     ) +
     theme_minimal(base_size = 13) +
     theme(legend.position = "bottom", panel.grid.major.y = element_blank())

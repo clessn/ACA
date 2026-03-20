@@ -57,6 +57,21 @@ save_regtable(
 plot_coefs(coef_logit_imp, "Importance (binary) -- Logit average marginal effects",
            file.path(params$out_reg, "coef_imp_logit_AME.png"))
 
+# Typed version: strip background distinguishes investment from fiscal consolidation DVs
+imp_type_map <- c(
+  "Healthcare"    = "Investment",
+  "Education"     = "Investment",
+  "Pensions"      = "Investment",
+  "Tax reduction" = "Fiscal consolidation",
+  "Debt reduction"= "Fiscal consolidation"
+)
+plot_coefs_typed(
+  coef_logit_imp,
+  "Importance (binary) — Logit AME (investment vs fiscal consolidation)",
+  file.path(params$out_reg, "coef_imp_logit_AME_typed.png"),
+  type_map = imp_type_map
+)
+
 plot_coefs(coef_lpm_imp, "Importance (binary) -- LPM coefficients",
            file.path(params$out_reg, "coef_imp_LPM.png"))
 

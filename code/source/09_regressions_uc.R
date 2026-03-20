@@ -1,6 +1,6 @@
 # ==============================================================
 # 09_regressions_uc.R
-# HC & CC2 universal vs targeted composites
+# HC & CC2 broad vs narrow beneficiary composites
 # Logit AME (primary) + LPM (robustness), _bin and _intense
 # ==============================================================
 
@@ -32,21 +32,21 @@ fit_lpm_uc_intense   <- extract_fit_lm(uc_intense_models$lpm,     "LPM_intense")
 save_regtable(
   uc_bin_models$logit,
   file.path(params$out_reg, "regtable_uc_bin_logit_AME.txt"),
-  notes        = "HC & CC2 universal/targeted — Logit AME (first choice). HC1 robust SEs. * p<0.05, ** p<0.01, *** p<0.001",
+  notes        = "HC & CC2 broad/narrow beneficiaries — Logit AME (first choice). HC1 robust SEs. * p<0.05, ** p<0.01, *** p<0.001",
   is_logit_ame = TRUE
 )
 
 save_regtable(
   uc_intense_models$logit,
   file.path(params$out_reg, "regtable_uc_intense_logit_AME.txt"),
-  notes        = "HC & CC2 universal/targeted — Logit AME (intense preference). HC1 robust SEs. * p<0.05, ** p<0.01, *** p<0.001",
+  notes        = "HC & CC2 broad/narrow beneficiaries — Logit AME (intense preference). HC1 robust SEs. * p<0.05, ** p<0.01, *** p<0.001",
   is_logit_ame = TRUE
 )
 
 save_regtable(
   uc_bin_models$lpm,
   file.path(params$out_reg, "regtable_uc_bin_lpm.txt"),
-  notes        = "HC & CC2 universal/targeted — LPM robustness (first choice). HC1 robust SEs.",
+  notes        = "HC & CC2 broad/narrow beneficiaries — LPM robustness (first choice). HC1 robust SEs.",
   is_logit_ame = FALSE,
   gof          = c("nobs", "r.squared")
 )
@@ -54,7 +54,7 @@ save_regtable(
 save_regtable(
   uc_intense_models$lpm,
   file.path(params$out_reg, "regtable_uc_intense_lpm.txt"),
-  notes        = "HC & CC2 universal/targeted — LPM robustness (intense preference). HC1 robust SEs.",
+  notes        = "HC & CC2 broad/narrow beneficiaries — LPM robustness (intense preference). HC1 robust SEs.",
   is_logit_ame = FALSE,
   gof          = c("nobs", "r.squared")
 )
@@ -63,22 +63,22 @@ save_regtable(
 # ── COEFFICIENT PLOTS ─────────────────────────────────────────
 
 plot_coefs(coef_logit_uc_bin,
-           "HC & CC2 universal/targeted — Logit AME (first choice)",
+           "HC & CC2 broad/narrow beneficiaries — Logit AME (first choice)",
            file.path(params$out_reg, "coef_uc_bin_logit_AME.png"))
 
 plot_coefs(coef_logit_uc_intense,
-           "HC & CC2 universal/targeted — Logit AME (intense preference)",
+           "HC & CC2 broad/narrow beneficiaries — Logit AME (intense preference)",
            file.path(params$out_reg, "coef_uc_intense_logit_AME.png"))
 
 plot_robustness(
   coef_logit_uc_bin, coef_lpm_uc_bin,
-  "HC & CC2 universal/targeted — Logit AME vs. LPM (first choice, robustness)",
+  "HC & CC2 broad/narrow beneficiaries — Logit AME vs. LPM (first choice, robustness)",
   file.path(params$out_reg, "coef_uc_bin_logit_vs_lpm.png")
 )
 
 plot_robustness(
   coef_logit_uc_intense, coef_lpm_uc_intense,
-  "HC & CC2 universal/targeted — Logit AME vs. LPM (intense preference, robustness)",
+  "HC & CC2 broad/narrow beneficiaries — Logit AME vs. LPM (intense preference, robustness)",
   file.path(params$out_reg, "coef_uc_intense_logit_vs_lpm.png")
 )
 
@@ -87,13 +87,68 @@ plot_robustness(
 
 plot_r2(fit_logit_uc_bin,
         r2_col    = "pseudo_r2",
-        title_str = "Model fit — UC universal/targeted, Logit pseudo-R2 (first choice)",
+        title_str = "Model fit — HC & CC2 broad/narrow beneficiaries, Logit pseudo-R2 (first choice)",
         file_path = file.path(params$out_reg, "r2_uc_bin_logit.png"))
 
 plot_r2(fit_logit_uc_intense,
         r2_col    = "pseudo_r2",
-        title_str = "Model fit — UC universal/targeted, Logit pseudo-R2 (intense preference)",
+        title_str = "Model fit — HC & CC2 broad/narrow beneficiaries, Logit pseudo-R2 (intense preference)",
         file_path = file.path(params$out_reg, "r2_uc_intense_logit.png"))
+
+
+# ── CROSS-DOMAIN PLOTS: BROAD VS NARROW (COMBINED SINGLE PANEL) ──
+#
+# All four series on one plot per outcome type:
+#   Home care × Broad, Home care × Narrow,
+#   Childcare × Broad, Childcare × Narrow
+#
+# Colour = policy domain (blue = Home care, red = Childcare)
+# Shape & linetype = scope (circle/solid = broad, triangle/dashed = narrow)
+#
+# Mapping:
+#   hc_univ_*   → Broad  | Home care
+#   hc_target_* → Narrow | Home care
+#   cc_univ_*   → Broad  | Childcare
+#   cc_target_* → Narrow | Childcare
+# ─────────────────────────────────────────────────────────────
+
+dv_to_scope <- c(
+  "Home care: broad beneficiaries (first choice)"  = "Broad beneficiaries",
+  "Home care: narrow beneficiaries (first choice)" = "Narrow beneficiaries",
+  "Childcare: broad beneficiaries (first choice)"  = "Broad beneficiaries",
+  "Childcare: narrow beneficiaries (first choice)" = "Narrow beneficiaries",
+  "Home care: broad beneficiaries (intense)"       = "Broad beneficiaries",
+  "Home care: narrow beneficiaries (intense)"      = "Narrow beneficiaries",
+  "Childcare: broad beneficiaries (intense)"       = "Broad beneficiaries",
+  "Childcare: narrow beneficiaries (intense)"      = "Narrow beneficiaries"
+)
+
+dv_to_domain <- c(
+  "Home care: broad beneficiaries (first choice)"  = "Home care",
+  "Home care: narrow beneficiaries (first choice)" = "Home care",
+  "Childcare: broad beneficiaries (first choice)"  = "Childcare",
+  "Childcare: narrow beneficiaries (first choice)" = "Childcare",
+  "Home care: broad beneficiaries (intense)"       = "Home care",
+  "Home care: narrow beneficiaries (intense)"      = "Home care",
+  "Childcare: broad beneficiaries (intense)"       = "Childcare",
+  "Childcare: narrow beneficiaries (intense)"      = "Childcare"
+)
+
+plot_uc_scope_by_scope(
+  coef_df      = coef_logit_uc_bin,
+  outcome_slug = "pref",
+  file_prefix  = file.path(params$out_reg, "coef_uc_scope"),
+  dv_to_scope  = dv_to_scope,
+  dv_to_domain = dv_to_domain
+)
+
+plot_uc_scope_by_scope(
+  coef_df      = coef_logit_uc_intense,
+  outcome_slug = "intense",
+  file_prefix  = file.path(params$out_reg, "coef_uc_scope"),
+  dv_to_scope  = dv_to_scope,
+  dv_to_domain = dv_to_domain
+)
 
 
 # ── DIAGNOSTICS ───────────────────────────────────────────────
