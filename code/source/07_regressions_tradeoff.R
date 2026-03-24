@@ -60,23 +60,23 @@ write.csv(fit_tradeoff,
 walk(names(batteries), function(bat_name) {
   models <- tradeoff_models[[bat_name]]
   bat    <- batteries[[bat_name]]
-
+  
   save_regtable(models$logit_pref,    file.path(params$out_reg, paste0("regtable_tradeoff_", bat_name, "_pref_logit_AME.txt")),
                 paste0(bat$title, " — Logit AME (first choice). HC1 robust SEs. * p<0.05, ** p<0.01, *** p<0.001"),
                 is_logit_ame = TRUE)
-
+  
   save_regtable(models$logit_intense, file.path(params$out_reg, paste0("regtable_tradeoff_", bat_name, "_intense_logit_AME.txt")),
                 paste0(bat$title, " — Logit AME (intense preference). HC1 robust SEs. * p<0.05, ** p<0.01, *** p<0.001"),
                 is_logit_ame = TRUE)
-
+  
   save_regtable(models$lpm_pref,      file.path(params$out_reg, paste0("regtable_tradeoff_", bat_name, "_pref_lpm.txt")),
                 paste0(bat$title, " — LPM robustness check. HC1 robust SEs. * p<0.05, ** p<0.01, *** p<0.001"),
                 is_logit_ame = FALSE, gof = c("nobs", "r.squared"))
-
+  
   save_regtable(models$lpm_intense,   file.path(params$out_reg, paste0("regtable_tradeoff_", bat_name, "_intense_lpm.txt")),
                 paste0(bat$title, " — LPM robustness check (intense). HC1 robust SEs. * p<0.05, ** p<0.01, *** p<0.001"),
                 is_logit_ame = FALSE, gof = c("nobs", "r.squared"))
-
+  
   save_regtable(models$lm_raw,        file.path(params$out_reg, paste0("regtable_tradeoff_", bat_name, "_raw_ols.txt")),
                 paste0(bat$title, " — OLS (0-100 allocation). HC1 robust SEs. * p<0.05, ** p<0.01, *** p<0.001"),
                 is_logit_ame = FALSE, gof = c("nobs", "r.squared"))
@@ -87,27 +87,27 @@ walk(names(batteries), function(bat_name) {
 
 walk(names(batteries), function(bat_name) {
   bat <- batteries[[bat_name]]
-
+  
   # Primary: Logit AME
   coef_lp <- coef_tradeoff |> dplyr::filter(battery == bat_name, question == paste0(bat_name, "_pref_logit"))
   coef_li <- coef_tradeoff |> dplyr::filter(battery == bat_name, question == paste0(bat_name, "_intense_logit"))
   coef_pp <- coef_tradeoff |> dplyr::filter(battery == bat_name, question == paste0(bat_name, "_pref_lpm"))
   coef_pi <- coef_tradeoff |> dplyr::filter(battery == bat_name, question == paste0(bat_name, "_intense_lpm"))
-
+  
   if (nrow(coef_lp) > 0)
     plot_coefs(coef_lp, paste0(bat$title, " — Logit AME (first choice)"),
                file.path(params$out_reg, paste0("coef_tradeoff_", bat_name, "_pref_logit_AME.png")))
-
+  
   if (nrow(coef_li) > 0)
     plot_coefs(coef_li, paste0(bat$title, " — Logit AME (intense preference)"),
                file.path(params$out_reg, paste0("coef_tradeoff_", bat_name, "_intense_logit_AME.png")))
-
+  
   # Robustness: LPM vs Logit AME
   if (nrow(coef_lp) > 0 && nrow(coef_pp) > 0)
     plot_robustness(coef_lp, coef_pp,
                     paste0(bat$title, " — Logit AME vs. LPM (first choice, robustness)"),
                     file.path(params$out_reg, paste0("coef_tradeoff_", bat_name, "_pref_logit_vs_lpm.png")))
-
+  
   if (nrow(coef_li) > 0 && nrow(coef_pi) > 0)
     plot_robustness(coef_li, coef_pi,
                     paste0(bat$title, " — Logit AME vs. LPM (intense preference, robustness)"),
@@ -119,19 +119,19 @@ walk(names(batteries), function(bat_name) {
 
 walk(names(batteries), function(bat_name) {
   bat <- batteries[[bat_name]]
-
+  
   fit_tradeoff |> dplyr::filter(battery == bat_name, model_type == "Logit_pref") |>
     plot_r2("pseudo_r2", paste0(bat$title, " — Logit pseudo-R2 (first choice)"),
             file.path(params$out_reg, paste0("r2_tradeoff_", bat_name, "_pref_logit.png")))
-
+  
   fit_tradeoff |> dplyr::filter(battery == bat_name, model_type == "Logit_intense") |>
     plot_r2("pseudo_r2", paste0(bat$title, " — Logit pseudo-R2 (intense preference)"),
             file.path(params$out_reg, paste0("r2_tradeoff_", bat_name, "_intense_logit.png")))
-
+  
   fit_tradeoff |> dplyr::filter(battery == bat_name, model_type == "LPM_pref") |>
     plot_r2("adj_r_sq", paste0(bat$title, " — LPM adjusted R2 (first choice, robustness)"),
             file.path(params$out_reg, paste0("r2_tradeoff_", bat_name, "_pref_lpm.png")))
-
+  
   fit_tradeoff |> dplyr::filter(battery == bat_name, model_type == "LPM_intense") |>
     plot_r2("adj_r_sq", paste0(bat$title, " — LPM adjusted R2 (intense preference, robustness)"),
             file.path(params$out_reg, paste0("r2_tradeoff_", bat_name, "_intense_lpm.png")))
@@ -327,10 +327,10 @@ response_type_map <- tribble(
 
 # Map DV labels → response types (same across cc1 and ge)
 dv_to_response_type <- c(
-  "Raise taxes"        = "Increase taxes",
-  "Cut other spending" = "Cut other spending",
-  "Increase debt"      = "Increase debt",
-  "Don't spend more"   = "No increase"
+  "Raise taxes"                                        = "Increase taxes",
+  "Cut other spending"                                 = "Cut other spending",
+  "Increase debt"                                      = "Increase debt",
+  "No increase, regardless of implications for issue"  = "No increase"
 )
 
 # Ordered factor levels for response type panels (left-to-right)
@@ -372,7 +372,7 @@ plot_cross_battery_response <- function(model_suffix, title_str = NULL, file_pat
   
   ggplot(coef_cross,
          aes(x = estimate,
-             y = reorder(term, estimate),
+             y = factor(term, levels = rev(iv_order)),
              color = dv_cross,
              shape = dv_cross)) +
     geom_vline(xintercept = 0, linetype = "dashed", color = "grey50") +
