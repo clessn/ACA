@@ -85,24 +85,9 @@ walk(names(batteries), function(bat_name) {
 
 # ── T6. COEFFICIENT PLOTS ─────────────────────────────────────
 
-# Key hypothesis variables shown in figures.
+# Key hypothesis variables shown in figures (hyp_vars defined in 03_variable_definitions.R).
 # All variables remain in models and regression tables — this filter
 # applies only to coefficient plot outputs.
-hyp_vars <- c(
-  "incomeHigh_bin",
-  "univ_educ_bin",
-  "employ_fulltime_bin",
-  "children_bin",
-  "ideo_right_num",
-  "vote_PLC_bin",
-  "vote_PCC_bin",
-  "ideo_define_QC_first_bin",
-  "quebec_bin",
-  "alberta_bin",
-  "region_eastcoast_bin",
-  "trust_inst_fed_bin",
-  "trust_inst_prov_bin"
-)
 
 walk(names(batteries), function(bat_name) {
   bat <- batteries[[bat_name]]

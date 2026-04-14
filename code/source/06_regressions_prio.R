@@ -70,23 +70,7 @@ save_regtable(
   is_logit_ame = TRUE
 )
 
-# Coefficient plot — key hypothesis variables only (full model retained above)
-hyp_vars <- c(
-  "incomeHigh_bin",
-  "univ_educ_bin",
-  "employ_fulltime_bin",
-  "children_bin",
-  "ideo_right_num",
-  "vote_PLC_bin",
-  "vote_PCC_bin",
-  "ideo_define_QC_first_bin",
-  "quebec_bin",
-  "alberta_bin",
-  "region_eastcoast_bin",
-  "trust_inst_fed_bin",
-  "trust_inst_prov_bin"
-)
-
+# Coefficient plot — hypothesis variables only (hyp_vars defined in 03_variable_definitions.R)
 plot_coefs(
   coef_logit_prio_pref |> dplyr::filter(term %in% hyp_vars),
   "Budget priority first choice -- Logit average marginal effects",

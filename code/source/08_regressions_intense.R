@@ -54,24 +54,9 @@ save_regtable(
 
 # ── COEFFICIENT PLOTS ─────────────────────────────────────────
 #
-# Figures show only the key hypothesis variables listed below.
-# All variables remain in the fitted models and regression tables.
-hyp_vars <- c(
-  "incomeHigh_bin",
-  "univ_educ_bin",
-  "employ_fulltime_bin",
-  "children_bin",
-  "ideo_right_num",
-  "vote_PLC_bin",
-  "vote_PCC_bin",
-  "ideo_define_QC_first_bin",
-  "quebec_bin",
-  "alberta_bin",
-  "region_eastcoast_bin",
-  "trust_inst_fed_bin",
-  "trust_inst_prov_bin"
-)
-
+# Figures show only the key hypothesis variables (hyp_vars defined
+# in 03_variable_definitions.R). All variables remain in the fitted
+# models and regression tables.
 plot_coefs(
   coef_logit_intense |> dplyr::filter(term %in% hyp_vars),
   "Intense preference -- Logit average marginal effects",

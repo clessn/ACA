@@ -99,6 +99,29 @@ iv_order <- c(
 )
 
 
+# ── HYPOTHESIS VARIABLES FOR FIGURES ─────────────────────────
+# Variables for which we have theoretical expectations.
+# Controls remain in all models and regression tables — this list
+# governs coefficient plot outputs only (applied via dplyr::filter).
+# Single source of truth: edit here, all regression scripts inherit.
+hyp_vars <- c(
+  "incomeHigh_bin",
+  "univ_educ_bin",
+  "employ_fulltime_bin",
+  "age18_34_bin",
+  "children_bin",
+  "ideo_right_num",
+  "vote_PLC_bin",
+  "vote_PCC_bin",
+  "ideo_define_QC_first_bin",
+  "quebec_bin",
+  "alberta_bin",
+  "region_eastcoast_bin",
+  "trust_inst_fed_bin",
+  "trust_inst_prov_bin"
+)
+
+
 # ── 4. POLICY LABELS ──────────────────────────────────────────
 
 imp_policy_labels <- c(
