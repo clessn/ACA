@@ -13,7 +13,7 @@ ivs <- list(
   list(type="binary",  var="quebec_bin",               low=0, high=1, label="Quebec (No=0 vs Yes=1)"),
   list(type="binary",  var="alberta_bin",              low=0, high=1, label="Alberta (No=0 vs Yes=1)"),
   list(type="binary",  var="ontario_bin",              low=0, high=1, label="Ontario (No=0 vs Yes=1)"),
-  list(type="binary",  var="region_eastcoast_bin",     low=0, high=1, label="Eastern Canada (No=0 vs Yes=1)"),
+  list(type="binary",  var="region_eastcoast_bin",     low=0, high=1, label="Atlantic Canada (No=0 vs Yes=1)"),
   list(type="binary",  var="ses_french_bin",           low=0, high=1, label="French-speaking (No=0 vs Yes=1)"),
   # ── Socio-economic ────────────────────────────────────────
   list(type="binary",  var="incomeHigh_bin",           low=0, high=1, label="High Income (No=0 vs Yes=1)"),
@@ -67,7 +67,7 @@ term_labels <- c(
   "ideo_define_QC_first_bin" = "Quebecker First",
   "quebec_bin"               = "Quebec",
   "alberta_bin"              = "Alberta",
-  "region_eastcoast_bin"     = "Eastern Canada",
+  "region_eastcoast_bin"     = "Atlantic Canada",
   "ses_french_bin"           = "French-speaking",
   # Institutional trust
   "trust_inst_fed_bin"       = "Trust: Federal government",
@@ -92,7 +92,7 @@ iv_order <- c(
   "Quebecker First",
   "Quebec",
   "Alberta",
-  "Eastern Canada",
+  "Atlantic Canada",
   "French-speaking",
   "Trust: Federal government",
   "Trust: Provincial government"
@@ -353,7 +353,7 @@ uc_dvs <- list(
 # ── 9. REGIONAL LEVELS ────────────────────────────────────────
 
 region_var    <- "ses_region_cat"
-region_levels <- c("Ontario", "Quebec", "Alberta", "East Coast")
+region_levels <- c("Ontario", "Quebec", "Alberta", "Atlantic Canada")
 
 # ── 10. CANONICAL DV ORDER FOR PLOTS ─────────────────────────
 # Add any new DVs here to control their panel order across all plots

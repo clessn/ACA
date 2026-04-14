@@ -56,12 +56,18 @@ extract_ame <- function(model, dv_label, question_tag, data = df) {
   model_vars <- all.vars(fml)
   model_data <- data |> dplyr::select(all_of(model_vars)) |> drop_na()
   vm         <- robust_vcov(model)
+  n_obs      <- if (inherits(model, "glm")) {
+    model$df.residual + length(model$coefficients)
+  } else {
+    length(model$residuals)
+  }
   avg_slopes(model, vcov = vm, newdata = model_data) |>
     as_tibble() |>
     transmute(
       question  = question_tag,
       dv        = dv_label,
       term,
+      n         = n_obs,
       estimate  = round(estimate, 3),
       conf.low  = round(conf.low,  3),
       conf.high = round(conf.high, 3),
@@ -160,7 +166,7 @@ extract_fit_logit <- function(model_list, model_type_label) {
       dv         = dv_label,
       model_type = model_type_label,
       pseudo_r2  = round(1 - (s$deviance / s$null.deviance), 3),
-      n          = length(s$residuals)
+      n          = s$df.residual + length(s$coefficients)
     )
   })
 }
@@ -419,6 +425,7 @@ plot_robustness <- function(coef_logit, coef_lpm, title_str = NULL, file_path,
 plot_r2 <- function(fit_df, r2_col = "adj_r_sq", title_str = NULL, file_path,
                     width = 8, height = 5) {
   fit_df |>
+    tidyr::drop_na(all_of(r2_col)) |>
     mutate(
       fit_level = case_when(
         .data[[r2_col]] >= 0.07 ~ "High (>=0.07)",
@@ -438,7 +445,7 @@ plot_r2 <- function(fit_df, r2_col = "adj_r_sq", title_str = NULL, file_path,
                  "Low (<0.03)"          = "#d6604d")
     ) +
     scale_x_continuous(
-      limits = function(x) c(0, max(x[2], 0.05) * 1.25),
+      limits = function(x) c(0, max(c(x, 0.05), na.rm = TRUE) * 1.25),
       labels = scales::label_number(accuracy = 0.01)
     ) +
     labs(

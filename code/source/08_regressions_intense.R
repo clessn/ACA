@@ -53,22 +53,40 @@ save_regtable(
 
 
 # ── COEFFICIENT PLOTS ─────────────────────────────────────────
+#
+# Figures show only the key hypothesis variables listed below.
+# All variables remain in the fitted models and regression tables.
+hyp_vars <- c(
+  "incomeHigh_bin",
+  "univ_educ_bin",
+  "employ_fulltime_bin",
+  "children_bin",
+  "ideo_right_num",
+  "vote_PLC_bin",
+  "vote_PCC_bin",
+  "ideo_define_QC_first_bin",
+  "quebec_bin",
+  "alberta_bin",
+  "region_eastcoast_bin",
+  "trust_inst_fed_bin",
+  "trust_inst_prov_bin"
+)
 
 plot_coefs(
-  coef_logit_intense,
+  coef_logit_intense |> dplyr::filter(term %in% hyp_vars),
   "Intense preference -- Logit average marginal effects",
   file.path(params$out_reg, "coef_intense_logit_AME.png")
 )
 
 plot_coefs(
-  coef_lpm_intense,
+  coef_lpm_intense |> dplyr::filter(term %in% hyp_vars),
   "Intense preference -- LPM coefficients (robustness)",
   file.path(params$out_reg, "coef_intense_LPM.png")
 )
 
 plot_robustness(
-  coef_logit = coef_logit_intense,
-  coef_lpm   = coef_lpm_intense,
+  coef_logit = coef_logit_intense |> dplyr::filter(term %in% hyp_vars),
+  coef_lpm   = coef_lpm_intense   |> dplyr::filter(term %in% hyp_vars),
   title_str  = "Intense preference -- Logit AME vs. LPM (robustness check)",
   file_path  = file.path(params$out_reg, "coef_intense_LPM_vs_logit.png"),
   ncol = 3, width = 16, height = 14
@@ -126,8 +144,9 @@ no_spend_models <- fit_binary_models(
 coef_logit_no_spend <- extract_ame_list(no_spend_models$logit, "no_spend_logit")
 
 coef_logit_no_spend |>
+  dplyr::filter(term %in% hyp_vars) |>
   mutate(term = recode(term, !!!term_labels)) |>
-  ggplot(aes(x = estimate, y = reorder(term, estimate), color = direction)) +
+  ggplot(aes(x = estimate, y = factor(term, levels = rev(iv_order)), color = direction)) +
   geom_vline(xintercept = 0, linetype = "dashed", color = "grey50") +
   geom_point(size = 2.5) +
   geom_errorbarh(aes(xmin = conf.low, xmax = conf.high), height = 0.2) +

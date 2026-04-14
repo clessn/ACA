@@ -70,9 +70,25 @@ save_regtable(
   is_logit_ame = TRUE
 )
 
-# Coefficient plot
+# Coefficient plot — key hypothesis variables only (full model retained above)
+hyp_vars <- c(
+  "incomeHigh_bin",
+  "univ_educ_bin",
+  "employ_fulltime_bin",
+  "children_bin",
+  "ideo_right_num",
+  "vote_PLC_bin",
+  "vote_PCC_bin",
+  "ideo_define_QC_first_bin",
+  "quebec_bin",
+  "alberta_bin",
+  "region_eastcoast_bin",
+  "trust_inst_fed_bin",
+  "trust_inst_prov_bin"
+)
+
 plot_coefs(
-  coef_logit_prio_pref,
+  coef_logit_prio_pref |> dplyr::filter(term %in% hyp_vars),
   "Budget priority first choice -- Logit average marginal effects",
   file.path(params$out_reg, "coef_prio_pref_logit_AME.png")
 )
@@ -86,7 +102,7 @@ prio_type_map <- c(
   "Fight against climate change"           = "Investment"
 )
 plot_coefs_typed(
-  coef_logit_prio_pref,
+  coef_logit_prio_pref |> dplyr::filter(term %in% hyp_vars),
   "Budget priority first choice — Logit AME (investment vs fiscal consolidation)",
   file.path(params$out_reg, "coef_prio_pref_logit_AME_typed.png"),
   type_map = prio_type_map
@@ -94,8 +110,8 @@ plot_coefs_typed(
 
 # Robustness
 plot_robustness(
-  coef_logit = coef_logit_prio_pref,
-  coef_lpm   = coef_lpm_prio_pref,
+  coef_logit = coef_logit_prio_pref |> dplyr::filter(term %in% hyp_vars),
+  coef_lpm   = coef_lpm_prio_pref   |> dplyr::filter(term %in% hyp_vars),
   title_str  = "Budget priority first choice -- Logit AME vs. LPM (robustness)",
   file_path  = file.path(params$out_reg, "coef_prio_pref_logit_vs_lpm.png")
 )

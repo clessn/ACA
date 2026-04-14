@@ -15,8 +15,11 @@ if (!"incomeHigh_bin" %in% names(df)) {
 }
 
 df$educ_group     <- factor(df$educ_group,     levels = c("educBHS", "educHS", "educUniv"))
-df$ses_region_cat <- factor(df$ses_region_cat, levels = c("Ontario", "Quebec", "Alberta", "East Coast"))
 df$ses_income3Cat <- factor(df$ses_income3Cat, levels = c("Low", "Mid", "High"))
+
+# Recode raw data value to match the Atlantic Canada label used throughout
+df$ses_region_cat[df$ses_region_cat == "East Coast"] <- "Atlantic Canada"
+df$ses_region_cat <- factor(df$ses_region_cat, levels = c("Ontario", "Quebec", "Alberta", "Atlantic Canada"))
 
 
 # ── 2. BUDGET IMPORTANCE COMPOSITES ───────────────────────────
