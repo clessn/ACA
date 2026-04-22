@@ -1,6 +1,6 @@
 # ==============================================================
 # Redistribution Attitudes — Master Script
-# Four-region Canadian survey: Alberta, Ontario, Quebec, Eastern Canada
+# Four-region Canadian survey: Alberta, Ontario, Quebec, Atlantic Canada
 #
 # Sections:
 #   0.  Setup: packages, paths, output folders
@@ -46,8 +46,8 @@ params <- list(
   plot_width  = 14,
   plot_height = 10,
   out_graphs  = "graphs",
-  out_desc    = "graphs/descriptives",
-  out_reg     = "graphs/regressions",
+  out_desc    = "graphs/descriptives_redis",
+  out_reg     = "graphs/regressions_redis",
   data_path   = "data/clean_df_valid.csv"
 )
 
@@ -86,6 +86,7 @@ df <- df |>
   )
 
 # ── 1.4  DV vectors and labels ───────────────────────────────
+# 1 = fair, 0 = unfair
 dv_vars <- c(
   "redis_effort_num",
   "redis_no_cheat_system_num",
@@ -138,7 +139,7 @@ ivs <- list(
   list(type = "binary",  var = "ideo_define_QC_first_bin",   low = 0, high = 1, label = "Quebecker First (No=0 vs Yes=1)"),
   list(type = "binary",  var = "alberta_bin",                low = 0, high = 1, label = "Alberta (No=0 vs Yes=1)"),
   list(type = "binary",  var = "ontario_bin",                low = 0, high = 1, label = "Ontario (No=0 vs Yes=1)"),
-  list(type = "binary",  var = "region_eastcoast_bin",       low = 0, high = 1, label = "Eastern Canada (No=0 vs Yes=1)"),
+  list(type = "binary",  var = "region_eastcoast_bin",       low = 0, high = 1, label = "Atlantic Canada (No=0 vs Yes=1)"),
   list(type = "binary",  var = "ses_male_bin",               low = 0, high = 1, label = "Gender (Female=0 vs Male=1)"),
   list(type = "numeric", var = "ses_age",                    low = 30, high = 60, label = "Age (30 vs 60)"),
   list(type = "numeric", var = "univ_educ_bin",              low = 0, high = 1, label = "Education (University vs below)"),
@@ -148,9 +149,7 @@ ivs <- list(
   list(type = "binary",  var = "trust_social_bin",           low = 0, high = 1, label = "Social Trust (Low=0 vs High=1)"),
   list(type = "binary",  var = "employ_fulltime_bin",        low = 0, high = 1, label = "Employed Full-Time (No=0 vs Yes=1)"),
   list(type = "numeric", var = "ideo_right_num",             low = 0, high = 1, label = "Ideology: Left (0) vs Right (1)"),
-  list(type = "numeric", var = "ideo_interest_politics_num", low = 0, high = 1, label = "Political Interest: Low (0) vs High (1)"),
-  list(type = "binary",  var = "vote_PLC_bin",               low = 0, high = 1, label = "Liberal voter (No=0 vs Yes=1)"),
-  list(type = "binary",  var = "vote_PCC_bin",               low = 0, high = 1, label = "Conservative voter (No=0 vs Yes=1)")
+  list(type = "numeric", var = "ideo_interest_politics_num", low = 0, high = 1, label = "Political Interest: Low (0) vs High (1)")
 )
 
 # ── 2.2  RHS formula string ───────────────────────────────────
@@ -166,19 +165,20 @@ term_labels <- c(
   "quebec_bin"                 = "Quebec",
   "ideo_define_QC_first_bin"   = "Quebecker First",
   "alberta_bin"                = "Alberta",
-  "region_eastcoast_bin"       = "Eastern Canada",
+  "region_eastcoast_bin"       = "Atlantic Canada",
   "ses_male_bin"               = "Male",
   "ses_age"                    = "Age",
   "univ_educ_bin"              = "Education: Below HS/HS vs. Univ",
   "incomeHigh_bin"             = "Income: Low/Mid vs High",
   "ses_citizenYes_bin"         = "Citizen",
+  "children_bin"               = "Has Children",
   "ses_french_bin"             = "French-speaking",
   "trust_social_bin"           = "Social Trust",
+  "trust_inst_prov_bin"        = "Provincial Trust",
+  "trust_inst_fed_bin"         = "Federal Trust",
   "employ_fulltime_bin"        = "Employed Full-Time",
   "ideo_right_num"             = "Ideology (Right)",
-  "ideo_interest_politics_num" = "Political Interest",
-  "vote_PLC_bin"               = "Liberal voter",
-  "vote_PCC_bin"               = "Conservative voter"
+  "ideo_interest_politics_num" = "Political Interest"
 )
 
 

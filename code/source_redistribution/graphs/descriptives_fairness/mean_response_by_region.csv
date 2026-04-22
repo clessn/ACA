@@ -1,0 +1,41 @@
+"region","dv","dv_type","n","mean","se","lo","hi"
+"Ontario","Equal opportunity","Proportionality",290,0.673,0.015,0.643,0.703
+"Quebec","Equal opportunity","Proportionality",279,0.661,0.018,0.626,0.696
+"Alberta","Equal opportunity","Proportionality",299,0.656,0.016,0.625,0.688
+"Atlantic Canada","Equal opportunity","Proportionality",311,0.637,0.015,0.608,0.666
+"All Canada","Equal opportunity","Proportionality",1179,0.656,0.008,0.641,0.672
+"Ontario","Rewarded for effort & skill","Proportionality",295,0.672,0.013,0.646,0.698
+"Quebec","Rewarded for effort & skill","Proportionality",299,0.618,0.016,0.587,0.649
+"Alberta","Rewarded for effort & skill","Proportionality",311,0.632,0.014,0.604,0.66
+"Atlantic Canada","Rewarded for effort & skill","Proportionality",288,0.632,0.015,0.603,0.661
+"All Canada","Rewarded for effort & skill","Proportionality",1193,0.639,0.007,0.624,0.653
+"Ontario","Fairness of income distribution","Proportionality",585,0.589,0.01,0.568,0.609
+"Quebec","Fairness of income distribution","Proportionality",578,0.542,0.012,0.519,0.565
+"Alberta","Fairness of income distribution","Proportionality",610,0.578,0.011,0.556,0.599
+"Atlantic Canada","Fairness of income distribution","Proportionality",599,0.566,0.01,0.547,0.586
+"All Canada","Fairness of income distribution","Proportionality",2372,0.569,0.005,0.558,0.579
+"Ontario","Violating outcomes (Poor)","Proportionality",585,0.299,0.009,0.282,0.316
+"Quebec","Violating outcomes (Poor)","Proportionality",578,0.286,0.01,0.267,0.305
+"Alberta","Violating outcomes (Poor)","Proportionality",610,0.298,0.009,0.28,0.315
+"Atlantic Canada","Violating outcomes (Poor)","Proportionality",599,0.284,0.008,0.268,0.301
+"All Canada","Violating outcomes (Poor)","Proportionality",2372,0.292,0.004,0.283,0.301
+"Ontario","Violating outcomes (Rich)","Proportionality",585,0.284,0.009,0.267,0.302
+"Quebec","Violating outcomes (Rich)","Proportionality",578,0.304,0.009,0.286,0.323
+"Alberta","Violating outcomes (Rich)","Proportionality",610,0.281,0.009,0.264,0.298
+"Atlantic Canada","Violating outcomes (Rich)","Proportionality",599,0.258,0.009,0.241,0.275
+"All Canada","Violating outcomes (Rich)","Proportionality",2372,0.282,0.004,0.273,0.29
+"Ontario","Social benefits not a choice","Reciprocity",585,0.635,0.01,0.615,0.655
+"Quebec","Social benefits not a choice","Reciprocity",578,0.674,0.01,0.654,0.695
+"Alberta","Social benefits not a choice","Reciprocity",610,0.656,0.01,0.637,0.675
+"Atlantic Canada","Social benefits not a choice","Reciprocity",599,0.632,0.01,0.612,0.651
+"All Canada","Social benefits not a choice","Reciprocity",2372,0.649,0.005,0.639,0.659
+"Ontario","Welfare goes to undeserving","Reciprocity",585,0.367,0.009,0.35,0.385
+"Quebec","Welfare goes to undeserving","Reciprocity",578,0.37,0.01,0.351,0.389
+"Alberta","Welfare goes to undeserving","Reciprocity",610,0.382,0.009,0.363,0.4
+"Atlantic Canada","Welfare goes to undeserving","Reciprocity",599,0.354,0.009,0.336,0.372
+"All Canada","Welfare goes to undeserving","Reciprocity",2372,0.368,0.005,0.359,0.377
+"Ontario","Trust not to cheat system","Reciprocity",585,0.57,0.011,0.548,0.592
+"Quebec","Trust not to cheat system","Reciprocity",578,0.54,0.012,0.516,0.563
+"Alberta","Trust not to cheat system","Reciprocity",610,0.569,0.011,0.547,0.591
+"Atlantic Canada","Trust not to cheat system","Reciprocity",599,0.57,0.011,0.548,0.591
+"All Canada","Trust not to cheat system","Reciprocity",2372,0.562,0.006,0.551,0.573
