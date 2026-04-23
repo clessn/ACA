@@ -57,26 +57,26 @@ df <- read.csv(params$data_path)
 
 
 # ==============================================================
-# 1.  VARIABLE CONSTRUCTION
+# 1. VARIABLE CONSTRUCTION
 # ==============================================================
 
-# ── 1.1  Derived binary variables ─────────────────────────────
-df$univ_educ_bin <- as.integer(df$educ_group == "educUniv")
+# ── 1.1 Binary independent variables ───────────────────────────
 
-if (!"incomeHigh_bin" %in% names(df)) {
-  df$incomeHigh_bin <- as.integer(df$ses_income3Cat == "High")
-}
+df$univ_educ_bin  <- as.integer(df$educ_group == "educUniv")
+df$incomeHigh_bin <- as.integer(df$ses_income3Cat == "High")
 
-# ── 1.2  Factor ordering ──────────────────────────────────────
-df$educ_group     <- factor(df$educ_group,
-                            levels = c("educBHS", "educHS", "educUniv"))
+# ── 1.2 Factor ordering (for descriptives only) ────────────────
+
+df$educ_group <- factor(df$educ_group,
+                        levels = c("educBHS", "educHS", "educUniv"))
+
+df$ses_income3Cat <- factor(df$ses_income3Cat,
+                            levels = c("Low", "Mid", "High"))
+
 df$ses_region_cat <- factor(
   dplyr::recode(df$ses_region_cat, "East Coast" = "Atlantic Canada"),
   levels = c("Ontario", "Quebec", "Alberta", "Atlantic Canada")
 )
-df$ses_income3Cat <- factor(df$ses_income3Cat,
-                            levels = c("Low", "Mid", "High"))
-
 
 # ==============================================================
 # 2.  DV DEFINITIONS AND IV LIST
@@ -139,10 +139,10 @@ dv_ord_vars <- paste0(all_dv_vars, "_ord")
 #   Ontario is the omitted region reference category.
 ivs <- list(
   # ── Socio-economic ────────────────────────────────────────────
-  list(type = "numeric", var = "incomeHigh_bin",             low = 0,  high = 1,  label = "Income (High vs low/mid)"),
+  list(type = "binary", var = "incomeHigh_bin",             low = 0,  high = 1,  label = "Income (High vs low/mid)"),
   list(type = "binary",  var = "ses_male_bin",               low = 0, high = 1, label = "Gender (Female=0 vs Male=1)"),
   list(type = "numeric", var = "ses_age",                    low = 30, high = 60, label = "Age (30 vs 60)"),
-  list(type = "numeric", var = "univ_educ_bin",              low = 0,  high = 1,  label = "Education (University vs below)"),
+  list(type = "binary", var = "univ_educ_bin",              low = 0,  high = 1,  label = "Education (Some university vs below)"),
   list(type = "binary",  var = "employ_fulltime_bin",        low = 0, high = 1, label = "Employed Full-Time (No=0 vs Yes=1)"),
   list(type = "binary",  var = "ses_citizenYes_bin",         low = 0, high = 1, label = "Citizen (No=0 vs Yes=1)"),
   # ── Ideology & political interest ─────────────────────────────
@@ -155,7 +155,9 @@ ivs <- list(
   list(type = "binary",  var = "region_eastcoast_bin",       low = 0, high = 1, label = "Atlantic Canada (No=0 vs Yes=1)"),
   list(type = "binary",  var = "ses_french_bin",             low = 0, high = 1, label = "French-speaking (No=0 vs Yes=1)"),
   # ── Institutional / social trust ──────────────────────────────
-  list(type = "binary",  var = "trust_social_bin",           low = 0, high = 1, label = "Social Trust (Low=0 vs High=1)")
+  list(type = "binary",  var = "trust_social_bin",           low = 0, high = 1, label = "Social Trust (Low=0 vs High=1)"),
+  list(type = "binary",  var = "trust_inst_fed_bin",         low = 0, high = 1, label = "Trust: Federal institutions (Low=0 vs High=1)"),
+  list(type = "binary",  var = "trust_inst_prov_bin",        low = 0, high = 1, label = "Trust: Provincial institutions (Low=0 vs High=1)")
 )
 
 # ── 2.6  RHS formula string ───────────────────────────────────
@@ -165,7 +167,7 @@ rhs <- "incomeHigh_bin + ses_male_bin + ses_age + univ_educ_bin +
         ideo_right_num + ideo_interest_politics_num +
         ideo_define_QC_first_bin + quebec_bin + alberta_bin + region_eastcoast_bin +
         ses_french_bin +
-        trust_social_bin"
+        trust_social_bin + trust_inst_fed_bin + trust_inst_prov_bin"
 
 # ── 2.6b  RHS without regional variables (robustness check) ──
 #   Used to verify that individual-level results are stable when
@@ -174,7 +176,7 @@ rhs <- "incomeHigh_bin + ses_male_bin + ses_age + univ_educ_bin +
 rhs_no_region <- "incomeHigh_bin + ses_male_bin + ses_age + univ_educ_bin +
                   employ_fulltime_bin + ses_citizenYes_bin +
                   ideo_right_num + ideo_interest_politics_num +
-                  trust_social_bin"
+                  trust_social_bin + trust_inst_fed_bin + trust_inst_prov_bin"
 
 # ── 2.7  Human-readable term labels ───────────────────────────
 term_labels <- c(
@@ -195,11 +197,28 @@ term_labels <- c(
   "region_eastcoast_bin"       = "Atlantic Canada",
   "ses_french_bin"             = "French-speaking",
   # Institutional / social trust
-  "trust_social_bin"           = "Social Trust"
+  "trust_social_bin"           = "Social Trust",
+  "trust_inst_fed_bin"         = "Trust: Federal institutions",
+  "trust_inst_prov_bin"        = "Trust: Provincial institutions"
 )
 
+# ── 2.8  Terms hidden from MAIN figures (run as controls, not shown) ──────────
+#   These variables are included in all model specifications but excluded
+#   from the main coefficient plots to reduce visual clutter for the reader.
+#   They remain visible in appendix / no-region plots and all regression tables.
+terms_hide_main <- c("ses_citizenYes_bin")
 
-# Consistent region colour palette across all plots
+# ── 2.9  Predictor subset shown in MAIN figures ───────────────
+#   These are the terms displayed in the main coefficient plots.
+#   All other IVs run as controls but appear only in appendix
+#   plots and regression tables.
+vars_main <- c(
+  "incomeHigh_bin", "ses_male_bin", "ses_age", "univ_educ_bin",
+  "employ_fulltime_bin",
+  "ideo_right_num", "ideo_interest_politics_num",
+  "trust_social_bin", "trust_inst_fed_bin", "trust_inst_prov_bin",
+  "quebec_bin", "ideo_define_QC_first_bin"
+)
 region_colours <- c(
   "Ontario"    = "#d6604d",
   "Quebec"     = "#2166ac",
@@ -224,7 +243,29 @@ level_labels <- c(
 robust_vcov <- function(model) vcovHC(model, type = "HC1")
 
 
-# ── 3.2  Ordered logit AME extractor ─────────────────────────
+# ── 3.2  CPP journal theme ────────────────────────────────────
+#   Clean, print-friendly theme suited to Canadian Public Policy.
+#   White background, restrained grid, serif text.
+theme_cpp <- function(base_size = 11) {
+  theme_classic(base_size = base_size) +
+    theme(
+      text               = element_text(family = "serif"),
+      axis.line          = element_line(colour = "black", linewidth = 0.4),
+      axis.ticks         = element_line(colour = "black", linewidth = 0.3),
+      panel.grid.major.x = element_line(colour = "grey90", linewidth = 0.3),
+      panel.grid.major.y = element_blank(),
+      strip.background   = element_blank(),
+      strip.text         = element_text(face = "bold", size = rel(0.95)),
+      legend.position    = "bottom",
+      legend.key.size    = unit(0.4, "cm"),
+      plot.title         = element_text(face = "bold", size = rel(1.05)),
+      plot.caption       = element_text(size = rel(0.8), colour = "grey40",
+                                        hjust = 0, margin = margin(t = 6))
+    )
+}
+
+
+# ── 3.3  Ordered logit AME extractor ─────────────────────────
 #   Re-fits polr() on complete cases for numerical stability,
 #   computes HC1 avg_slopes(), and returns a list:
 #     $top  — AME on the highest response category (= 1) only
@@ -235,7 +276,9 @@ tidy_polr_slopes <- function(model, dv_label, data = df) {
   model_data <- data |> dplyr::select(all_of(model_vars)) |> drop_na()
   model_fit  <- MASS::polr(fml, data = model_data, Hess = TRUE)
   
-  slopes_all <- avg_slopes(model_fit, vcov = "HC1", newdata = model_data) |>
+  slopes_all <- avg_slopes(model_fit,
+                           vcov       = \(x) sandwich::vcovHC(x, type = "HC1"),
+                           newdata    = model_data) |>
     as_tibble() |>
     mutate(dv = dv_label)
   
@@ -268,7 +311,7 @@ tidy_polr_slopes <- function(model, dv_label, data = df) {
 }
 
 
-# ── 3.3  OLS AME extractor (robustness check) ─────────────────
+# ── 3.4  OLS AME extractor (robustness check) ─────────────────
 #   Fits OLS on the raw 0/0.33/0.66/1 scale; HC1 robust SEs.
 extract_ame_ols <- function(dv, dv_label, rhs, data = df) {
   model_vars <- c(dv, all.vars(as.formula(paste("~", rhs))))
@@ -298,11 +341,19 @@ extract_ame_ols <- function(dv, dv_label, rhs, data = df) {
 }
 
 
-# ── 3.4  Coefficient plot helper ──────────────────────────────
-plot_coefs <- function(coef_df, title_str, caption_str, file_path,
+# ── 3.5  Coefficient plot helper ──────────────────────────────
+#   keep_vars: character vector of term names to display.
+#              If NULL, all terms are shown (appendix mode).
+plot_coefs <- function(coef_df, caption_str, file_path,
                        ncol_facet = 2,
+                       keep_vars  = NULL,
                        width  = params$plot_width,
                        height = params$plot_height) {
+  
+  if (!is.null(keep_vars)) {
+    coef_df <- coef_df |> dplyr::filter(term %in% keep_vars)
+  }
+  
   coef_df |>
     mutate(
       term = recode(term, !!!term_labels),
@@ -322,10 +373,10 @@ plot_coefs <- function(coef_df, title_str, caption_str, file_path,
       x       = "Estimated effect (HC1 robust SEs, 95% CI)",
       y       = NULL,
       color   = NULL,
-      title   = title_str,
+      title   = NULL,
       caption = caption_str
     ) +
-    theme_minimal(base_size = 12) +
+    theme_cpp() +
     theme(legend.position = "bottom",
           strip.text = element_text(face = "bold"))
   
@@ -334,15 +385,25 @@ plot_coefs <- function(coef_df, title_str, caption_str, file_path,
 }
 
 
-# ── 3.5  Robustness comparison plot: ordered logit AME vs OLS ─
-plot_robustness <- function(coef_polr, coef_ols, title_str, file_path,
+# ── 3.6  Robustness comparison plot: ordered logit AME vs OLS ─
+#   keep_vars: character vector of term names to display.
+#              If NULL, all terms are shown (appendix mode).
+plot_robustness <- function(coef_polr, coef_ols, caption_str, file_path,
                             ncol_facet = 2,
+                            keep_vars  = NULL,
                             width  = params$plot_width,
                             height = params$plot_height) {
-  bind_rows(
+  
+  df_plot <- bind_rows(
     coef_polr |> mutate(model = "Ordered logit AME"),
     coef_ols  |> mutate(model = "OLS")
-  ) |>
+  )
+  
+  if (!is.null(keep_vars)) {
+    df_plot <- df_plot |> dplyr::filter(term %in% keep_vars)
+  }
+  
+  df_plot |>
     mutate(
       term = recode(term, !!!term_labels),
       dv   = factor(dv, levels = intersect(dv_order, unique(dv)))
@@ -362,10 +423,10 @@ plot_robustness <- function(coef_polr, coef_ols, title_str, file_path,
       y       = NULL,
       colour  = NULL,
       shape   = NULL,
-      title   = title_str,
-      caption = "HC1 robust SEs. 95% CI. Ordered logit AME on P(response = 1)."
+      title   = NULL,
+      caption = caption_str
     ) +
-    theme_minimal(base_size = 11) +
+    theme_cpp() +
     theme(legend.position = "bottom",
           strip.text = element_text(face = "bold"))
   
@@ -418,10 +479,10 @@ desc_by_region |>
     title   = "Proportionality attitudes — response distribution by region",
     caption = "DVs coded 0 / 0.33 / 0.66 / 1."
   ) +
-  theme_minimal(base_size = 12) +
+  theme_cpp() +
   theme(
     strip.text         = element_text(face = "bold"),
-    axis.text.x        = element_text(angle = 20, hjust = 1),
+    axis.text.x        = element_text(angle = 45, hjust = 1),
     panel.grid.major.x = element_blank(),
     legend.position    = "bottom"
   )
@@ -453,10 +514,10 @@ desc_by_region |>
     title   = "Reciprocity attitudes — response distribution by region",
     caption = "DVs coded 0 / 0.33 / 0.66 / 1."
   ) +
-  theme_minimal(base_size = 12) +
+  theme_cpp() +
   theme(
     strip.text         = element_text(face = "bold"),
-    axis.text.x        = element_text(angle = 20, hjust = 1),
+    axis.text.x        = element_text(angle = 45, hjust = 1),
     panel.grid.major.x = element_blank(),
     legend.position    = "bottom"
   )
@@ -543,7 +604,7 @@ mean_ci |>
     title   = "Proportionality & Reciprocity — mean response by region",
     caption = "DV scale: 0 = Unfair, 1 = Fair. Error bars = t-based 95% CI."
   ) +
-  theme_minimal(base_size = 12) +
+  theme_cpp() +
   theme(strip.text = element_text(face = "bold"))
 
 ggsave(
@@ -714,56 +775,106 @@ write.csv(fit_ols,
 # ==============================================================
 # 7.  COEFFICIENT PLOTS
 # ==============================================================
+#
+#   Main figures (keep_vars = vars_main): core predictors shown
+#   in the article. Citizenship hidden (control only).
+#
+#   Appendix figures (keep_vars = NULL): all IVs including
+#   regional dummies, French-speaking, and citizenship.
 
-# ── 7.1  Ordered logit AME — proportionality DVs ─────────────
+# ── 7.1  Ordered logit AME — proportionality DVs (main) ───────
 plot_coefs(
   coef_df     = coef_polr_top |> dplyr::filter(dv %in% unname(prop_labels)),
-  title_str   = "Proportionality attitudes — Ordered logit AME on P(response = 1)",
-  caption_str = "AME on P(highest response level = 1). HC1 robust SEs. Error bars = 95% CI.",
-  file_path   = file.path(params$out_reg, "coef_prop_polr_top.png"),
-  ncol_facet  = 2,
-  height      = params$plot_height + 2
-)
-
-# ── 7.2  Ordered logit AME — reciprocity DVs ─────────────────
-plot_coefs(
-  coef_df     = coef_polr_top |> dplyr::filter(dv %in% unname(recip_labels)),
-  title_str   = "Reciprocity attitudes — Ordered logit AME on P(response = 1)",
-  caption_str = "AME on P(highest response level = 1). HC1 robust SEs. Error bars = 95% CI.",
-  file_path   = file.path(params$out_reg, "coef_recip_polr_top.png"),
+  keep_vars   = vars_main,
+  caption_str = "AME on P(response = 1). HC1 robust SEs. 95% CI.",
+  file_path   = file.path(params$out_reg, "coef_prop_polr_main.png"),
   ncol_facet  = 2,
   height      = params$plot_height
 )
 
-# ── 7.3  OLS robustness — all DVs ─────────────────────────────
+# ── 7.2  Ordered logit AME — reciprocity DVs (main) ───────────
+plot_coefs(
+  coef_df     = coef_polr_top |> dplyr::filter(dv %in% unname(recip_labels)),
+  keep_vars   = vars_main,
+  caption_str = "AME on P(response = 1). HC1 robust SEs. 95% CI.",
+  file_path   = file.path(params$out_reg, "coef_recip_polr_main.png"),
+  ncol_facet  = 2,
+  height      = params$plot_height - 1
+)
+
+# ── 7.3  Ordered logit AME — proportionality DVs (appendix) ───
+plot_coefs(
+  coef_df     = coef_polr_top |> dplyr::filter(dv %in% unname(prop_labels)),
+  keep_vars   = NULL,
+  caption_str = "Appendix. AME on P(response = 1). HC1 robust SEs. 95% CI.",
+  file_path   = file.path(params$out_reg, "coef_prop_polr_appendix.png"),
+  ncol_facet  = 2,
+  height      = params$plot_height + 3
+)
+
+# ── 7.4  Ordered logit AME — reciprocity DVs (appendix) ───────
+plot_coefs(
+  coef_df     = coef_polr_top |> dplyr::filter(dv %in% unname(recip_labels)),
+  keep_vars   = NULL,
+  caption_str = "Appendix. AME on P(response = 1). HC1 robust SEs. 95% CI.",
+  file_path   = file.path(params$out_reg, "coef_recip_polr_appendix.png"),
+  ncol_facet  = 2,
+  height      = params$plot_height + 2
+)
+
+# ── 7.5  OLS robustness — all DVs (appendix only) ─────────────
 plot_coefs(
   coef_df     = coef_ols,
-  title_str   = "Proportionality & Reciprocity — OLS coefficients (robustness check)",
-  caption_str = "OLS on 0/0.33/0.66/1 scale. HC1 robust SEs. Error bars = 95% CI.",
-  file_path   = file.path(params$out_reg, "coef_all_ols.png"),
+  keep_vars   = NULL,
+  caption_str = "Appendix. OLS on 0/0.33/0.66/1 scale. HC1 robust SEs. 95% CI.",
+  file_path   = file.path(params$out_reg, "coef_all_ols_appendix.png"),
   ncol_facet  = 3,
   width       = params$plot_width + 4,
   height      = params$plot_height + 4
 )
 
-# ── 7.4  Robustness comparison — proportionality DVs ──────────
+# ── 7.6  Robustness comparison — proportionality DVs (main) ───
 plot_robustness(
-  coef_polr  = coef_polr_top |> dplyr::filter(dv %in% unname(prop_labels)),
-  coef_ols   = coef_ols      |> dplyr::filter(dv %in% unname(prop_labels)),
-  title_str  = "Proportionality attitudes — Ordered logit AME vs OLS",
-  file_path  = file.path(params$out_reg, "robustness_prop_polr_vs_ols.png"),
-  ncol_facet = 2,
-  height     = params$plot_height + 2
+  coef_polr   = coef_polr_top |> dplyr::filter(dv %in% unname(prop_labels)),
+  coef_ols    = coef_ols      |> dplyr::filter(dv %in% unname(prop_labels)),
+  keep_vars   = vars_main,
+  caption_str = "HC1 robust SEs. 95% CI. Ordered logit AME on P(response = 1).",
+  file_path   = file.path(params$out_reg, "robustness_prop_main.png"),
+  ncol_facet  = 2,
+  height      = params$plot_height
 )
 
-# ── 7.5  Robustness comparison — reciprocity DVs ──────────────
+# ── 7.7  Robustness comparison — reciprocity DVs (main) ───────
 plot_robustness(
-  coef_polr  = coef_polr_top |> dplyr::filter(dv %in% unname(recip_labels)),
-  coef_ols   = coef_ols      |> dplyr::filter(dv %in% unname(recip_labels)),
-  title_str  = "Reciprocity attitudes — Ordered logit AME vs OLS",
-  file_path  = file.path(params$out_reg, "robustness_recip_polr_vs_ols.png"),
-  ncol_facet = 2,
-  height     = params$plot_height
+  coef_polr   = coef_polr_top |> dplyr::filter(dv %in% unname(recip_labels)),
+  coef_ols    = coef_ols      |> dplyr::filter(dv %in% unname(recip_labels)),
+  keep_vars   = vars_main,
+  caption_str = "HC1 robust SEs. 95% CI. Ordered logit AME on P(response = 1).",
+  file_path   = file.path(params$out_reg, "robustness_recip_main.png"),
+  ncol_facet  = 2,
+  height      = params$plot_height - 1
+)
+
+# ── 7.8  Robustness comparison — proportionality DVs (appendix)
+plot_robustness(
+  coef_polr   = coef_polr_top |> dplyr::filter(dv %in% unname(prop_labels)),
+  coef_ols    = coef_ols      |> dplyr::filter(dv %in% unname(prop_labels)),
+  keep_vars   = NULL,
+  caption_str = "Appendix. HC1 robust SEs. 95% CI. Ordered logit AME on P(response = 1).",
+  file_path   = file.path(params$out_reg, "robustness_prop_appendix.png"),
+  ncol_facet  = 2,
+  height      = params$plot_height + 3
+)
+
+# ── 7.9  Robustness comparison — reciprocity DVs (appendix) ───
+plot_robustness(
+  coef_polr   = coef_polr_top |> dplyr::filter(dv %in% unname(recip_labels)),
+  coef_ols    = coef_ols      |> dplyr::filter(dv %in% unname(recip_labels)),
+  keep_vars   = NULL,
+  caption_str = "Appendix. HC1 robust SEs. 95% CI. Ordered logit AME on P(response = 1).",
+  file_path   = file.path(params$out_reg, "robustness_recip_appendix.png"),
+  ncol_facet  = 2,
+  height      = params$plot_height + 2
 )
 
 
@@ -949,59 +1060,30 @@ modelsummary(
 # ==============================================================
 
 # ── 9.1  Brant test — proportional odds assumption ────────────
-#
-#   The Brant test evaluates whether the proportional odds
-#   assumption holds for each predictor in the ordered logit.
-#   A significant result (p < 0.05) for a given term indicates
-#   that the log-odds ratio is not constant across response
-#   thresholds, violating the assumption. The omnibus test
-#   assesses the assumption globally across all predictors.
-#
-#   Note: brant() requires the model to be fitted with polr()
-#   and does not support HC1 robust SEs — this is a diagnostic
-#   only. If violations are found, consider a partial proportional
-#   odds model (vglm with cumulative family) or report the OLS
-#   robustness check as the primary specification.
-#
-#   Requires the brant package.
-
+#   brant() requires the model data to be available in the global
+#   environment. We refit plain polr models on the numeric DVs
+#   (not the _ord versions) solely for this diagnostic.
 library(brant)
 
-brant_results <- map2_dfr(polr_models, names(polr_models), function(model, dv_label) {
-  bt <- tryCatch(
-    brant(model),
-    error = function(e) NULL
-  )
-  if (is.null(bt)) {
-    tibble(dv = dv_label, term = "ERROR", chi_sq = NA, df = NA, p_value = NA)
-  } else {
-    as.data.frame(bt) |>
-      rownames_to_column("term") |>
-      as_tibble() |>
-      rename(chi_sq = X2, df = df, p_value = p) |>
-      mutate(
-        dv  = dv_label,
-        sig = case_when(
-          p_value < 0.001 ~ "***", p_value < 0.01 ~ "**",
-          p_value < 0.05  ~ "*",   p_value < 0.10 ~ ".", TRUE ~ ""
-        )
-      ) |>
-      dplyr::select(dv, term, chi_sq, df, p_value, sig)
-  }
-})
-
 cat("\n========== BRANT TEST — PROPORTIONAL ODDS ASSUMPTION ==========\n")
-cat("Significant results (p < 0.05) indicate a violation for that term/DV.\n\n")
-brant_results |>
-  dplyr::filter(!is.na(p_value)) |>
-  mutate(across(c(chi_sq, p_value), ~ round(.x, 3))) |>
-  print(n = Inf)
-
-write.csv(
-  brant_results |> mutate(across(c(chi_sq, p_value), ~ round(.x, 3))),
-  file.path(params$out_reg, "brant_test_fairness.csv"),
-  row.names = FALSE
-)
+for (v in all_dv_vars) {
+  dv_label <- all_dv_labels[[v]]
+  cat("\n---", dv_label, "---\n")
+  brant_data <- df |>
+    dplyr::select(all_of(c(v, all.vars(as.formula(paste("~", rhs)))))) |>
+    drop_na()
+  brant_data[[v]] <- factor(brant_data[[v]], ordered = TRUE)
+  brant_model <- MASS::polr(
+    as.formula(paste(v, "~", rhs)),
+    data  = brant_data,
+    Hess  = TRUE
+  )
+  tryCatch(
+    print(brant(brant_model)),
+    error   = function(e) cat("ERROR:", conditionMessage(e), "\n"),
+    warning = function(w) cat("WARNING:", conditionMessage(w), "\n")
+  )
+}
 
 cat("\n========== MODEL FIT — ORDERED LOGIT (McFadden pseudo-R2) ==========\n")
 print(fit_polr)
@@ -1038,18 +1120,27 @@ cat("\nOverall sign agreement rate (both-significant terms):",
     round(mean(check_signs$sign_agree[check_signs$both_sig], na.rm = TRUE), 3), "\n")
 
 cat("\n========== OUTPUT FILES ==========\n")
-cat("Descriptive CSV:                  ", file.path(params$out_desc, "mean_response_by_region.csv"), "\n")
-cat("Descriptive LaTeX table:          ", file.path(params$out_desc, "table_desc_fairness.tex"), "\n")
-cat("AME all levels CSV:               ", file.path(params$out_reg,  "AME_all_levels_fairness.csv"), "\n")
-cat("Brant test CSV:                   ", file.path(params$out_reg,  "brant_test_fairness.csv"), "\n")
-cat("Model fit — polr:                 ", file.path(params$out_reg,  "fit_polr_fairness.csv"), "\n")
-cat("Model fit — OLS:                  ", file.path(params$out_reg,  "fit_ols_fairness.csv"), "\n")
-cat("Reg table prop polr:              ", file.path(params$out_reg,  "regtable_prop_polr_logodds.txt"), "\n")
-cat("Reg table recip polr:             ", file.path(params$out_reg,  "regtable_recip_polr_logodds.txt"), "\n")
-cat("Reg table prop OLS:               ", file.path(params$out_reg,  "regtable_prop_ols.txt"), "\n")
-cat("Reg table recip OLS:              ", file.path(params$out_reg,  "regtable_recip_ols.txt"), "\n")
-cat("Reg table prop polr (no region):  ", file.path(params$out_reg,  "regtable_prop_polr_noregion.txt"), "\n")
-cat("Reg table recip polr (no region): ", file.path(params$out_reg,  "regtable_recip_polr_noregion.txt"), "\n")
-cat("Reg table prop OLS (no region):   ", file.path(params$out_reg,  "regtable_prop_ols_noregion.txt"), "\n")
-cat("Reg table recip OLS (no region):  ", file.path(params$out_reg,  "regtable_recip_ols_noregion.txt"), "\n")
+cat("Descriptive CSV:                      ", file.path(params$out_desc, "mean_response_by_region.csv"), "\n")
+cat("Descriptive LaTeX table:              ", file.path(params$out_desc, "table_desc_fairness.tex"), "\n")
+cat("AME all levels CSV:                   ", file.path(params$out_reg,  "AME_all_levels_fairness.csv"), "\n")
+cat("Brant test CSV:                       ", file.path(params$out_reg,  "brant_test_fairness.csv"), "\n")
+cat("Model fit — polr:                     ", file.path(params$out_reg,  "fit_polr_fairness.csv"), "\n")
+cat("Model fit — OLS:                      ", file.path(params$out_reg,  "fit_ols_fairness.csv"), "\n")
+cat("Coef plot prop polr (main):           ", file.path(params$out_reg,  "coef_prop_polr_main.png"), "\n")
+cat("Coef plot recip polr (main):          ", file.path(params$out_reg,  "coef_recip_polr_main.png"), "\n")
+cat("Coef plot prop polr (appendix):       ", file.path(params$out_reg,  "coef_prop_polr_appendix.png"), "\n")
+cat("Coef plot recip polr (appendix):      ", file.path(params$out_reg,  "coef_recip_polr_appendix.png"), "\n")
+cat("Coef plot all OLS (appendix):         ", file.path(params$out_reg,  "coef_all_ols_appendix.png"), "\n")
+cat("Robustness prop (main):               ", file.path(params$out_reg,  "robustness_prop_main.png"), "\n")
+cat("Robustness recip (main):              ", file.path(params$out_reg,  "robustness_recip_main.png"), "\n")
+cat("Robustness prop (appendix):           ", file.path(params$out_reg,  "robustness_prop_appendix.png"), "\n")
+cat("Robustness recip (appendix):          ", file.path(params$out_reg,  "robustness_recip_appendix.png"), "\n")
+cat("Reg table prop polr:                  ", file.path(params$out_reg,  "regtable_prop_polr_logodds.txt"), "\n")
+cat("Reg table recip polr:                 ", file.path(params$out_reg,  "regtable_recip_polr_logodds.txt"), "\n")
+cat("Reg table prop OLS:                   ", file.path(params$out_reg,  "regtable_prop_ols.txt"), "\n")
+cat("Reg table recip OLS:                  ", file.path(params$out_reg,  "regtable_recip_ols.txt"), "\n")
+cat("Reg table prop polr (no region):      ", file.path(params$out_reg,  "regtable_prop_polr_noregion.txt"), "\n")
+cat("Reg table recip polr (no region):     ", file.path(params$out_reg,  "regtable_recip_polr_noregion.txt"), "\n")
+cat("Reg table prop OLS (no region):       ", file.path(params$out_reg,  "regtable_prop_ols_noregion.txt"), "\n")
+cat("Reg table recip OLS (no region):      ", file.path(params$out_reg,  "regtable_recip_ols_noregion.txt"), "\n")
 cat("\n========== PIPELINE COMPLETE ==========\n")
