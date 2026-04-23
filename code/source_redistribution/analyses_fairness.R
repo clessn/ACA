@@ -55,7 +55,6 @@ dir.create(params$out_reg,  recursive = TRUE, showWarnings = FALSE)
 # ── 0.4  Load data ────────────────────────────────────────────
 df <- read.csv(params$data_path)
 
-
 # ==============================================================
 # 1. VARIABLE CONSTRUCTION
 # ==============================================================
@@ -356,7 +355,7 @@ plot_coefs <- function(coef_df, caption_str, file_path,
   
   coef_df |>
     mutate(
-      term = recode(term, !!!term_labels),
+      term = dplyr::recode(term, !!!term_labels), 
       dv   = factor(dv, levels = intersect(dv_order, unique(dv)))
     ) |>
     ggplot(aes(x = estimate, y = reorder(term, estimate), color = direction)) +
@@ -405,7 +404,7 @@ plot_robustness <- function(coef_polr, coef_ols, caption_str, file_path,
   
   df_plot |>
     mutate(
-      term = recode(term, !!!term_labels),
+      term = dplyr::recode(term, !!!term_labels), 
       dv   = factor(dv, levels = intersect(dv_order, unique(dv)))
     ) |>
     ggplot(aes(x = estimate, y = reorder(term, estimate),
@@ -1095,7 +1094,7 @@ cat("\n========== MOST CONSISTENTLY SIGNIFICANT PREDICTORS (polr top-AME) ======
 coef_polr_top |>
   dplyr::filter(sig %in% c("*", "**", "***")) |>
   count(term, sort = TRUE) |>
-  mutate(term = recode(term, !!!term_labels)) |>
+  mutate(term = dplyr::recode(term, !!!term_labels)) |>
   print(n = 20)
 
 cat("\n========== SIGN AGREEMENT: ordered logit AME vs OLS ==========\n")
@@ -1118,6 +1117,22 @@ check_signs |>
 
 cat("\nOverall sign agreement rate (both-significant terms):",
     round(mean(check_signs$sign_agree[check_signs$both_sig], na.rm = TRUE), 3), "\n")
+
+# ── 9.2  Multicollinearity diagnostics (VIF) ──────────────────
+library(car)
+
+cat("\n========== MULTICOLLINEARITY (VIF) ==========\n")
+
+# Build a linear model with identical RHS
+vif_formula <- as.formula(paste("as.numeric(", all_dv_vars[1], ") ~", rhs))
+
+vif_data <- df |>
+  dplyr::select(all_of(c(all_dv_vars[1], all.vars(as.formula(paste("~", rhs)))))) |>
+  drop_na()
+
+vif_model <- lm(vif_formula, data = vif_data)
+
+print(vif(vif_model))
 
 cat("\n========== OUTPUT FILES ==========\n")
 cat("Descriptive CSV:                      ", file.path(params$out_desc, "mean_response_by_region.csv"), "\n")
