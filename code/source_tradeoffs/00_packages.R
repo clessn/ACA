@@ -13,7 +13,10 @@ library(lmtest)
 library(ggthemes)
 library(RColorBrewer)
 library(ggpattern)
+library(flextable)
+library(officer)
 
 # Resolve conflicts with MASS
 select <- dplyr::select
 filter <- dplyr::filter
+recode <- dplyr::recode

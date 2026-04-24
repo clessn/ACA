@@ -14,7 +14,6 @@ ivs <- list(
   list(type="binary",  var="alberta_bin",              low=0, high=1, label="Alberta (No=0 vs Yes=1)"),
   list(type="binary",  var="ontario_bin",              low=0, high=1, label="Ontario (No=0 vs Yes=1)"),
   list(type="binary",  var="region_eastcoast_bin",     low=0, high=1, label="Atlantic Canada (No=0 vs Yes=1)"),
-  list(type="binary",  var="ses_french_bin",           low=0, high=1, label="French-speaking (No=0 vs Yes=1)"),
   # ── Socio-economic ────────────────────────────────────────
   list(type="binary",  var="incomeHigh_bin",           low=0, high=1, label="High Income (No=0 vs Yes=1)"),
   list(type="binary",  var="ses_male_bin",             low=0, high=1, label="Gender (Female=0 vs Male=1)"),
@@ -38,7 +37,6 @@ ivs <- list(
 # Ontario is the omitted region reference category
 
 rhs <- "ideo_define_QC_first_bin + quebec_bin + alberta_bin + region_eastcoast_bin +
-        ses_french_bin +
         incomeHigh_bin + ses_male_bin + age18_34_bin + age55plus_bin +
         univ_educ_bin + employ_fulltime_bin + children_bin +
         trust_inst_fed_bin + trust_inst_prov_bin +
@@ -68,7 +66,6 @@ term_labels <- c(
   "quebec_bin"               = "Quebec",
   "alberta_bin"              = "Alberta",
   "region_eastcoast_bin"     = "Atlantic Canada",
-  "ses_french_bin"           = "French-speaking",
   # Institutional trust
   "trust_inst_fed_bin"       = "Trust: Federal government",
   "trust_inst_prov_bin"      = "Trust: Provincial government"
@@ -150,7 +147,7 @@ imp_policies  <- str_extract(imp_bin_vars, "(?<=budget_imp_).*(?=_bin)")
 imp_bin_df    <- tibble(
   var    = imp_bin_vars,
   policy = imp_policies,
-  label  = recode(imp_policies, !!!imp_policy_labels, .default = imp_policies)
+  label = dplyr::recode(imp_policies, !!!imp_policy_labels, .default = imp_policies)
 )
 
 prio_num_vars <- df |> dplyr::select(matches("^budget_prio_[a-z]+$")) |> names()
@@ -158,7 +155,7 @@ prio_policies <- str_remove(prio_num_vars, "budget_prio_")
 prio_num_df   <- tibble(
   var    = prio_num_vars,
   policy = prio_policies,
-  label  = recode(prio_policies, !!!prio_policy_labels, .default = prio_policies)
+  label = dplyr::recode(prio_policies, !!!prio_policy_labels, .default = prio_policies)
 )
 
 prio_pref_vars    <- df |> dplyr::select(matches("^budget_prio_.*_pref$"))    |> names()

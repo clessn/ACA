@@ -19,7 +19,6 @@
 #   9.  Diagnostics
 # ==============================================================
 
-
 # ==============================================================
 # 0.  SETUP
 # ==============================================================
@@ -55,17 +54,16 @@ dir.create(params$out_reg,  recursive = TRUE, showWarnings = FALSE)
 # ── 0.4  Load data ────────────────────────────────────────────
 df <- read.csv(params$data_path)
 
+
 # ==============================================================
 # 1. VARIABLE CONSTRUCTION
 # ==============================================================
 
 # ── 1.1 Binary independent variables ───────────────────────────
-
 df$univ_educ_bin  <- as.integer(df$educ_group == "educUniv")
 df$incomeHigh_bin <- as.integer(df$ses_income3Cat == "High")
 
 # ── 1.2 Factor ordering (for descriptives only) ────────────────
-
 df$educ_group <- factor(df$educ_group,
                         levels = c("educBHS", "educHS", "educUniv"))
 
@@ -76,6 +74,7 @@ df$ses_region_cat <- factor(
   dplyr::recode(df$ses_region_cat, "East Coast" = "Atlantic Canada"),
   levels = c("Ontario", "Quebec", "Alberta", "Atlantic Canada")
 )
+
 
 # ==============================================================
 # 2.  DV DEFINITIONS AND IV LIST
@@ -131,32 +130,30 @@ for (v in all_dv_vars) {
     ordered = TRUE
   )
 }
-
 dv_ord_vars <- paste0(all_dv_vars, "_ord")
 
 # ── 2.5  IV list ──────────────────────────────────────────────
 #   Ontario is the omitted region reference category.
 ivs <- list(
   # ── Socio-economic ────────────────────────────────────────────
-  list(type = "binary", var = "incomeHigh_bin",             low = 0,  high = 1,  label = "Income (High vs low/mid)"),
-  list(type = "binary",  var = "ses_male_bin",               low = 0, high = 1, label = "Gender (Female=0 vs Male=1)"),
-  list(type = "numeric", var = "ses_age",                    low = 30, high = 60, label = "Age (30 vs 60)"),
-  list(type = "binary", var = "univ_educ_bin",              low = 0,  high = 1,  label = "Education (Some university vs below)"),
-  list(type = "binary",  var = "employ_fulltime_bin",        low = 0, high = 1, label = "Employed Full-Time (No=0 vs Yes=1)"),
-  list(type = "binary",  var = "ses_citizenYes_bin",         low = 0, high = 1, label = "Citizen (No=0 vs Yes=1)"),
+  list(type = "binary",  var = "incomeHigh_bin",             low = 0,  high = 1,  label = "Income (High vs low/mid)"),
+  list(type = "binary",  var = "ses_male_bin",               low = 0,  high = 1,  label = "Gender (Female=0 vs Male=1)"),
+  list(type = "numeric", var = "ses_age",                    low = 30, high = 60, label = "Age"),
+  list(type = "binary",  var = "univ_educ_bin",              low = 0,  high = 1,  label = "Education (Some university vs below)"),
+  list(type = "binary",  var = "employ_fulltime_bin",        low = 0,  high = 1,  label = "Employed Full-Time (No=0 vs Yes=1)"),
+  list(type = "binary",  var = "ses_citizenYes_bin",         low = 0,  high = 1,  label = "Citizen (No=0 vs Yes=1)"),
   # ── Ideology & political interest ─────────────────────────────
   list(type = "numeric", var = "ideo_right_num",             low = 0,  high = 1,  label = "Ideology: Left (0) vs Right (1)"),
   list(type = "numeric", var = "ideo_interest_politics_num", low = 0,  high = 1,  label = "Political Interest: Low (0) vs High (1)"),
   # ── Region & identity ─────────────────────────────────────────
-  list(type = "binary",  var = "ideo_define_QC_first_bin",   low = 0, high = 1, label = "Quebecker First (No=0 vs Yes=1)"),
-  list(type = "binary",  var = "quebec_bin",                 low = 0, high = 1, label = "Quebec (No=0 vs Yes=1)"),
-  list(type = "binary",  var = "alberta_bin",                low = 0, high = 1, label = "Alberta (No=0 vs Yes=1)"),
-  list(type = "binary",  var = "region_eastcoast_bin",       low = 0, high = 1, label = "Atlantic Canada (No=0 vs Yes=1)"),
-  list(type = "binary",  var = "ses_french_bin",             low = 0, high = 1, label = "French-speaking (No=0 vs Yes=1)"),
+  list(type = "binary",  var = "ideo_define_QC_first_bin",   low = 0,  high = 1,  label = "Quebecker First (No=0 vs Yes=1)"),
+  list(type = "binary",  var = "quebec_bin",                 low = 0,  high = 1,  label = "Quebec (No=0 vs Yes=1)"),
+  list(type = "binary",  var = "alberta_bin",                low = 0,  high = 1,  label = "Alberta (No=0 vs Yes=1)"),
+  list(type = "binary",  var = "region_eastcoast_bin",       low = 0,  high = 1,  label = "Atlantic Canada (No=0 vs Yes=1)"),
   # ── Institutional / social trust ──────────────────────────────
-  list(type = "binary",  var = "trust_social_bin",           low = 0, high = 1, label = "Social Trust (Low=0 vs High=1)"),
-  list(type = "binary",  var = "trust_inst_fed_bin",         low = 0, high = 1, label = "Trust: Federal institutions (Low=0 vs High=1)"),
-  list(type = "binary",  var = "trust_inst_prov_bin",        low = 0, high = 1, label = "Trust: Provincial institutions (Low=0 vs High=1)")
+  list(type = "binary",  var = "trust_social_bin",           low = 0,  high = 1,  label = "Social Trust (Low=0 vs High=1)"),
+  list(type = "binary",  var = "trust_inst_fed_bin",         low = 0,  high = 1,  label = "Trust: Federal institutions (Low=0 vs High=1)"),
+  list(type = "binary",  var = "trust_inst_prov_bin",        low = 0,  high = 1,  label = "Trust: Provincial institutions (Low=0 vs High=1)")
 )
 
 # ── 2.6  RHS formula string ───────────────────────────────────
@@ -165,7 +162,6 @@ rhs <- "incomeHigh_bin + ses_male_bin + ses_age + univ_educ_bin +
         employ_fulltime_bin + ses_citizenYes_bin +
         ideo_right_num + ideo_interest_politics_num +
         ideo_define_QC_first_bin + quebec_bin + alberta_bin + region_eastcoast_bin +
-        ses_french_bin +
         trust_social_bin + trust_inst_fed_bin + trust_inst_prov_bin"
 
 # ── 2.6b  RHS without regional variables (robustness check) ──
@@ -194,34 +190,46 @@ term_labels <- c(
   "quebec_bin"                 = "Quebec",
   "alberta_bin"                = "Alberta",
   "region_eastcoast_bin"       = "Atlantic Canada",
-  "ses_french_bin"             = "French-speaking",
   # Institutional / social trust
   "trust_social_bin"           = "Social Trust",
   "trust_inst_fed_bin"         = "Trust: Federal institutions",
   "trust_inst_prov_bin"        = "Trust: Provincial institutions"
 )
 
-# ── 2.8  Terms hidden from MAIN figures (run as controls, not shown) ──────────
-#   These variables are included in all model specifications but excluded
-#   from the main coefficient plots to reduce visual clutter for the reader.
-#   They remain visible in appendix / no-region plots and all regression tables.
-terms_hide_main <- c("ses_citizenYes_bin")
-
-# ── 2.9  Predictor subset shown in MAIN figures ───────────────
-#   These are the terms displayed in the main coefficient plots.
-#   All other IVs run as controls but appear only in appendix
-#   plots and regression tables.
+# ── 2.8  Predictor subset shown in MAIN figures ───────────────
+#   These are the terms displayed in the main coefficient plots
+#   (sections 7.1 and 7.2). All other IVs run as controls but
+#   appear only in appendix plots (keep_vars = NULL) and regression
+#   tables.
+#
+#   ses_citizenYes_bin is included in all model specifications via
+#   rhs, but intentionally absent from vars_main: it is a demographic
+#   control of limited theoretical interest and its near-uniformity
+#   in the sample makes the estimate unreliable for substantive
+#   interpretation. It is fully visible in the appendix plots and
+#   all regression tables.
+#
+#   NOTE: ses_french was removed from all specifications due to high
+#   multicollinearity with quebec_bin (VIF >> 5). The three region
+#   dummies (quebec_bin, alberta_bin, region_eastcoast_bin) are
+#   retained and shown in the main figures.
 vars_main <- c(
+  # Socio-economic
   "incomeHigh_bin", "ses_male_bin", "ses_age", "univ_educ_bin",
   "employ_fulltime_bin",
+  # Ideology & political interest
   "ideo_right_num", "ideo_interest_politics_num",
-  "trust_social_bin", "trust_inst_fed_bin", "trust_inst_prov_bin",
-  "quebec_bin", "ideo_define_QC_first_bin"
+  # Region & identity — all three dummies shown in main figures
+  "quebec_bin", "alberta_bin", "region_eastcoast_bin",
+  "ideo_define_QC_first_bin",
+  # Institutional / social trust
+  "trust_social_bin", "trust_inst_fed_bin", "trust_inst_prov_bin"
 )
+
 region_colours <- c(
-  "Ontario"    = "#d6604d",
-  "Quebec"     = "#2166ac",
-  "Alberta"    = "#4dac26",
+  "Ontario"         = "#d6604d",
+  "Quebec"          = "#2166ac",
+  "Alberta"         = "#4dac26",
   "Atlantic Canada" = "#984ea3"
 )
 
@@ -240,7 +248,6 @@ level_labels <- c(
 
 # ── 3.1  HC1 robust variance-covariance ───────────────────────
 robust_vcov <- function(model) vcovHC(model, type = "HC1")
-
 
 # ── 3.2  CPP journal theme ────────────────────────────────────
 #   Clean, print-friendly theme suited to Canadian Public Policy.
@@ -263,7 +270,6 @@ theme_cpp <- function(base_size = 11) {
     )
 }
 
-
 # ── 3.3  Ordered logit AME extractor ─────────────────────────
 #   Re-fits polr() on complete cases for numerical stability,
 #   computes HC1 avg_slopes(), and returns a list:
@@ -276,8 +282,8 @@ tidy_polr_slopes <- function(model, dv_label, data = df) {
   model_fit  <- MASS::polr(fml, data = model_data, Hess = TRUE)
   
   slopes_all <- avg_slopes(model_fit,
-                           vcov       = \(x) sandwich::vcovHC(x, type = "HC1"),
-                           newdata    = model_data) |>
+                           vcov    = \(x) sandwich::vcovHC(x, type = "HC1"),
+                           newdata = model_data) |>
     as_tibble() |>
     mutate(dv = dv_label)
   
@@ -309,7 +315,6 @@ tidy_polr_slopes <- function(model, dv_label, data = df) {
   list(top = slopes_top, full = slopes_all)
 }
 
-
 # ── 3.4  OLS AME extractor (robustness check) ─────────────────
 #   Fits OLS on the raw 0/0.33/0.66/1 scale; HC1 robust SEs.
 extract_ame_ols <- function(dv, dv_label, rhs, data = df) {
@@ -339,7 +344,6 @@ extract_ame_ols <- function(dv, dv_label, rhs, data = df) {
     )
 }
 
-
 # ── 3.5  Coefficient plot helper ──────────────────────────────
 #   keep_vars: character vector of term names to display.
 #              If NULL, all terms are shown (appendix mode).
@@ -355,7 +359,7 @@ plot_coefs <- function(coef_df, caption_str, file_path,
   
   coef_df |>
     mutate(
-      term = dplyr::recode(term, !!!term_labels), 
+      term = dplyr::recode(term, !!!term_labels),
       dv   = factor(dv, levels = intersect(dv_order, unique(dv)))
     ) |>
     ggplot(aes(x = estimate, y = reorder(term, estimate), color = direction)) +
@@ -383,7 +387,6 @@ plot_coefs <- function(coef_df, caption_str, file_path,
   invisible()
 }
 
-
 # ── 3.6  Robustness comparison plot: ordered logit AME vs OLS ─
 #   keep_vars: character vector of term names to display.
 #              If NULL, all terms are shown (appendix mode).
@@ -404,7 +407,7 @@ plot_robustness <- function(coef_polr, coef_ols, caption_str, file_path,
   
   df_plot |>
     mutate(
-      term = dplyr::recode(term, !!!term_labels), 
+      term = dplyr::recode(term, !!!term_labels),
       dv   = factor(dv, levels = intersect(dv_order, unique(dv)))
     ) |>
     ggplot(aes(x = estimate, y = reorder(term, estimate),
@@ -554,6 +557,7 @@ ggsave(
 #   proportions, would be a poorer fit for this four-level ordinal
 #   variable.
 mean_ci <- map_dfr(all_dv_vars, function(v) {
+  
   # ── By region ───────────────────────────────────────────────
   by_region <- df |>
     dplyr::filter(!is.na(.data[[v]]), !is.na(ses_region_cat)) |>
@@ -626,7 +630,6 @@ write.csv(
 #   cell shows the mean and 95% CI as "mean [lo, hi]". Proportionality
 #   and reciprocity DVs are separated by a group header row.
 #   Requires kableExtra.
-
 library(kableExtra)
 
 desc_table <- mean_ci |>
@@ -666,6 +669,152 @@ desc_table |>
     escape            = FALSE
   ) |>
   save_kable(file.path(params$out_desc, "table_desc_fairness.tex"))
+
+# ── 4.6  Median + MAD-based CI (quick check) ──────────────────
+median_ci_mad <- map_dfr(all_dv_vars, function(v) {
+  
+  by_region <- df |>
+    dplyr::filter(!is.na(.data[[v]]), !is.na(ses_region_cat)) |>
+    group_by(ses_region_cat) |>
+    summarise(
+      n      = n(),
+      median = median(.data[[v]], na.rm = TRUE),
+      mad    = mad(.data[[v]], na.rm = TRUE),
+      .groups = "drop"
+    ) |>
+    rename(region = ses_region_cat)
+  
+  all_canada <- df |>
+    dplyr::filter(!is.na(.data[[v]])) |>
+    summarise(
+      n      = n(),
+      median = median(.data[[v]], na.rm = TRUE),
+      mad    = mad(.data[[v]], na.rm = TRUE)
+    ) |>
+    mutate(region = "All Canada")
+  
+  bind_rows(by_region, all_canada) |>
+    mutate(
+      dv        = all_dv_labels[[v]],
+      dv_type   = ifelse(v %in% prop_vars, "Proportionality", "Reciprocity"),
+      se_approx = mad / sqrt(n),
+      lo        = median - qt(0.975, df = n - 1) * se_approx,
+      hi        = median + qt(0.975, df = n - 1) * se_approx,
+      region    = factor(region,
+                         levels = c("Ontario", "Quebec", "Alberta",
+                                    "Atlantic Canada", "All Canada"))
+    ) |>
+    dplyr::select(region, dv, dv_type, n, median, mad, lo, hi)
+})
+
+median_ci_mad |>
+  mutate(dv = factor(dv, levels = dv_order)) |>
+  ggplot(aes(x = median, y = region, colour = region)) +
+  geom_point(size = 3.5) +
+  geom_errorbarh(aes(xmin = lo, xmax = hi), height = 0.3) +
+  scale_colour_manual(values = c(region_colours, "All Canada" = "#636363"), guide = "none") +
+  scale_x_continuous(limits = c(0, 1), breaks = c(0, 0.33, 0.66, 1)) +
+  facet_wrap(~ dv, ncol = 2) +
+  labs(
+    x       = "Median response (0–1 scale) — robust CI (MAD-based)",
+    y       = NULL,
+    title   = "Proportionality & Reciprocity — median response by region",
+    caption = "DV scale: 0 = Unfair, 1 = Fair. Error bars = robust approximation."
+  ) +
+  theme_cpp() +
+  theme(strip.text = element_text(face = "bold"))
+
+ggsave(
+  file.path(params$out_desc, "desc_all_median_dotCI_by_region.png"),
+  width = params$plot_width, height = params$plot_height + 2,
+  dpi = params$dpi
+)
+
+write.csv(
+  median_ci_mad |> mutate(across(where(is.numeric), ~ round(.x, 3))),
+  file.path(params$out_desc, "median_response_by_region.csv"),
+  row.names = FALSE
+)
+
+# ── 4.7  Bootstrapped median CI ───────────────────────────────
+library(dplyr)
+library(purrr)
+library(tibble)
+
+set.seed(123)
+
+boot_median_ci <- function(x, n_boot = 2000) {
+  x <- x[!is.na(x)]
+  boots <- replicate(n_boot, median(sample(x, replace = TRUE)))
+  tibble(
+    median = median(x),
+    lo     = quantile(boots, 0.025),
+    hi     = quantile(boots, 0.975)
+  )
+}
+
+median_ci_boot <- map_dfr(all_dv_vars, function(v) {
+  
+  by_region <- df |>
+    filter(!is.na(.data[[v]]), !is.na(ses_region_cat)) |>
+    group_by(ses_region_cat) |>
+    summarise(
+      n   = n(),
+      res = list(boot_median_ci(.data[[v]])),
+      .groups = "drop"
+    ) |>
+    tidyr::unnest(res) |>
+    rename(region = ses_region_cat)
+  
+  all_canada <- df |>
+    filter(!is.na(.data[[v]])) |>
+    summarise(
+      n   = n(),
+      res = list(boot_median_ci(.data[[v]]))
+    ) |>
+    tidyr::unnest(res) |>
+    mutate(region = "All Canada")
+  
+  bind_rows(by_region, all_canada) |>
+    mutate(
+      dv      = all_dv_labels[[v]],
+      dv_type = ifelse(v %in% prop_vars, "Proportionality", "Reciprocity"),
+      region  = factor(region,
+                       levels = c("Ontario", "Quebec", "Alberta",
+                                  "Atlantic Canada", "All Canada"))
+    ) |>
+    select(region, dv, dv_type, n, median, lo, hi)
+})
+
+median_ci_boot |>
+  mutate(dv = factor(dv, levels = dv_order)) |>
+  ggplot(aes(x = median, y = region, colour = region)) +
+  geom_point(size = 3.5) +
+  geom_errorbarh(aes(xmin = lo, xmax = hi), height = 0.3) +
+  scale_colour_manual(values = c(region_colours, "All Canada" = "#636363"), guide = "none") +
+  scale_x_continuous(limits = c(0, 1), breaks = c(0, 0.33, 0.66, 1)) +
+  facet_wrap(~ dv, ncol = 2) +
+  labs(
+    x       = "Median response (0–1 scale) — bootstrap 95% CI",
+    y       = NULL,
+    title   = "Proportionality & Reciprocity — median response by region",
+    caption = "95% CIs computed via nonparametric bootstrap (2,000 resamples)."
+  ) +
+  theme_cpp() +
+  theme(strip.text = element_text(face = "bold"))
+
+ggsave(
+  file.path(params$out_desc, "desc_all_median_bootstrap_CI_by_region.png"),
+  width  = params$plot_width,
+  height = params$plot_height + 2,
+  dpi    = params$dpi
+)
+
+write.csv(
+  median_ci_boot |> mutate(across(where(is.numeric), ~ round(.x, 3))),
+  file.path(params$out_desc, "median_response_bootstrap_by_region.csv"),
+  row.names = FALSE
+)
 
 
 # ==============================================================
@@ -775,47 +924,54 @@ write.csv(fit_ols,
 # 7.  COEFFICIENT PLOTS
 # ==============================================================
 #
-#   Main figures (keep_vars = vars_main): core predictors shown
-#   in the article. Citizenship hidden (control only).
+#   Main figures (keep_vars = vars_main): all predictors in vars_main,
+#   which now includes the three region dummies (quebec_bin,
+#   alberta_bin, region_eastcoast_bin) and ideo_define_QC_first_bin.
+#   ses_citizenYes_bin is a control-only variable, excluded via
+#   vars_main (see section 2.8).
 #
 #   Appendix figures (keep_vars = NULL): all IVs including
-#   regional dummies, French-speaking, and citizenship.
+#   ses_citizenYes_bin.
 
 # ── 7.1  Ordered logit AME — proportionality DVs (main) ───────
+#   Regions are shown in the main figure (see vars_main, section 2.8).
 plot_coefs(
   coef_df     = coef_polr_top |> dplyr::filter(dv %in% unname(prop_labels)),
   keep_vars   = vars_main,
-  caption_str = "AME on P(response = 1). HC1 robust SEs. 95% CI.",
+  caption_str = "AME on P(response = 1). HC1 robust SEs. 95% CI. Ontario = reference region.",
   file_path   = file.path(params$out_reg, "coef_prop_polr_main.png"),
   ncol_facet  = 2,
   height      = params$plot_height
 )
 
 # ── 7.2  Ordered logit AME — reciprocity DVs (main) ───────────
+#   Regions are shown in the main figure (see vars_main, section 2.8).
 plot_coefs(
   coef_df     = coef_polr_top |> dplyr::filter(dv %in% unname(recip_labels)),
   keep_vars   = vars_main,
-  caption_str = "AME on P(response = 1). HC1 robust SEs. 95% CI.",
+  caption_str = "AME on P(response = 1). HC1 robust SEs. 95% CI. Ontario = reference region.",
   file_path   = file.path(params$out_reg, "coef_recip_polr_main.png"),
   ncol_facet  = 2,
   height      = params$plot_height - 1
 )
 
 # ── 7.3  Ordered logit AME — proportionality DVs (appendix) ───
+#   keep_vars = NULL → all terms shown, including ses_citizenYes_bin.
 plot_coefs(
   coef_df     = coef_polr_top |> dplyr::filter(dv %in% unname(prop_labels)),
   keep_vars   = NULL,
-  caption_str = "Appendix. AME on P(response = 1). HC1 robust SEs. 95% CI.",
+  caption_str = "Appendix. AME on P(response = 1). HC1 robust SEs. 95% CI. Ontario = reference region.",
   file_path   = file.path(params$out_reg, "coef_prop_polr_appendix.png"),
   ncol_facet  = 2,
   height      = params$plot_height + 3
 )
 
 # ── 7.4  Ordered logit AME — reciprocity DVs (appendix) ───────
+#   keep_vars = NULL → all terms shown, including ses_citizenYes_bin.
 plot_coefs(
   coef_df     = coef_polr_top |> dplyr::filter(dv %in% unname(recip_labels)),
   keep_vars   = NULL,
-  caption_str = "Appendix. AME on P(response = 1). HC1 robust SEs. 95% CI.",
+  caption_str = "Appendix. AME on P(response = 1). HC1 robust SEs. 95% CI. Ontario = reference region.",
   file_path   = file.path(params$out_reg, "coef_recip_polr_appendix.png"),
   ncol_facet  = 2,
   height      = params$plot_height + 2
@@ -837,7 +993,7 @@ plot_robustness(
   coef_polr   = coef_polr_top |> dplyr::filter(dv %in% unname(prop_labels)),
   coef_ols    = coef_ols      |> dplyr::filter(dv %in% unname(prop_labels)),
   keep_vars   = vars_main,
-  caption_str = "HC1 robust SEs. 95% CI. Ordered logit AME on P(response = 1).",
+  caption_str = "HC1 robust SEs. 95% CI. Ordered logit AME on P(response = 1). Ontario = reference region.",
   file_path   = file.path(params$out_reg, "robustness_prop_main.png"),
   ncol_facet  = 2,
   height      = params$plot_height
@@ -848,7 +1004,7 @@ plot_robustness(
   coef_polr   = coef_polr_top |> dplyr::filter(dv %in% unname(recip_labels)),
   coef_ols    = coef_ols      |> dplyr::filter(dv %in% unname(recip_labels)),
   keep_vars   = vars_main,
-  caption_str = "HC1 robust SEs. 95% CI. Ordered logit AME on P(response = 1).",
+  caption_str = "HC1 robust SEs. 95% CI. Ordered logit AME on P(response = 1). Ontario = reference region.",
   file_path   = file.path(params$out_reg, "robustness_recip_main.png"),
   ncol_facet  = 2,
   height      = params$plot_height - 1
@@ -953,10 +1109,10 @@ modelsummary(
 # ==============================================================
 #   Re-runs ordered logit and OLS excluding all regional variables
 #   (quebec_bin, alberta_bin, region_eastcoast_bin,
-#   ideo_define_QC_first_bin, ses_french_bin).
+#   ideo_define_QC_first_bin).
 #   Presented as a secondary specification to verify that
 #   individual-level results are stable when regional variables
-#   are excluded given null regional effects in the main models.
+#   are excluded.
 
 # ── 8b.1  Ordered logit — no-region models ────────────────────
 polr_models_nr <- dv_ord_vars |>
@@ -1065,6 +1221,7 @@ modelsummary(
 library(brant)
 
 cat("\n========== BRANT TEST — PROPORTIONAL ODDS ASSUMPTION ==========\n")
+
 for (v in all_dv_vars) {
   dv_label <- all_dv_labels[[v]]
   cat("\n---", dv_label, "---\n")
@@ -1079,7 +1236,7 @@ for (v in all_dv_vars) {
   )
   tryCatch(
     print(brant(brant_model)),
-    error   = function(e) cat("ERROR:", conditionMessage(e), "\n"),
+    error   = function(e) cat("ERROR:",   conditionMessage(e), "\n"),
     warning = function(w) cat("WARNING:", conditionMessage(w), "\n")
   )
 }
@@ -1122,23 +1279,17 @@ cat("\nOverall sign agreement rate (both-significant terms):",
 library(car)
 
 cat("\n========== MULTICOLLINEARITY (VIF) ==========\n")
-
-# Build a linear model with identical RHS
 vif_formula <- as.formula(paste("as.numeric(", all_dv_vars[1], ") ~", rhs))
-
-vif_data <- df |>
+vif_data    <- df |>
   dplyr::select(all_of(c(all_dv_vars[1], all.vars(as.formula(paste("~", rhs)))))) |>
   drop_na()
-
 vif_model <- lm(vif_formula, data = vif_data)
-
 print(vif(vif_model))
 
 cat("\n========== OUTPUT FILES ==========\n")
 cat("Descriptive CSV:                      ", file.path(params$out_desc, "mean_response_by_region.csv"), "\n")
 cat("Descriptive LaTeX table:              ", file.path(params$out_desc, "table_desc_fairness.tex"), "\n")
 cat("AME all levels CSV:                   ", file.path(params$out_reg,  "AME_all_levels_fairness.csv"), "\n")
-cat("Brant test CSV:                       ", file.path(params$out_reg,  "brant_test_fairness.csv"), "\n")
 cat("Model fit — polr:                     ", file.path(params$out_reg,  "fit_polr_fairness.csv"), "\n")
 cat("Model fit — OLS:                      ", file.path(params$out_reg,  "fit_ols_fairness.csv"), "\n")
 cat("Coef plot prop polr (main):           ", file.path(params$out_reg,  "coef_prop_polr_main.png"), "\n")

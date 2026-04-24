@@ -21,8 +21,8 @@ params <- list(
   plot_width  = 14,
   plot_height = 10,
   out_graphs  = "graphs",
-  out_desc    = "graphs/descriptives",
-  out_reg     = "graphs/regressions",
+  out_desc    = "graphs/descriptives_noFrench",
+  out_reg     = "graphs/regressions_noFrench",
   data_path   = "data/clean_df_valid.csv"
 )
 
@@ -31,17 +31,17 @@ dir.create(params$out_desc, recursive = TRUE, showWarnings = FALSE)
 dir.create(params$out_reg,  recursive = TRUE, showWarnings = FALSE)
 
 # ── Source modules in order ────────────────────────────────────
-source("code/source/00_packages.R")
-source("code/source/01_data_prep.R")
-source("code/source/02_helpers.R")
-source("code/source/03_variable_definitions.R")
-source("code/source/04_descriptives.R")
-source("code/source/05_regressions_imp.R")
-source("code/source/06_regressions_prio.R")
-source("code/source/07_regressions_tradeoff.R")
-source("code/source/08_regressions_intense.R")
-source("code/source/09_regressions_uc.R")
-source("code/source/11_appendix_tables.R")
+source("code/source_tradeoffs/00_packages.R")
+source("code/source_tradeoffs/01_data_prep.R")
+source("code/source_tradeoffs/02_helpers.R")
+source("code/source_tradeoffs/03_variable_definitions.R")
+source("code/source_tradeoffs/04_descriptives.R")
+source("code/source_tradeoffs/05_regressions_imp.R")
+source("code/source_tradeoffs/06_regressions_prio.R")
+source("code/source_tradeoffs/07_regressions_tradeoff.R")
+source("code/source_tradeoffs/08_regressions_intense.R")
+source("code/source_tradeoffs/09_regressions_uc.R")
+source("code/source_tradeoffs/11_appendix_tables.R")
 
 cat("\n========== PIPELINE COMPLETE ==========\n")
 cat("All outputs saved to:", params$out_graphs, "\n")
