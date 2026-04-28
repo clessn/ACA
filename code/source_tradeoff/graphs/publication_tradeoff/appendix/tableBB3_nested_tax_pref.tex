@@ -1,0 +1,55 @@
+\begin{table}
+\centering
+\begin{talltblr}[         %% tabularray outer open
+caption={Nested Logit — Taxation Preferences (First-Choice Preference)},
+note{}={Binary logit. Log-odds coefficients. HC1 robust SEs in parentheses. Sample held constant across M1--M4 (listwise deletion on union of all RHS variables). Ontario = reference region. M1 = Quebec + other regions + demographics. M2 = M1 + Qu\textbackslash{}'ebecois-first identity. M3 = M2 + ideology (right scale) + partisanship (Liberal, Conservative, federal left vote, provincial left vote). M4 = M3 + federal institutional trust + provincial institutional trust. * \$p<0.05\$, ** \$p<0.01\$, *** \$p<0.001\$},
+]                     %% tabularray outer close
+{                     %% tabularray inner open
+colspec={Q[]Q[]Q[]Q[]Q[]Q[]Q[]Q[]Q[]Q[]Q[]Q[]Q[]Q[]Q[]Q[]Q[]},
+column{2-17}={}{halign=c,},
+column{1}={}{halign=l,},
+hline{38}={1-17}{solid, black, 0.05em},
+}                     %% tabularray inner close
+\toprule
+& No increase, even if fewer services\_\_M1 & No increase, even if fewer services\_\_M2 & No increase, even if fewer services\_\_M3 & No increase, even if fewer services\_\_M4 & Sales tax increase\_\_M1 & Sales tax increase\_\_M2 & Sales tax increase\_\_M3 & Sales tax increase\_\_M4 & Income tax increase\_\_M1 & Income tax increase\_\_M2 & Income tax increase\_\_M3 & Income tax increase\_\_M4 & Wealth tax\_\_M1 & Wealth tax\_\_M2 & Wealth tax\_\_M3 & Wealth tax\_\_M4 \\ \midrule %% TinyTableHeader
+Quebec & \num{-0.096} & \num{0.010} & \num{0.018} & \num{0.014} & \num{-0.025} & \num{-0.074} & \num{-0.143} & \num{-0.140} & \num{0.037} & \num{0.060} & \num{0.063} & \num{0.073} & \num{0.149} & \num{0.109} & \num{0.108} & \num{0.104} \\
+& (\num{0.139}) & (\num{0.157}) & (\num{0.166}) & (\num{0.167}) & (\num{0.195}) & (\num{0.224}) & (\num{0.225}) & (\num{0.226}) & (\num{0.128}) & (\num{0.147}) & (\num{0.152}) & (\num{0.152}) & (\num{0.128}) & (\num{0.146}) & (\num{0.148}) & (\num{0.148}) \\
+Alberta & \num{0.054} & \num{0.054} & \num{-0.092} & \num{-0.111} & \num{-0.101} & \num{-0.101} & \num{-0.074} & \num{-0.063} & \num{0.049} & \num{0.049} & \num{0.149} & \num{0.152} & \num{0.038} & \num{0.038} & \num{0.091} & \num{0.096} \\
+& (\num{0.136}) & (\num{0.136}) & (\num{0.144}) & (\num{0.145}) & (\num{0.194}) & (\num{0.194}) & (\num{0.201}) & (\num{0.201}) & (\num{0.126}) & (\num{0.126}) & (\num{0.131}) & (\num{0.131}) & (\num{0.127}) & (\num{0.127}) & (\num{0.130}) & (\num{0.130}) \\
+Atlantic Canada & \num{-0.192} & \num{-0.192} & \num{-0.140} & \num{-0.138} & \num{-0.073} & \num{-0.073} & \num{-0.071} & \num{-0.089} & \num{0.027} & \num{0.026} & \num{-0.026} & \num{-0.014} & \num{0.080} & \num{0.080} & \num{0.057} & \num{0.044} \\
+& (\num{0.140}) & (\num{0.140}) & (\num{0.149}) & (\num{0.149}) & (\num{0.192}) & (\num{0.192}) & (\num{0.196}) & (\num{0.199}) & (\num{0.127}) & (\num{0.127}) & (\num{0.133}) & (\num{0.134}) & (\num{0.127}) & (\num{0.127}) & (\num{0.127}) & (\num{0.128}) \\
+Québécois identity first &  & \num{-0.295} & \num{-0.255} & \num{-0.270} &  & \num{0.129} & \num{0.095} & \num{0.103} &  & \num{-0.061} & \num{-0.100} & \num{-0.085} &  & \num{0.107} & \num{0.094} & \num{0.091} \\
+&  & (\num{0.207}) & (\num{0.215}) & (\num{0.215}) &  & (\num{0.285}) & (\num{0.290}) & (\num{0.291}) &  & (\num{0.187}) & (\num{0.190}) & (\num{0.191}) &  & (\num{0.186}) & (\num{0.188}) & (\num{0.189}) \\
+Income: High & \num{0.417}** & \num{0.420}** & \num{0.462}*** & \num{0.465}*** & \num{-0.064} & \num{-0.064} & \num{-0.021} & \num{-0.024} & \num{-0.530}*** & \num{-0.529}*** & \num{-0.543}*** & \num{-0.551}*** & \num{-0.214}+ & \num{-0.214}+ & \num{-0.211}+ & \num{-0.211}+ \\
+& (\num{0.130}) & (\num{0.131}) & (\num{0.138}) & (\num{0.139}) & (\num{0.186}) & (\num{0.186}) & (\num{0.188}) & (\num{0.190}) & (\num{0.125}) & (\num{0.125}) & (\num{0.129}) & (\num{0.129}) & (\num{0.124}) & (\num{0.124}) & (\num{0.125}) & (\num{0.125}) \\
+Male & \num{0.202}* & \num{0.198}* & \num{0.040} & \num{0.067} & \num{0.693}*** & \num{0.695}*** & \num{0.676}*** & \num{0.616}*** & \num{-0.035} & \num{-0.036} & \num{0.084} & \num{0.077} & \num{-0.161}+ & \num{-0.159}+ & \num{-0.106} & \num{-0.127} \\
+& (\num{0.100}) & (\num{0.100}) & (\num{0.106}) & (\num{0.107}) & (\num{0.149}) & (\num{0.149}) & (\num{0.152}) & (\num{0.152}) & (\num{0.091}) & (\num{0.092}) & (\num{0.095}) & (\num{0.096}) & (\num{0.091}) & (\num{0.092}) & (\num{0.093}) & (\num{0.094}) \\
+Age 18–34 & \num{0.138} & \num{0.140} & \num{0.125} & \num{0.150} & \num{0.562}** & \num{0.561}** & \num{0.520}** & \num{0.483}** & \num{-0.103} & \num{-0.103} & \num{-0.089} & \num{-0.090} & \num{-0.278}* & \num{-0.279}* & \num{-0.275}* & \num{-0.288}* \\
+& (\num{0.136}) & (\num{0.136}) & (\num{0.146}) & (\num{0.146}) & (\num{0.173}) & (\num{0.173}) & (\num{0.175}) & (\num{0.175}) & (\num{0.129}) & (\num{0.129}) & (\num{0.133}) & (\num{0.133}) & (\num{0.129}) & (\num{0.129}) & (\num{0.131}) & (\num{0.131}) \\
+Age 55+ & \num{-0.404}** & \num{-0.401}** & \num{-0.367}** & \num{-0.359}* & \num{-0.748}*** & \num{-0.749}*** & \num{-0.641}** & \num{-0.663}*** & \num{-0.045} & \num{-0.044} & \num{-0.054} & \num{-0.057} & \num{-0.183} & \num{-0.184} & \num{-0.194} & \num{-0.204} \\
+& (\num{0.133}) & (\num{0.133}) & (\num{0.139}) & (\num{0.141}) & (\num{0.199}) & (\num{0.199}) & (\num{0.200}) & (\num{0.202}) & (\num{0.122}) & (\num{0.122}) & (\num{0.126}) & (\num{0.127}) & (\num{0.121}) & (\num{0.121}) & (\num{0.124}) & (\num{0.124}) \\
+University education & \num{-0.247}* & \num{-0.248}* & \num{-0.079} & \num{-0.058} & \num{0.245}+ & \num{0.246}+ & \num{0.312}* & \num{0.269}+ & \num{-0.048} & \num{-0.048} & \num{-0.171}+ & \num{-0.176}+ & \num{0.087} & \num{0.087} & \num{0.027} & \num{0.011} \\
+& (\num{0.100}) & (\num{0.100}) & (\num{0.106}) & (\num{0.106}) & (\num{0.142}) & (\num{0.142}) & (\num{0.147}) & (\num{0.148}) & (\num{0.092}) & (\num{0.092}) & (\num{0.096}) & (\num{0.097}) & (\num{0.092}) & (\num{0.092}) & (\num{0.094}) & (\num{0.094}) \\
+Employed full-time & \num{-0.103} & \num{-0.104} & \num{-0.054} & \num{-0.035} & \num{-0.056} & \num{-0.055} & \num{0.023} & \num{0.003} & \num{-0.032} & \num{-0.032} & \num{-0.049} & \num{-0.057} & \num{0.098} & \num{0.099} & \num{0.092} & \num{0.088} \\
+& (\num{0.115}) & (\num{0.115}) & (\num{0.119}) & (\num{0.119}) & (\num{0.161}) & (\num{0.161}) & (\num{0.162}) & (\num{0.164}) & (\num{0.106}) & (\num{0.106}) & (\num{0.108}) & (\num{0.108}) & (\num{0.105}) & (\num{0.105}) & (\num{0.107}) & (\num{0.107}) \\
+Has children & \num{0.053} & \num{0.050} & \num{-0.085} & \num{-0.092} & \num{-0.116} & \num{-0.115} & \num{-0.114} & \num{-0.107} & \num{-0.186}+ & \num{-0.187}+ & \num{-0.092} & \num{-0.089} & \num{-0.129} & \num{-0.128} & \num{-0.081} & \num{-0.078} \\
+& (\num{0.109}) & (\num{0.109}) & (\num{0.116}) & (\num{0.117}) & (\num{0.154}) & (\num{0.154}) & (\num{0.156}) & (\num{0.156}) & (\num{0.101}) & (\num{0.101}) & (\num{0.105}) & (\num{0.105}) & (\num{0.102}) & (\num{0.102}) & (\num{0.103}) & (\num{0.103}) \\
+Ideology (Right scale) &  &  & \num{1.688}*** & \num{1.680}*** &  &  & \num{0.888}* & \num{0.831}* &  &  & \num{-1.335}*** & \num{-1.294}*** &  &  & \num{-0.534}* & \num{-0.565}* \\
+&  &  & (\num{0.280}) & (\num{0.285}) &  &  & (\num{0.370}) & (\num{0.368}) &  &  & (\num{0.249}) & (\num{0.251}) &  &  & (\num{0.236}) & (\num{0.239}) \\
+Fed. vote: Liberal &  &  & \num{-0.128} & \num{-0.044} &  &  & \num{-0.236} & \num{-0.343}+ &  &  & \num{0.117} & \num{0.075} &  &  & \num{0.068} & \num{0.034} \\
+&  &  & (\num{0.162}) & (\num{0.164}) &  &  & (\num{0.191}) & (\num{0.197}) &  &  & (\num{0.129}) & (\num{0.131}) &  &  & (\num{0.124}) & (\num{0.126}) \\
+Fed. vote: Conservative &  &  & \num{0.123} & \num{0.105} &  &  & \num{-0.751}*** & \num{-0.733}*** &  &  & \num{-0.245}+ & \num{-0.230}+ &  &  & \num{-0.149} & \num{-0.146} \\
+&  &  & (\num{0.144}) & (\num{0.145}) &  &  & (\num{0.204}) & (\num{0.205}) &  &  & (\num{0.139}) & (\num{0.139}) &  &  & (\num{0.137}) & (\num{0.137}) \\
+Fed. vote (Left scale) &  &  & \num{-0.909}** & \num{-0.906}** &  &  & \num{-0.749}* & \num{-0.792}* &  &  & \num{0.075} & \num{0.089} &  &  & \num{0.102} & \num{0.084} \\
+&  &  & (\num{0.294}) & (\num{0.297}) &  &  & (\num{0.344}) & (\num{0.348}) &  &  & (\num{0.245}) & (\num{0.245}) &  &  & (\num{0.238}) & (\num{0.239}) \\
+Prov. vote (Left scale) &  &  & \num{-0.489}** & \num{-0.446}** &  &  & \num{0.184} & \num{0.164} &  &  & \num{0.334}* & \num{0.286}* &  &  & \num{0.130} & \num{0.140} \\
+&  &  & (\num{0.157}) & (\num{0.160}) &  &  & (\num{0.215}) & (\num{0.219}) &  &  & (\num{0.140}) & (\num{0.143}) &  &  & (\num{0.136}) & (\num{0.139}) \\
+Trust: Federal government &  &  &  & \num{-0.429}** &  &  &  & \num{0.448}* &  &  &  & \num{0.262}* &  &  &  & \num{0.110} \\
+&  &  &  & (\num{0.143}) &  &  &  & (\num{0.184}) &  &  &  & (\num{0.125}) &  &  &  & (\num{0.121}) \\
+Trust: Provincial government &  &  &  & \num{0.159} &  &  &  & \num{0.030} &  &  &  & \num{-0.212}+ &  &  &  & \num{0.091} \\
+&  &  &  & (\num{0.139}) &  &  &  & (\num{0.180}) &  &  &  & (\num{0.125}) &  &  &  & (\num{0.122}) \\
+Num.Obs. & \num{2059} & \num{2059} & \num{2059} & \num{2059} & \num{2058} & \num{2058} & \num{2058} & \num{2058} & \num{2059} & \num{2059} & \num{2059} & \num{2059} & \num{2059} & \num{2059} & \num{2059} & \num{2059} \\
+Log.Lik. & \num{-1244.307} & \num{-1243.289} & \num{-1152.117} & \num{-1147.386} & \num{-738.750} & \num{-738.645} & \num{-727.600} & \num{-722.773} & \num{-1411.618} & \num{-1411.565} & \num{-1361.000} & \num{-1358.619} & \num{-1414.428} & \num{-1414.261} & \num{-1402.333} & \num{-1400.756} \\
+\bottomrule
+\end{talltblr}
+\end{table}

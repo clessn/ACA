@@ -1,0 +1,48 @@
+\begin{table}
+\centering
+\begin{talltblr}[         %% tabularray outer open
+caption={Ordered Logit — Proportionality Beliefs},
+note{}={Ordered logit (polr). Log-odds coefficients. HC1 robust SEs in parentheses. DV coded 0/0.33/0.66/1; highest level (= 1) = ``fair''. Ontario = reference region. * \$p<0.05\$, ** \$p<0.01\$, *** \$p<0.001\$},
+]                     %% tabularray outer close
+{                     %% tabularray inner open
+colspec={Q[]Q[]Q[]Q[]Q[]Q[]},
+column{2-6}={}{halign=c,},
+column{1}={}{halign=l,},
+hline{32}={1-6}{solid, black, 0.05em},
+}                     %% tabularray inner close
+\toprule
+& Equal opportunity & Rewarded for effort \& skill & Fairness of income distribution & Violating outcomes (Poor) & Violating outcomes (Rich) \\ \midrule %% TinyTableHeader
+Income: High vs Low/Mid & \num{0.404}* & \num{0.405}* & \num{0.266}* & \num{0.128} & \num{0.378}** \\
+& (\num{0.159}) & (\num{0.168}) & (\num{0.114}) & (\num{0.120}) & (\num{0.119}) \\
+Male & \num{0.264}* & \num{0.062} & \num{0.279}** & \num{0.121} & \num{-0.147} \\
+& (\num{0.123}) & (\num{0.124}) & (\num{0.086}) & (\num{0.090}) & (\num{0.090}) \\
+Age & \num{0.019}*** & \num{0.009}* & \num{0.001} & \num{-0.001} & \num{-0.000} \\
+& (\num{0.004}) & (\num{0.004}) & (\num{0.003}) & (\num{0.003}) & (\num{0.003}) \\
+Education: Univ vs Below & \num{0.063} & \num{0.191} & \num{-0.243}** & \num{0.113} & \num{-0.044} \\
+& (\num{0.123}) & (\num{0.126}) & (\num{0.088}) & (\num{0.091}) & (\num{0.090}) \\
+Employed Full-Time & \num{-0.030} & \num{-0.110} & \num{0.037} & \num{0.234}* & \num{0.035} \\
+& (\num{0.131}) & (\num{0.134}) & (\num{0.093}) & (\num{0.098}) & (\num{0.096}) \\
+Citizen & \num{-0.286}+ & \num{-0.036} & \num{-0.099} & \num{0.270}* & \num{0.253}* \\
+& (\num{0.160}) & (\num{0.166}) & (\num{0.115}) & (\num{0.119}) & (\num{0.118}) \\
+Ideology (Right) & \num{1.243}*** & \num{-0.318} & \num{2.222}*** & \num{1.415}*** & \num{2.033}*** \\
+& (\num{0.276}) & (\num{0.287}) & (\num{0.204}) & (\num{0.211}) & (\num{0.210}) \\
+Political Interest & \num{0.017} & \num{0.073} & \num{-0.495}** & \num{-0.890}*** & \num{-0.458}** \\
+& (\num{0.228}) & (\num{0.225}) & (\num{0.161}) & (\num{0.169}) & (\num{0.164}) \\
+Quebecker First & \num{-0.049} & \num{-0.239} & \num{-0.633}*** & \num{0.054} & \num{0.147} \\
+& (\num{0.257}) & (\num{0.246}) & (\num{0.175}) & (\num{0.182}) & (\num{0.179}) \\
+Quebec & \num{0.095} & \num{-0.251} & \num{-0.120} & \num{-0.229} & \num{0.108} \\
+& (\num{0.195}) & (\num{0.191}) & (\num{0.136}) & (\num{0.142}) & (\num{0.140}) \\
+Alberta & \num{-0.083} & \num{-0.086} & \num{-0.147} & \num{-0.107} & \num{-0.106} \\
+& (\num{0.165}) & (\num{0.166}) & (\num{0.117}) & (\num{0.122}) & (\num{0.120}) \\
+Atlantic Canada & \num{-0.092} & \num{-0.234} & \num{-0.166} & \num{-0.201} & \num{-0.258}* \\
+& (\num{0.164}) & (\num{0.168}) & (\num{0.117}) & (\num{0.123}) & (\num{0.122}) \\
+Social Trust & \num{0.350}** & \num{0.321}* & \num{0.079} & \num{-0.025} & \num{0.231}* \\
+& (\num{0.128}) & (\num{0.132}) & (\num{0.091}) & (\num{0.095}) & (\num{0.094}) \\
+Trust: Federal institutions & \num{0.208} & \num{0.405}* & \num{-0.183}+ & \num{-0.075} & \num{-0.089} \\
+& (\num{0.148}) & (\num{0.161}) & (\num{0.107}) & (\num{0.113}) & (\num{0.111}) \\
+Trust: Provincial institutions & \num{0.375}* & \num{0.453}** & \num{0.448}*** & \num{0.427}*** & \num{0.252}* \\
+& (\num{0.154}) & (\num{0.168}) & (\num{0.112}) & (\num{0.117}) & (\num{0.115}) \\
+Num.Obs. & \num{1072} & \num{1098} & \num{2170} & \num{2170} & \num{2170} \\
+\bottomrule
+\end{talltblr}
+\end{table}

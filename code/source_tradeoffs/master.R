@@ -43,6 +43,7 @@ source("code/source_tradeoffs/08_regressions_intense.R")
 source("code/source_tradeoffs/09_regressions_uc.R")
 source("code/source_tradeoffs/11_appendix_tables.R")
 source("code/source_tradeoffs/12_regressions_tradeoff_nested.R")
+source("code/source_tradeoffs/13_publication_tradeoff.R")
 
 cat("\n========== PIPELINE COMPLETE ==========\n")
 cat("All outputs saved to:", params$out_graphs, "\n")
