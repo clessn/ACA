@@ -77,11 +77,11 @@
 | Num.Obs.                       | 2099    | 2099    | 2099      | 2099      | 2099      |
 +================================+=========+=========+===========+===========+===========+
 | Ordered logit (polr). Log-odds coefficients. HC1 robust SEs in parentheses. Sample     |
-| held constant across M1–M5 (listwise deletion on union of all RHS vars). DV coded 0 /  |
-| 0.33 / 0.66 / 1; highest level (= 1) = 'fair'. Ontario = reference region. M1 =        |
-| Quebec + demographics. M2 = M1 + French language + Québécois-first identity. M3 = M2   |
-| + ideology (right scale) + federal vote (left scale). M4 = M3 + social trust +         |
-| federal inst. trust + provincial inst. trust. M5 = M4 + Quebec × Income (High)         |
-| interaction. * p<0.05 ** p<0.01 *** p<0.001                                            |
+| held constant across M1-M5 (listwise deletion on union of all RHS vars). DV coded      |
+| 0/0.33/0.66/1; highest level (= 1) = 'fair'. Ontario = reference region. M1 = Quebec   |
+| + Atlantic Canada + demographics. M2 = M1 + French language + Quebecois-first          |
+| identity. M3 = M2 + ideology (right scale) + federal vote + provincial vote (left      |
+| scales). M4 = M3 + social trust + federal inst. trust + provincial inst. trust. M5 =   |
+| M4 + Quebec x Income (High) interaction. * p<0.05 ** p<0.01 *** p<0.001                |
 +================================+=========+=========+===========+===========+===========+
 Table: Ordered logit — Violating outcomes (Rich)
