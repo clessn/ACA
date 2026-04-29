@@ -10,9 +10,11 @@
 #   - Five nested polr models per DV (M1–M5)
 #
 # Saves to paths$rds:
-#   polr_models.rds      — fitted polr models
-#   coef_polr_top.rds    — AMEs on P(response = 1)
-#   coef_ols.rds         — OLS AMEs
+#   polr_models.rds      — fitted polr models (larger sample, full rhs)
+#   coef_polr_top.rds    — AMEs from full models (reference only)
+#   coef_M4_top.rds      — AMEs from M4 nested models (USED FOR PUBLICATION)
+#   coef_M4_models.rds   — fitted M4 models (USED FOR APPENDIX TABLES)
+#   coef_ols.rds         — OLS AMEs (robustness, matched to M4 sample)
 #   fit_polr.rds         — McFadden pseudo-R2
 #   fit_ols.rds          — OLS R2
 #
@@ -33,7 +35,7 @@ tidy_polr_slopes <- function(model, dv_label, data = df) {
   model_vars <- all.vars(fml)
   model_data <- data |> dplyr::select(all_of(model_vars)) |> drop_na()
   model_fit  <- MASS::polr(fml, data = model_data, Hess = TRUE)
-
+  
   slopes_all <- avg_slopes(
     model_fit,
     vcov    = \(x) sandwich::vcovHC(x, type = "HC1"),
@@ -41,10 +43,10 @@ tidy_polr_slopes <- function(model, dv_label, data = df) {
   ) |>
     as_tibble() |>
     mutate(dv = dv_label)
-
+  
   top_level <- slopes_all |>
     pull(group) |> as.character() |> unique() |> sort() |> tail(1)
-
+  
   slopes_top <- slopes_all |>
     dplyr::filter(as.character(group) == top_level) |>
     transmute(
@@ -65,7 +67,7 @@ tidy_polr_slopes <- function(model, dv_label, data = df) {
         TRUE          ~ "No clear effect"
       )
     )
-
+  
   list(top = slopes_top, full = slopes_all)
 }
 
@@ -221,7 +223,7 @@ fit_five_polr <- function(dv_ord_var) {
   })
 }
 
-# ── 4.2  Save nested table (.txt) ─────────────────────────────
+# ── 4.2  Save nested table (.tex) ─────────────────────────────
 save_nested_table <- function(models, dv_label, file_path) {
   models_ok <- Filter(Negate(is.null), models)
   if (length(models_ok) == 0) {
@@ -240,7 +242,7 @@ save_nested_table <- function(models, dv_label, file_path) {
       coef_map  = term_labels_nested,
       gof_map   = c("nobs", "logLik", "AIC"),
       output    = file_path,
-      title     = paste("Ordered logit —", dv_label),
+      title     = paste("Ordered logit (M1--M5) ---", dv_label),
       notes     = nested_footnote
     )
     cat("  Table saved:", file_path, "\n")
@@ -254,7 +256,7 @@ plot_interaction <- function(model_M5, dv_label, file_path) {
   }
   model_data <- model_M5$model
   top_level  <- nlevels(model_data[[1]])
-
+  
   other_vars <- setdiff(
     names(model_data),
     c(names(model_data)[1], "quebec_bin", "incomeHigh_bin", "quebec_x_income")
@@ -266,19 +268,19 @@ plot_interaction <- function(model_M5, dv_label, file_path) {
   baseline <- lapply(model_data[other_vars], function(col) {
     if (is.numeric(col)) mean(col, na.rm = TRUE) else modal_val(col)
   })
-
+  
   grid <- expand.grid(quebec_bin = c(0, 1), incomeHigh_bin = c(0, 1))
   grid$quebec_x_income <- grid$quebec_bin * grid$incomeHigh_bin
   for (vn in names(baseline)) grid[[vn]] <- baseline[[vn]]
-
+  
   preds    <- predict(model_M5, newdata = grid, type = "probs")
   pred_top <- if (is.matrix(preds)) preds[, top_level] else preds
-
+  
   plot_df <- grid |>
     mutate(pred_top = pred_top,
            Quebec   = factor(quebec_bin,     labels = c("Rest of Canada", "Quebec")),
            Income   = factor(incomeHigh_bin, labels = c("Low / Mid", "High")))
-
+  
   pred_ci <- tryCatch({
     top_label <- levels(model_data[[1]])[top_level]
     avg_predictions(
@@ -291,16 +293,16 @@ plot_interaction <- function(model_M5, dv_label, file_path) {
       mutate(Quebec = factor(quebec_bin,     labels = c("Rest of Canada", "Quebec")),
              Income = factor(incomeHigh_bin, labels = c("Low / Mid", "High")))
   }, error = function(e) { message("  CI failed: ", conditionMessage(e)); NULL })
-
+  
   p <- ggplot(plot_df,
               aes(x = Income, y = pred_top, colour = Quebec, group = Quebec)) +
     geom_line(linewidth = 0.9) +
     geom_point(size = 3.5) +
     { if (!is.null(pred_ci)) {
-        geom_errorbar(data = pred_ci,
-                      aes(x = Income, y = estimate,
-                          ymin = conf.low, ymax = conf.high, colour = Quebec),
-                      width = 0.08, linewidth = 0.6)
+      geom_errorbar(data = pred_ci,
+                    aes(x = Income, y = estimate,
+                        ymin = conf.low, ymax = conf.high, colour = Quebec),
+                    width = 0.08, linewidth = 0.6)
     }} +
     scale_colour_manual(values = c("Rest of Canada" = "#d6604d", "Quebec" = "#2166ac")) +
     scale_y_continuous(limits = c(0, 1), breaks = c(0, 0.25, 0.5, 0.75, 1),
@@ -313,7 +315,7 @@ plot_interaction <- function(model_M5, dv_label, file_path) {
                          "All other covariates held at mean / mode.",
                          "Error bars = HC1 delta-method 95% CI.")) +
     theme_cpp()
-
+  
   ggsave(file_path, plot = p,
          width = plot_width / 1.4, height = plot_height / 1.4, dpi = plot_dpi)
   invisible(p)
@@ -322,26 +324,32 @@ plot_interaction <- function(model_M5, dv_label, file_path) {
 # ── 4.4  Main loop ────────────────────────────────────────────
 cat("DVs:", length(all_dv_vars), "| Models per DV: 5\n\n")
 
+# Store all nested model lists for M4 extraction after the loop
+nested_models_all <- list()
+
 for (i in seq_along(all_dv_vars)) {
   dv_raw  <- all_dv_vars[i]
   dv_ord  <- dv_ord_vars[i]
   dv_lbl  <- all_dv_labels[[dv_raw]]
   dv_type <- if (dv_raw %in% prop_vars) "proportionality" else "reciprocity"
   slug    <- safe_filename(dv_lbl)
-
+  
   cat("─────────────────────────────────────────────────────\n")
   cat("[", dv_type, "]  DV:", dv_lbl, "\n")
-
+  
   models <- fit_five_polr(dv_ord)
   names(models) <- paste0("M", 1:5)
-
+  
+  # Store for M4 extraction below
+  nested_models_all[[dv_lbl]] <- models
+  
   save_nested_table(
     models    = models,
     dv_label  = dv_lbl,
     file_path = file.path(paths$nested,
-                          paste0("nested_polr_", dv_type, "_", slug, ".txt"))
+                          paste0("nested_polr_", dv_type, "_", slug, ".tex"))
   )
-
+  
   tryCatch(
     plot_interaction(
       model_M5  = models[["M5"]],
@@ -353,7 +361,145 @@ for (i in seq_along(all_dv_vars)) {
   )
 }
 
+
+# ==============================================================
+# 5.  M4 EXTRACTION — PUBLICATION FIGURES AND TABLES
+#     M4 uses a common listwise-deleted sample across all models,
+#     ensuring consistency between figures and regression tables.
+#     This replaces the larger-sample full polr models for all
+#     publication outputs.
+# ==============================================================
+
+cat("\n── Extracting M4 AMEs for publication ──\n")
+
+# ── 5.1  AMEs from M4 (proportionality: P(response = 1)) ──────
+coef_M4_top <- map2_dfr(
+  nested_models_all,
+  names(nested_models_all),
+  function(models, lbl) {
+    m4 <- models[["M4"]]
+    if (is.null(m4)) {
+      message("  M4 is NULL for: ", lbl)
+      return(NULL)
+    }
+    cat("  AME:", lbl, "\n")
+    tryCatch(
+      tidy_polr_slopes(m4, dv_label = lbl)$top,
+      error = function(e) {
+        message("  AME failed (", lbl, "): ", conditionMessage(e))
+        NULL
+      }
+    )
+  }
+)
+
+saveRDS(coef_M4_top, file.path(paths$rds, "coef_M4_top.rds"))
+cat("  coef_M4_top.rds saved.\n")
+
+# ── 5.2  Save M4 fitted models (for appendix regression tables) ─
+coef_M4_models <- lapply(nested_models_all, function(models) models[["M4"]])
+coef_M4_models <- Filter(Negate(is.null), coef_M4_models)
+saveRDS(coef_M4_models, file.path(paths$rds, "coef_M4_models.rds"))
+cat("  coef_M4_models.rds saved.\n")
+
+# ── 5.3  OLS robustness on the same M4 sample ─────────────────
+#     Re-fit OLS using the M4 variable set and common sample
+#     so the robustness comparison is on identical observations.
+cat("\n── Fitting OLS on M4 sample for robustness ──\n")
+
+coef_ols_M4 <- map2_dfr(
+  names(nested_models_all),
+  names(nested_models_all),
+  function(dv_lbl, dv_lbl2) {
+    m4 <- nested_models_all[[dv_lbl]][["M4"]]
+    if (is.null(m4)) return(NULL)
+    
+    # Recover the M4 data and DV raw variable name
+    dv_raw <- all_dv_vars[all_dv_labels[all_dv_vars] == dv_lbl]
+    if (length(dv_raw) == 0) return(NULL)
+    
+    model_data <- m4$model
+    # Replace ordered DV with numeric raw DV for OLS
+    model_data[[1]] <- as.numeric(as.character(model_data[[1]]))
+    
+    ols_fml <- as.formula(paste(
+      names(model_data)[1], "~",
+      paste(names(model_data)[-1], collapse = " + ")
+    ))
+    ols_mod <- tryCatch(
+      lm(ols_fml, data = model_data),
+      error = function(e) NULL
+    )
+    if (is.null(ols_mod)) return(NULL)
+    
+    avg_slopes(ols_mod,
+               vcov    = \(x) sandwich::vcovHC(x, type = "HC1"),
+               newdata = model_data) |>
+      as_tibble() |>
+      transmute(
+        dv = dv_lbl, term,
+        estimate  = round(estimate,  3),
+        conf.low  = round(conf.low,  3),
+        conf.high = round(conf.high, 3),
+        p.value   = round(p.value,   3),
+        sig = case_when(
+          p.value < 0.001 ~ "***", p.value < 0.01 ~ "**",
+          p.value < 0.05  ~ "*",   p.value < 0.10 ~ ".",
+          TRUE ~ ""
+        ),
+        direction = case_when(
+          conf.low  > 0 ~ "Positive",
+          conf.high < 0 ~ "Negative",
+          TRUE          ~ "No clear effect"
+        )
+      )
+  }
+)
+
+saveRDS(coef_ols_M4, file.path(paths$rds, "coef_ols_M4.rds"))
+cat("  coef_ols_M4.rds saved.\n")
+
 cat("\n========== MODELS COMPLETE ==========\n")
 cat("RDS objects:      ", paths$rds,        "\n")
+cat("  coef_M4_top.rds    — M4 AMEs (use for publication figures)\n")
+cat("  coef_M4_models.rds — M4 fitted models (use for appendix tables)\n")
+cat("  coef_ols_M4.rds    — OLS AMEs on M4 sample (use for robustness)\n")
+cat("  coef_polr_top.rds  — full model AMEs (reference only)\n")
 cat("Nested tables:    ", paths$nested,     "\n")
 cat("Interaction plots:", paths$nested_int, "\n")
+
+
+# ==============================================================
+# SIGN AGREEMENT RATE — polr AME (M4) vs OLS (M4 sample)
+# Run after fairness_models.R has been sourced or executed.
+# ==============================================================
+
+agreement <- coef_M4_top |>
+  dplyr::select(dv, term, estimate_polr = estimate) |>
+  inner_join(
+    coef_ols_M4 |> dplyr::select(dv, term, estimate_ols = estimate),
+    by = c("dv", "term")
+  ) |>
+  mutate(agree = sign(estimate_polr) == sign(estimate_ols)) |>
+  summarise(
+    n_terms       = n(),
+    n_agree       = sum(agree),
+    agreement_rate = round(mean(agree), 3)
+  )
+
+cat("Sign agreement rate (polr AME vs OLS, M4 sample):\n")
+cat("  Terms compared:", agreement$n_terms, "\n")
+cat("  Terms agreeing:", agreement$n_agree, "\n")
+cat("  Agreement rate:", agreement$agreement_rate, "\n")
+
+# Identify the disagreeing terms
+coef_M4_top |>
+  dplyr::select(dv, term, estimate_polr = estimate) |>
+  inner_join(
+    coef_ols_M4 |> dplyr::select(dv, term, estimate_ols = estimate),
+    by = c("dv", "term")
+  ) |>
+  mutate(agree = sign(estimate_polr) == sign(estimate_ols)) |>
+  dplyr::filter(!agree) |>
+  arrange(dv, term) |>
+  print(n = Inf)

@@ -5,10 +5,11 @@
 # Run independently. Sources fairness_config.R for all metadata.
 #
 # Outputs (all to paths$desc):
-#   desc_prop_dist_by_region.png   — response distribution, proportionality
-#   desc_recip_dist_by_region.png  — response distribution, reciprocity
-#   desc_mean_dotCI_by_region.png  — mean response dot-and-CI (main figure)
-#   table_desc_fairness.tex        — LaTeX descriptive means table
+#   desc_prop_dist_by_region.png     — response distribution, proportionality
+#   desc_recip_dist_by_region.png    — response distribution, reciprocity
+#   desc_mean_dotCI_by_region.png    — mean response dot-and-CI (main figure)
+#   desc_median_dotCI_by_region.png  — median response dot-and-CI (robustness)
+#   table_desc_fairness.tex          — LaTeX descriptive means table
 # ==============================================================
 
 source("code/source_redistribution/fairness_config.R")
@@ -150,7 +151,69 @@ cat("Saved: desc_mean_dotCI_by_region.png\n")
 
 
 # ==============================================================
-# 3.  TABLE 1 — DESCRIPTIVE MEANS (LaTeX)
+# 3.  MEDIAN RESPONSE — DOT-AND-CI BY REGION (robustness check)
+#     Uses MAD-based approximate SE given skewed DV distributions.
+# ==============================================================
+
+median_ci_mad <- map_dfr(all_dv_vars, function(v) {
+  by_region <- df |>
+    dplyr::filter(!is.na(.data[[v]]), !is.na(ses_region_cat)) |>
+    group_by(ses_region_cat) |>
+    summarise(
+      n      = n(),
+      median = median(.data[[v]], na.rm = TRUE),
+      mad    = mad(.data[[v]],    na.rm = TRUE),
+      .groups = "drop"
+    ) |>
+    rename(region = ses_region_cat)
+  
+  all_canada <- df |>
+    dplyr::filter(!is.na(.data[[v]])) |>
+    summarise(
+      n      = n(),
+      median = median(.data[[v]], na.rm = TRUE),
+      mad    = mad(.data[[v]],    na.rm = TRUE)
+    ) |>
+    mutate(region = "All Canada")
+  
+  bind_rows(by_region, all_canada) |>
+    mutate(
+      dv        = all_dv_labels[[v]],
+      dv_type   = ifelse(v %in% prop_vars, "Proportionality", "Reciprocity"),
+      se_approx = mad / sqrt(n),
+      lo        = median - qt(0.975, df = n - 1) * se_approx,
+      hi        = median + qt(0.975, df = n - 1) * se_approx,
+      region    = factor(region,
+                         levels = c("Ontario", "Quebec", "Alberta",
+                                    "Atlantic Canada", "All Canada"))
+    ) |>
+    dplyr::select(region, dv, dv_type, n, median, mad, lo, hi)
+})
+
+median_ci_mad |>
+  mutate(dv = factor(dv, levels = dv_order)) |>
+  ggplot(aes(x = median, y = region, colour = region)) +
+  geom_point(size = 3.5) +
+  geom_errorbarh(aes(xmin = lo, xmax = hi), height = 0.3, linewidth = 0.5) +
+  scale_colour_manual(
+    values = c(region_colours, "All Canada" = "#636363"),
+    guide  = "none"
+  ) +
+  scale_x_continuous(limits = c(0, 1), breaks = c(0, 0.33, 0.66, 1)) +
+  facet_wrap(~ dv, ncol = 2) +
+  labs(x       = "Median response (0\u20131 scale) \u2014 MAD-based 95% CI",
+       y       = NULL,
+       caption = "Median response on 0/0.33/0.66/1 scale. Error bars = MAD-based robust CI. DV scale: 0 = Unfair, 1 = Fair.") +
+  theme_cpp() +
+  theme(strip.text = element_text(face = "bold"))
+
+ggsave(file.path(paths$desc, "desc_median_dotCI_by_region.png"),
+       width = plot_width, height = plot_height + 2, dpi = plot_dpi)
+cat("Saved: desc_median_dotCI_by_region.png\n")
+
+
+# ==============================================================
+# 4.  TABLE 1 — DESCRIPTIVE MEANS (LaTeX)
 # ==============================================================
 
 desc_table <- mean_ci |>
@@ -186,6 +249,7 @@ desc_table |>
     notation = "none"
   ) |>
   save_kable(file.path(paths$desc, "table_desc_fairness.tex"))
+
 
 cat("Saved: table_desc_fairness.tex\n")
 cat("\n========== DESCRIPTIVES COMPLETE ==========\n")

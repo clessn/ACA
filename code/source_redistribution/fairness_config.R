@@ -321,15 +321,30 @@ plot_coefs <- function(coef_df, caption_str, file_path,
                        height     = plot_height) {
   if (!is.null(keep_vars))
     coef_df <- coef_df |> dplyr::filter(term %in% keep_vars)
-
-  coef_df |>
+  
+  # Recode term labels before computing order
+  coef_df <- coef_df |>
     mutate(
       term = dplyr::recode(term, !!!term_labels),
       dv   = factor(dv, levels = intersect(dv_order, unique(dv)))
-    ) |>
+    )
+  
+  # Order terms by mean absolute estimate across all DVs (largest at top)
+  term_order <- coef_df |>
+    group_by(term) |>
+    summarise(mean_abs = mean(abs(estimate), na.rm = TRUE), .groups = "drop") |>
+    arrange(mean_abs) |>   # ascending so ggplot puts largest at top
+    pull(term)
+  
+  # Significance indicator (p < 0.05)
+  coef_df <- coef_df |>
+    mutate(significant = ifelse(p.value < 0.05, "p < 0.05", "n.s."))
+  
+  coef_df |>
     ggplot(aes(x = estimate,
-               y = factor(term, levels = rev(iv_order)),
-               color = direction)) +
+               y = factor(term, levels = term_order),
+               color = direction,
+               shape = significant)) +
     geom_vline(xintercept = 0, linetype = "dashed", colour = "grey50") +
     geom_point(size = 2.5) +
     geom_errorbarh(aes(xmin = conf.low, xmax = conf.high), height = 0.2) +
@@ -338,13 +353,14 @@ plot_coefs <- function(coef_df, caption_str, file_path,
       "Negative"        = "#d6604d",
       "No clear effect" = "grey60"
     )) +
+    scale_shape_manual(values = c("p < 0.05" = 19, "n.s." = 1)) +
     facet_wrap(~ dv, ncol = ncol_facet, scales = "free_x") +
     labs(x = "Estimated effect (HC1 robust SEs, 95% CI)",
-         y = NULL, color = NULL, caption = caption_str) +
+         y = NULL, color = NULL, shape = NULL, caption = caption_str) +
     theme_cpp() +
     theme(legend.position = "bottom",
           strip.text = element_text(face = "bold"))
-
+  
   ggsave(file_path, width = width, height = height, dpi = plot_dpi)
   invisible()
 }
@@ -383,7 +399,7 @@ plot_robustness <- function(coef_polr, coef_ols, caption_str, file_path,
     theme_cpp() +
     theme(legend.position = "bottom",
           strip.text = element_text(face = "bold"))
-
+  
   ggsave(file_path, width = width, height = height, dpi = plot_dpi)
   invisible()
 }

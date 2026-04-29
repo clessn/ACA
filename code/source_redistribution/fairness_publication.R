@@ -6,19 +6,20 @@
 # fairness_descriptives.R have been run at least once.
 # Loads saved objects from paths$rds — no model refitting.
 #
+# All figures and tables use M4 from the nested models,
+# ensuring a consistent common sample across all outputs.
+#
 # MAIN TEXT
 #   Figure 1 — Mean response by region (dot-and-CI)
-#   Figure 2 — AME coefficient plot: proportionality DVs
-#   Figure 3 — AME coefficient plot: reciprocity DVs
+#   Figure 2 — AME coefficient plot: proportionality DVs (M4)
+#   Figure 3 — AME coefficient plot: reciprocity DVs (M4)
 #   Table 1  — Descriptive means (LaTeX)
 #
 # APPENDIX
-#   Figure A1 — Full coefficient plot: proportionality (all covariates)
-#   Figure A2 — Full coefficient plot: reciprocity (all covariates)
-#   Figure A3 — Robustness (polr AME vs OLS): proportionality
-#   Figure A4 — Robustness (polr AME vs OLS): reciprocity
-#   Table A1  — Ordered logit table: proportionality (LaTeX)
-#   Table A2  — Ordered logit table: reciprocity (LaTeX)
+#   Figure A1 — Robustness (polr AME vs OLS, M4 sample): proportionality
+#   Figure A2 — Robustness (polr AME vs OLS, M4 sample): reciprocity
+#   Table A1  — Ordered logit M4 table: proportionality (LaTeX)
+#   Table A2  — Ordered logit M4 table: reciprocity (LaTeX)
 # ==============================================================
 
 source("code/source_redistribution/fairness_config.R")
@@ -26,10 +27,10 @@ library(kableExtra)
 
 # ── Load saved objects ────────────────────────────────────────
 cat("Loading model objects from RDS...\n")
-polr_models   <- readRDS(file.path(paths$rds, "polr_models.rds"))
-coef_polr_top <- readRDS(file.path(paths$rds, "coef_polr_top.rds"))
-coef_ols      <- readRDS(file.path(paths$rds, "coef_ols.rds"))
-mean_ci       <- readRDS(file.path(paths$rds, "mean_ci.rds"))
+coef_M4_top    <- readRDS(file.path(paths$rds, "coef_M4_top.rds"))
+coef_M4_models <- readRDS(file.path(paths$rds, "coef_M4_models.rds"))
+coef_ols_M4    <- readRDS(file.path(paths$rds, "coef_ols_M4.rds"))
+mean_ci        <- readRDS(file.path(paths$rds, "mean_ci.rds"))
 cat("Done.\n\n")
 
 # ── Shared caption strings ────────────────────────────────────
@@ -107,14 +108,14 @@ cat("   Saved: table1_desc_means.tex\n\n")
 
 
 # ==============================================================
-# FIGURE 2 — AME: PROPORTIONALITY DVs (main)
+# FIGURE 2 — AME: PROPORTIONALITY DVs (main, M4)
 # ==============================================================
 
 cat("── Figure 2\n")
 plot_coefs(
-  coef_df     = coef_polr_top |> dplyr::filter(dv %in% unname(prop_labels)),
+  coef_df     = coef_M4_top |> dplyr::filter(dv %in% unname(prop_labels)),
   keep_vars   = vars_main,
-  caption_str = cap_main,
+  caption_str = "AME on P(response = 1), M4. HC1 robust SEs, 95% CI. Ontario = reference region.",
   file_path   = file.path(paths$pub_main, "figure2_coef_prop_main.png"),
   ncol_facet  = 2,
   width       = plot_width,
@@ -124,14 +125,14 @@ cat("   Saved: figure2_coef_prop_main.png\n\n")
 
 
 # ==============================================================
-# FIGURE 3 — AME: RECIPROCITY DVs (main)
+# FIGURE 3 — AME: RECIPROCITY DVs (main, M4)
 # ==============================================================
 
 cat("── Figure 3\n")
 plot_coefs(
-  coef_df     = coef_polr_top |> dplyr::filter(dv %in% unname(recip_labels)),
+  coef_df     = coef_M4_top |> dplyr::filter(dv %in% unname(recip_labels)),
   keep_vars   = vars_main,
-  caption_str = cap_main,
+  caption_str = "AME on P(response = 1), M4. HC1 robust SEs, 95% CI. Ontario = reference region.",
   file_path   = file.path(paths$pub_main, "figure3_coef_recip_main.png"),
   ncol_facet  = 2,
   width       = plot_width,
@@ -141,143 +142,98 @@ cat("   Saved: figure3_coef_recip_main.png\n\n")
 
 
 # ==============================================================
-# FIGURE A1 — FULL COEFFICIENT PLOT: PROPORTIONALITY (appendix)
+# FIGURE A1 — ROBUSTNESS: PROPORTIONALITY (appendix, M4 sample)
 # ==============================================================
 
 cat("── Figure A1\n")
-plot_coefs(
-  coef_df     = coef_polr_top |> dplyr::filter(dv %in% unname(prop_labels)),
-  keep_vars   = NULL,
-  caption_str = cap_app,
-  file_path   = file.path(paths$pub_app, "figureA1_coef_prop_appendix.png"),
+plot_robustness(
+  coef_polr   = coef_M4_top  |> dplyr::filter(dv %in% unname(prop_labels)),
+  coef_ols    = coef_ols_M4  |> dplyr::filter(dv %in% unname(prop_labels)),
+  keep_vars   = vars_main,
+  caption_str = "Ordered logit AME on P(response = 1) vs. OLS. M4 common sample. HC1 robust SEs, 95% CI. Ontario = reference region.",
+  file_path   = file.path(paths$pub_app, "figureA1_robustness_prop.png"),
   ncol_facet  = 2,
   width       = plot_width,
-  height      = plot_height + 3
+  height      = plot_height
 )
-cat("   Saved: figureA1_coef_prop_appendix.png\n\n")
+cat("   Saved: figureA1_robustness_prop.png\n\n")
 
 
 # ==============================================================
-# FIGURE A2 — FULL COEFFICIENT PLOT: RECIPROCITY (appendix)
+# FIGURE A2 — ROBUSTNESS: RECIPROCITY (appendix, M4 sample)
 # ==============================================================
 
 cat("── Figure A2\n")
-plot_coefs(
-  coef_df     = coef_polr_top |> dplyr::filter(dv %in% unname(recip_labels)),
-  keep_vars   = NULL,
-  caption_str = cap_app,
-  file_path   = file.path(paths$pub_app, "figureA2_coef_recip_appendix.png"),
-  ncol_facet  = 2,
-  width       = plot_width,
-  height      = plot_height
-)
-cat("   Saved: figureA2_coef_recip_appendix.png\n\n")
-
-
-# ==============================================================
-# FIGURE A3 — ROBUSTNESS: PROPORTIONALITY (appendix)
-# ==============================================================
-
-cat("── Figure A3\n")
 plot_robustness(
-  coef_polr   = coef_polr_top |> dplyr::filter(dv %in% unname(prop_labels)),
-  coef_ols    = coef_ols      |> dplyr::filter(dv %in% unname(prop_labels)),
+  coef_polr   = coef_M4_top  |> dplyr::filter(dv %in% unname(recip_labels)),
+  coef_ols    = coef_ols_M4  |> dplyr::filter(dv %in% unname(recip_labels)),
   keep_vars   = vars_main,
-  caption_str = cap_rob,
-  file_path   = file.path(paths$pub_app, "figureA3_robustness_prop.png"),
-  ncol_facet  = 2,
-  width       = plot_width,
-  height      = plot_height
-)
-cat("   Saved: figureA3_robustness_prop.png\n\n")
-
-
-# ==============================================================
-# FIGURE A4 — ROBUSTNESS: RECIPROCITY (appendix)
-# ==============================================================
-
-cat("── Figure A4\n")
-plot_robustness(
-  coef_polr   = coef_polr_top |> dplyr::filter(dv %in% unname(recip_labels)),
-  coef_ols    = coef_ols      |> dplyr::filter(dv %in% unname(recip_labels)),
-  keep_vars   = vars_main,
-  caption_str = cap_rob,
-  file_path   = file.path(paths$pub_app, "figureA4_robustness_recip.png"),
+  caption_str = "Ordered logit AME on P(response = 1) vs. OLS. M4 common sample. HC1 robust SEs, 95% CI. Ontario = reference region.",
+  file_path   = file.path(paths$pub_app, "figureA2_robustness_recip.png"),
   ncol_facet  = 2,
   width       = plot_width,
   height      = plot_height - 3
 )
-cat("   Saved: figureA4_robustness_recip.png\n\n")
+cat("   Saved: figureA2_robustness_recip.png\n\n")
 
 
 # ==============================================================
-# TABLE A1 — ORDERED LOGIT: PROPORTIONALITY (appendix, LaTeX)
+# APPENDIX TABLES — NESTED MODELS (M1–M5), ONE PER DV
+#
+# Tables are written by fairness_models.R to paths$nested as
+# .tex files. This section copies them to paths$pub_app so all
+# publication outputs are in one place, and prints the LaTeX
+# \input{} commands to use in the appendix.
+#
+# File naming convention (matches fairness_models.R loop):
+#   nested_polr_proportionality_<slug>.tex
+#   nested_polr_reciprocity_<slug>.tex
 # ==============================================================
 
-cat("── Table A1\n")
+cat("── Appendix nested tables\n")
 
-polr_prop <- polr_models[unname(prop_labels)]
-paired_prop <- make_vcov_list(polr_prop)
-
-modelsummary(
-  paired_prop$models,
-  estimate  = "{estimate}{stars}",
-  statistic = "({std.error})",
-  vcov      = paired_prop$vcovs,
-  coef_map  = term_labels,
-  gof_map   = c("nobs", "logLik", "AIC"),
-  output    = file.path(paths$pub_app, "tableA1_polr_prop.tex"),
-  title     = "Ordered Logit --- Proportionality Beliefs",
-  notes     = paste(
-    "Ordered logit (polr). Log-odds coefficients. HC1 robust SEs in parentheses.",
-    "DV coded 0/0.33/0.66/1; highest level (= 1) = ``fair''. Ontario = reference region.",
-    "* $p<0.05$, ** $p<0.01$, *** $p<0.001$"
-  )
+nested_table_files <- map_chr(
+  seq_along(all_dv_vars),
+  function(i) {
+    dv_raw  <- all_dv_vars[i]
+    dv_lbl  <- all_dv_labels[[dv_raw]]
+    dv_type <- if (dv_raw %in% prop_vars) "proportionality" else "reciprocity"
+    slug    <- safe_filename(dv_lbl)
+    paste0("nested_polr_", dv_type, "_", slug, ".tex")
+  }
 )
-cat("   Saved: tableA1_polr_prop.tex\n\n")
 
+# Copy from paths$nested to paths$pub_app
+walk(nested_table_files, function(fname) {
+  src  <- file.path(paths$nested, fname)
+  dest <- file.path(paths$pub_app, fname)
+  if (file.exists(src)) {
+    file.copy(src, dest, overwrite = TRUE)
+    cat("  Copied:", fname, "\n")
+  } else {
+    message("  NOT FOUND (run fairness_models.R first): ", fname)
+  }
+})
 
-# ==============================================================
-# TABLE A2 — ORDERED LOGIT: RECIPROCITY (appendix, LaTeX)
-# ==============================================================
-
-cat("── Table A2\n")
-
-polr_recip <- polr_models[unname(recip_labels)]
-paired_recip <- make_vcov_list(polr_recip)
-
-modelsummary(
-  paired_recip$models,
-  estimate  = "{estimate}{stars}",
-  statistic = "({std.error})",
-  vcov      = paired_recip$vcovs,
-  coef_map  = term_labels,
-  gof_map   = c("nobs", "logLik", "AIC"),
-  output    = file.path(paths$pub_app, "tableA2_polr_recip.tex"),
-  title     = "Ordered Logit --- Reciprocity Beliefs",
-  notes     = paste(
-    "Ordered logit (polr). Log-odds coefficients. HC1 robust SEs in parentheses.",
-    "DV coded 0/0.33/0.66/1; highest level (= 1) = ``fair''. Ontario = reference region.",
-    "* $p<0.05$, ** $p<0.01$, *** $p<0.001$"
-  )
-)
-cat("   Saved: tableA2_polr_recip.tex\n\n")
+# Print LaTeX \input{} commands for easy copy-paste into appendix
+cat("\n── LaTeX \\input{} commands for appendix:\n")
+walk2(nested_table_files, all_dv_labels[all_dv_vars], function(fname, lbl) {
+  cat(sprintf("\\subsection*{%s}\n\\input{appendix/%s}\n\n", lbl, fname))
+})
 
 
 # ==============================================================
 # SUMMARY
 # ==============================================================
 
-cat("========== PUBLICATION OUTPUT COMPLETE ==========\n\n")
+cat("\n========== PUBLICATION OUTPUT COMPLETE ==========\n\n")
 cat("Main (", paths$pub_main, "):\n", sep = "")
 cat("  Figure 1 — figure1_desc_mean_by_region.png\n")
-cat("  Figure 2 — figure2_coef_prop_main.png\n")
-cat("  Figure 3 — figure3_coef_recip_main.png\n")
+cat("  Figure 2 — figure2_coef_prop_main.png  (M4 AMEs)\n")
+cat("  Figure 3 — figure3_coef_recip_main.png (M4 AMEs)\n")
 cat("  Table  1 — table1_desc_means.tex\n\n")
 cat("Appendix (", paths$pub_app, "):\n", sep = "")
-cat("  Figure A1 — figureA1_coef_prop_appendix.png\n")
-cat("  Figure A2 — figureA2_coef_recip_appendix.png\n")
-cat("  Figure A3 — figureA3_robustness_prop.png\n")
-cat("  Figure A4 — figureA4_robustness_recip.png\n")
-cat("  Table  A1 — tableA1_polr_prop.tex\n")
-cat("  Table  A2 — tableA2_polr_recip.tex\n")
+cat("  Figure A1 — figureA1_robustness_prop.png  (M4 polr vs OLS)\n")
+cat("  Figure A2 — figureA2_robustness_recip.png (M4 polr vs OLS)\n")
+cat("  Tables    — one nested M1-M5 .tex file per DV (8 total)\n")
+walk(nested_table_files, function(f) cat("    ", f, "\n"))

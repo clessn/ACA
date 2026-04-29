@@ -1,0 +1,54 @@
+\begin{table}
+\centering
+\begin{talltblr}[         %% tabularray outer open
+caption={Ordered logit (M1--M5) --- Violating outcomes (Poor)},
+note{}={Ordered logit (polr). Log-odds coefficients. HC1 robust SEs in parentheses. Sample held constant across M1-M5 (listwise deletion on union of all RHS vars). DV coded 0/0.33/0.66/1; highest level (= 1) = 'fair'. Ontario = reference region. M1 = Quebec + Atlantic Canada + demographics. M2 = M1 + French language + Quebecois-first identity. M3 = M2 + ideology (right scale) + federal vote + provincial vote (left scales). M4 = M3 + social trust + federal inst. trust + provincial inst. trust. M5 = M4 + Quebec x Income (High) interaction. * p<0.05  ** p<0.01  *** p<0.001},
+]                     %% tabularray outer close
+{                     %% tabularray inner open
+colspec={Q[]Q[]Q[]Q[]Q[]Q[]},
+column{2-6}={}{halign=c,},
+column{1}={}{halign=l,},
+hline{38}={1-6}{solid, black, 0.05em},
+}                     %% tabularray inner close
+\toprule
+& M1 & M2 & M3 & M4 & M5 \\ \midrule %% TinyTableHeader
+Quebec & \num{-0.183}+ & \num{-0.314} & \num{-0.320} & \num{-0.309} & \num{-0.336} \\
+& (\num{0.109}) & (\num{0.197}) & (\num{0.200}) & (\num{0.200}) & (\num{0.210}) \\
+Atlantic Canada & \num{-0.135} & \num{-0.143} & \num{-0.123} & \num{-0.157} & \num{-0.159} \\
+& (\num{0.105}) & (\num{0.105}) & (\num{0.106}) & (\num{0.107}) & (\num{0.107}) \\
+Quebec × Income (High) &  &  &  &  & \num{0.108} \\
+&  &  &  &  & (\num{0.255}) \\
+Income: High & \num{0.067} & \num{0.067} & \num{0.054} & \num{0.062} & \num{0.029} \\
+& (\num{0.122}) & (\num{0.122}) & (\num{0.122}) & (\num{0.122}) & (\num{0.145}) \\
+Male & \num{0.135} & \num{0.136} & \num{0.052} & \num{0.033} & \num{0.032} \\
+& (\num{0.088}) & (\num{0.088}) & (\num{0.089}) & (\num{0.090}) & (\num{0.090}) \\
+Age 18–34 & \num{0.109} & \num{0.110} & \num{0.107} & \num{0.089} & \num{0.087} \\
+& (\num{0.122}) & (\num{0.122}) & (\num{0.122}) & (\num{0.123}) & (\num{0.123}) \\
+Age 55+ & \num{-0.104} & \num{-0.107} & \num{-0.127} & \num{-0.140} & \num{-0.138} \\
+& (\num{0.115}) & (\num{0.115}) & (\num{0.116}) & (\num{0.117}) & (\num{0.117}) \\
+Education: University+ & \num{0.009} & \num{0.007} & \num{0.099} & \num{0.087} & \num{0.086} \\
+& (\num{0.089}) & (\num{0.089}) & (\num{0.091}) & (\num{0.092}) & (\num{0.092}) \\
+Employed Full-Time & \num{0.203}* & \num{0.203}* & \num{0.199}* & \num{0.203}* & \num{0.203}* \\
+& (\num{0.101}) & (\num{0.101}) & (\num{0.102}) & (\num{0.102}) & (\num{0.102}) \\
+Citizen & \num{0.304}* & \num{0.300}* & \num{0.385}** & \num{0.408}** & \num{0.407}** \\
+& (\num{0.125}) & (\num{0.125}) & (\num{0.127}) & (\num{0.127}) & (\num{0.127}) \\
+French-speaking &  & \num{0.146} & \num{0.119} & \num{0.082} & \num{0.088} \\
+&  & (\num{0.190}) & (\num{0.192}) & (\num{0.193}) & (\num{0.193}) \\
+Québécois identity first &  & \num{0.016} & \num{0.044} & \num{0.040} & \num{0.040} \\
+&  & (\num{0.185}) & (\num{0.186}) & (\num{0.186}) & (\num{0.186}) \\
+Ideology (Right scale) &  &  & \num{1.104}*** & \num{1.035}*** & \num{1.035}*** \\
+&  &  & (\num{0.225}) & (\num{0.227}) & (\num{0.227}) \\
+Fed. vote (Left scale) &  &  & \num{0.183} & \num{0.138} & \num{0.139} \\
+&  &  & (\num{0.203}) & (\num{0.205}) & (\num{0.205}) \\
+Prov. vote (Left scale) &  &  & \num{-0.587}*** & \num{-0.543}*** & \num{-0.542}*** \\
+&  &  & (\num{0.133}) & (\num{0.136}) & (\num{0.136}) \\
+Social trust &  &  &  & \num{-0.050} & \num{-0.050} \\
+&  &  &  & (\num{0.096}) & (\num{0.096}) \\
+Trust: Federal institutions &  &  &  & \num{-0.026} & \num{-0.025} \\
+&  &  &  & (\num{0.116}) & (\num{0.116}) \\
+Trust: Provincial institutions &  &  &  & \num{0.292}* & \num{0.292}* \\
+&  &  &  & (\num{0.120}) & (\num{0.120}) \\
+Num.Obs. & \num{2099} & \num{2099} & \num{2099} & \num{2099} & \num{2099} \\
+\bottomrule
+\end{talltblr}
+\end{table}
