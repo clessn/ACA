@@ -243,8 +243,14 @@ save_nested_table <- function(models, dv_label, file_path) {
       gof_map   = c("nobs", "logLik", "AIC"),
       output    = file_path,
       title     = paste("Ordered logit (M1--M5) ---", dv_label),
-      notes     = nested_footnote
+      notes     = nested_footnote,
+      longtable = TRUE,
+      booktabs  = TRUE
     )
+    # Strip float wrapper so table appears inline in LaTeX
+    tex <- readLines(file_path)
+    tex <- tex[!grepl("\\\\begin\\{table\\}|\\\\end\\{table\\}|\\\\centering", tex)]
+    writeLines(tex, file_path)
     cat("  Table saved:", file_path, "\n")
   }, error = function(e) cat("  TABLE ERROR:", conditionMessage(e), "\n"))
 }
