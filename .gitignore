@@ -13,3 +13,6 @@
 .Rproj.user/
 .DS_Store
 .positai
+.RDataTmp1
+.RData
+.RHistory
